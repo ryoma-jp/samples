@@ -30,6 +30,9 @@ def main():
 
     # --- 外部プログラム実行 ---
     result = subprocess.run(args.bin, shell=True)
+    result = subprocess.run(args.bin, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print('result.args={}, result.returncode={}, result.stdout={}, result.stderr={}'.format( \
+            result.args, result.returncode, result.stdout, result.stderr))
 
     return
 
