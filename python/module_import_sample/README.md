@@ -3,6 +3,7 @@
 ## 概要
 
 * 下記のディレクトリ構成で，modulesを共通モジュールとしtool1, tool2, ... などから呼び出すケースを想定  
+
 		./
 		  ├ modules/
 		  │   ├ SubModule1/
@@ -13,6 +14,7 @@
 		  │   └ main.py
 		  └ tool2/
 		       └ main.py
+
 * tool1, tool2からはmodulesが見えるように，sys.pathにmodulesへのパス追加が必要  
 * modulesへのパス追加は絶対パスを追加する  
 Pythonでは，pythonコマンドを実行したディレクトリがルートとなる仕様なので，例えば，tool1以下でmain.pyをコールすると相対パスでは上位ディレクトリが見えず，importできない  
