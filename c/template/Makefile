@@ -7,8 +7,9 @@ INCLUDES     = -I./
 LIBS         =
 TARGET       = template
 SRCS         = $(wildcard *.c)
-OBJS         = $(SRCS:%.c=%.o)
-DEPS         = $(SRCS:%.c=%.d)
+OBJ_DIR      = ./build
+OBJS         = $(SRCS:%.c=$(OBJ_DIR)/%.o)
+DEPS         = $(SRCS:%.c=$(OBJ_DIR)/%.d)
 RM           = rm
 
 # 生成規則
@@ -16,15 +17,13 @@ RM           = rm
 
 all : $(TARGET)
 
--include $(DEPS)
-
 $(TARGET) : $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 clean :
 	$(RM) -f $(TARGET) $(OBJS) $(DEPS)
 
-.c.o :
-	$(CC) -c $(CFLAGS) $(INCLUDES) $<
+$(OBJ_DIR)/%.o : %.c
+	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ $<
 
-
+-include $(DEPS)
