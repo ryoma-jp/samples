@@ -11,4 +11,5 @@
 	$ python3 matplotlib_sample.py --graph_type line --output_dir out
 	$ python3 matplotlib_sample.py --graph_type line --output_dir out --use_gui
 	$ python3 matplotlib_sample.py --graph_type bar --output_dir out --use_gui
+	$ python3 matplotlib_sample.py --graph_type mixed_line_bar --output_dir out --use_gui
 
