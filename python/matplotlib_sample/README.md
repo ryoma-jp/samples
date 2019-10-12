@@ -2,12 +2,13 @@
 
 ## 概要
 
-* 折れ線グラフ，棒グラフ，散布図を描画するサンプルプログラム
+* 折れ線グラフ，棒グラフ，散布図，方対数グラフ(x軸，y軸)，両対数グラフを描画するサンプルプログラム
 	* 折れ線グラフ
 
 ## 実行手順
 
 	$ python3 matplotlib_sample.py --help
-	$ python3 matplotlib_sample.py --string sample --int 100 --float 10.12098 --bool
-
+	$ python3 matplotlib_sample.py --graph_type line --output_dir out
+	$ python3 matplotlib_sample.py --graph_type line --output_dir out --use_gui
+	$ python3 matplotlib_sample.py --graph_type bar --output_dir out --use_gui
 

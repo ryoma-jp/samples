@@ -9,6 +9,9 @@ import tqdm
 import argparse
 import pandas as pd
 import numpy as np
+
+#import matplotlib      #GUIのない環境で動かす場合にコメントアウトを外す
+#matplotlib.use('Agg')  #GUIのない環境で動かす場合にコメントアウトを外す
 import matplotlib.pyplot as plt
 
 #---------------------------------
@@ -28,13 +31,12 @@ def ArgParser():
                  '  * \'line\' : 折れ線グラフ\n'
                  '  * \'bar\' : 棒グラフ\n'
                  '  * \'mixed_line_bar\' : 折れ線グラフと棒グラフの混合\n'
+                 '  * \'x_log_10\' : 方対数グラフ(x軸)\n'
+                 '  * \'y_log_10\' : 片対数グラフ(y軸)\n'
+                 '  * \'xy_log_10\' : 両対数グラフ\n'
                  '  * \'scatter\' : 散布図\n')
     parser.add_argument('--output_dir', dest='output_dir', type=str, default=None, required=True, \
             help='描画したグラフの出力先ディレクトリ(存在しない場合は生成する)')
-#    parser.add_argument('--int', dest='int', type=int, default=None, required=False, \
-#            help='整数引数')
-#    parser.add_argument('--float', dest='float', type=float, default=None, required=False, \
-#            help='浮動小数引数')
     parser.add_argument('--use_gui', dest='use_gui', action='store_true', required=False, \
             help='GUIを使う(pyplot.show()でのウィンドウ表示する)場合にセット')
 
@@ -42,12 +44,29 @@ def ArgParser():
 
     return args
 
-def draw_line_graph(xdata, ydata, output_dir=None, use_gui=False):
+def draw_line_graph(xdata, ydata, xlabel='x', ylabel='y', output_dir=None, use_gui=False):
     for _ydata in ydata:
         plt.plot(xdata, _ydata)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
     plt.tight_layout()
     if (output_dir is not None):
         plt.savefig(os.path.join(output_dir, 'line.png'))
+    if (use_gui):
+        plt.show()
+
+    return
+
+def draw_bar_graph(ydata, xlabel=['x'], ylabel='y', output_dir=None, use_gui=False):
+    xdata = np.arange(len(xlabel))
+    bar_width = 0.8 / len(ydata)    # 0.8=default
+    for cnt, _ydata in enumerate(ydata):
+        plt.bar(xdata+bar_width*cnt, _ydata, width=bar_width, align='center')
+    plt.ylabel(ylabel)
+    plt.xticks(xdata+bar_width/len(ydata), xlabel)
+    plt.tight_layout()
+    if (output_dir is not None):
+        plt.savefig(os.path.join(output_dir, 'bar.png'))
     if (use_gui):
         plt.show()
 
@@ -74,7 +93,10 @@ def main():
             y = np.array([y_tmp / (i+1) for i in range(n_data)])
             draw_line_graph(x, y, output_dir=args.output_dir, use_gui=args.use_gui)
         elif (graph_type == 'bar'):
-            pass
+            # --- 入力データ生成 ---
+            y = np.array([[100, 200, 300, 400, 500], [150, 250, 350, 450, 550]])
+            xlabel = ['x0', 'x1', 'x2', 'x3', 'x4']
+            draw_bar_graph(y, xlabel=xlabel, output_dir=args.output_dir ,use_gui=args.use_gui)
         elif (graph_type == 'mixed_line_bar'):
             pass
         elif (graph_type == 'scatter'):
