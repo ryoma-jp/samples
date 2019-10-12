@@ -35,6 +35,7 @@ def ArgParser():
                  '  * \'x_log_10\' : 方対数グラフ(x軸)\n'
                  '  * \'y_log_10\' : 片対数グラフ(y軸)\n'
                  '  * \'xy_log_10\' : 両対数グラフ\n'
+                 '  * \'heatmap\' : ヒートマップ\n'
                  '  * \'scatter\' : 散布図\n')
     parser.add_argument('--output_dir', dest='output_dir', type=str, default=None, required=True, \
             help='描画したグラフの出力先ディレクトリ(存在しない場合は生成する)')
@@ -116,6 +117,22 @@ def draw_line_graph_with_bar(xdata, ydata_line, ydata_bar, xlabel=['x'], ylabel1
     
     return
 
+def draw_scatter_graph(xdata, ydata, xlabel='x', ylabel='y', sample_labels=None, output_dir=None, use_gui=False):
+    plt.figure()
+    for _xdata, _ydata in zip(xdata, ydata):
+        plt.scatter(_xdata, _ydata)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.tight_layout()
+    
+    # --- 保存・表示 ---
+    if (output_dir is not None):
+        plt.savefig(os.path.join(output_dir, 'scatter.png'))
+    if (use_gui):
+        plt.show()
+    plt.close()
+    
+    return
 
 def main():
     # --- 引数処理 ---
@@ -155,7 +172,12 @@ def main():
             # --- グラフ描画 ---
             draw_line_graph_with_bar(np.arange(len(xlabel)), y_line, y_bar, xlabel, output_dir=args.output_dir, use_gui=args.use_gui)
         elif (graph_type == 'scatter'):
-            pass
+            # --- 入力データ生成 ---
+            xdata = np.random.rand(2, 10)
+            ydata = np.random.rand(2, 10)
+            
+            # --- グラフ描画 ---
+            draw_scatter_graph(xdata, ydata, output_dir=args.output_dir, use_gui=args.use_gui)
         else:
             print('[ERROR] Unknown graph type : {}'.format(graph_type))
 
