@@ -61,15 +61,17 @@ def draw_line_graph(xdata, ydata, xlabel='x', ylabel='y', output_dir=None, use_g
 
     return
 
-def draw_bar_graph(ydata, xlabel=['x'], ylabel='y', output_dir=None, use_gui=False):
+def draw_bar_graph(xdata, ydata, xlabel='x', ylabel='y', output_dir=None, use_gui=False):
     plt.figure()
-    xdata = np.arange(len(xlabel))
+    xdata_idx = np.arange(len(xdata))
     bar_width = 0.8 / len(ydata)    # 0.8=default
     for cnt, _ydata in enumerate(ydata):
-        plt.bar(xdata+bar_width*cnt, _ydata, width=bar_width, align='center')
+        plt.bar(xdata_idx+bar_width*cnt, _ydata, width=bar_width, align='center')
+    plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.xticks(xdata+bar_width*(1.0-1.0/len(ydata)), xlabel)
+    plt.xticks(xdata_idx+bar_width*0.5*(len(ydata)-1), xdata)
     plt.tight_layout()
+    
     if (output_dir is not None):
         plt.savefig(os.path.join(output_dir, 'bar.png'))
     if (use_gui):
@@ -78,21 +80,22 @@ def draw_bar_graph(ydata, xlabel=['x'], ylabel='y', output_dir=None, use_gui=Fal
     
     return
 
-def draw_line_graph_with_bar(xdata, ydata_line, ydata_bar, xlabel=['x'], ylabel1='y1', ylabel2='y2', output_dir=None, use_gui=False):
+def draw_line_graph_with_bar(xdata, ydata_line, ydata_bar, xlabel='x', ylabel1='y1', ylabel2='y2', output_dir=None, use_gui=False):
     # --- 第一軸(折れ線グラフ)と第二軸(棒グラフ)を定義 ---
     fig, ax1 = plt.subplots()   # ax1 : 第一軸(折れ線グラフ)
     ax2 = ax1.twinx()           # ax2 : 第二軸(棒グラフ)
     color_idx = 0
+    xdata_idx = np.arange(len(xdata))
     
     # --- 第一軸をプロット ---
     for _ydata in ydata_line:
-        plt.plot(xdata, _ydata, marker='o', color=COLOR_LIST[color_idx % len(COLOR_LIST)])
+        plt.plot(xdata_idx, _ydata, marker='o', color=COLOR_LIST[color_idx % len(COLOR_LIST)])
         color_idx += 1
     
     # -- 第二軸をプロット ---
     bar_width = 0.8 / len(ydata_bar)
     for cnt, _ydata in enumerate(ydata_bar):
-        plt.bar(xdata+bar_width*cnt, _ydata, width=bar_width, align='center', color=COLOR_LIST[color_idx % len(COLOR_LIST)])
+        plt.bar(xdata_idx+bar_width*cnt, _ydata, width=bar_width, align='center', color=COLOR_LIST[color_idx % len(COLOR_LIST)])
         color_idx += 1
     
     # --- 重ね順を設定 ---
@@ -104,7 +107,8 @@ def draw_line_graph_with_bar(xdata, ydata_line, ydata_bar, xlabel=['x'], ylabel1
     ax1.patch.set_alpha(0)
     
     # --- ラベルを設定 ---
-    plt.xticks(xdata+bar_width*(1.0-1.0/len(ydata_bar)), xlabel)
+    plt.xticks(xdata_idx+bar_width*0.5*(len(ydata_bar)-1), xdata)
+    ax1.set_xlabel(xlabel)
     ax1.set_ylabel(ylabel1)
     ax2.set_ylabel(ylabel2)
     
@@ -125,7 +129,6 @@ def draw_scatter_graph(xdata, ydata, xlabel='x', ylabel='y', sample_labels=None,
     plt.ylabel(ylabel)
     plt.tight_layout()
     
-    # --- 保存・表示 ---
     if (output_dir is not None):
         plt.savefig(os.path.join(output_dir, 'scatter.png'))
     if (use_gui):
@@ -158,19 +161,22 @@ def main():
             draw_line_graph(x, y, output_dir=args.output_dir, use_gui=args.use_gui)
         elif (graph_type == 'bar'):
             # --- 入力データ生成 ---
+            x = ['x0', 'x1', 'x2', 'x3', 'x4']
+#            y = np.array([[100, 200, 300, 400, 500]])
             y = np.array([[100, 200, 300, 400, 500], [150, 250, 350, 450, 550]])
-            xlabel = ['x0', 'x1', 'x2', 'x3', 'x4']
+#            y = np.array([[100, 200, 300, 400, 500], [150, 250, 350, 450, 550], [50, 150, 250, 350, 450]])
+#            y = np.array([[100, 200, 300, 400, 500], [150, 250, 350, 450, 550], [50, 150, 250, 350, 450], [200, 300, 400, 500, 600]])
             
             # --- グラフ描画 ---
-            draw_bar_graph(y, xlabel=xlabel, output_dir=args.output_dir, use_gui=args.use_gui)
+            draw_bar_graph(x, y, output_dir=args.output_dir, use_gui=args.use_gui)
         elif (graph_type == 'mixed_line_bar'):
             # --- 入力データ生成 ---
-            xlabel = ['x0', 'x1', 'x2', 'x3', 'x4']
+            x = ['x0', 'x1', 'x2', 'x3', 'x4']
             y_line = np.array([[100, 200, 300, 400, 500]])    # 折れ線グラフ用データ
             y_bar = np.array([[150, 250, 350, 450, 550]])     # 棒グラフ用データ
             
             # --- グラフ描画 ---
-            draw_line_graph_with_bar(np.arange(len(xlabel)), y_line, y_bar, xlabel, output_dir=args.output_dir, use_gui=args.use_gui)
+            draw_line_graph_with_bar(x, y_line, y_bar, output_dir=args.output_dir, use_gui=args.use_gui)
         elif (graph_type == 'scatter'):
             # --- 入力データ生成 ---
             xdata = np.random.rand(2, 10)
