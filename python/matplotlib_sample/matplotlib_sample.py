@@ -46,13 +46,23 @@ def ArgParser():
 
     return args
 
-def draw_line_graph(xdata, ydata, xlabel='x', ylabel='y', output_dir=None, use_gui=False):
+def draw_line_graph(xdata, ydata, xlabel='x', ylabel='y', sample_labels=None, output_dir=None, use_gui=False):
+    # --- グラフ描画準備 ---
     plt.figure()
-    for _ydata in ydata:
-        plt.plot(xdata, _ydata)
+    if (sample_labels is None):
+        sample_labels = ['data{}'.format(i) for i in range(len(ydata))]
+    
+    # --- 折れ線グラフ描画 ---
+    for cnt, _ydata in enumerate(ydata):
+        plt.plot(xdata, _ydata, label=sample_labels[cnt])
+    
+    # --- ラベル，凡例設定 ---
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
+    plt.legend()
     plt.tight_layout()
+    
+    # --- 保存・表示 ---
     if (output_dir is not None):
         plt.savefig(os.path.join(output_dir, 'line.png'))
     if (use_gui):
@@ -61,17 +71,26 @@ def draw_line_graph(xdata, ydata, xlabel='x', ylabel='y', output_dir=None, use_g
 
     return
 
-def draw_bar_graph(xdata, ydata, xlabel='x', ylabel='y', output_dir=None, use_gui=False):
+def draw_bar_graph(xdata, ydata, xlabel='x', ylabel='y', sample_labels=None, output_dir=None, use_gui=False):
+    # --- グラフ描画準備 ---
     plt.figure()
     xdata_idx = np.arange(len(xdata))
+    if (sample_labels is None):
+        sample_labels = ['data{}'.format(i) for i in range(len(ydata))]
     bar_width = 0.8 / len(ydata)    # 0.8=default
+    
+    # --- 棒グラフ描画 ---
     for cnt, _ydata in enumerate(ydata):
-        plt.bar(xdata_idx+bar_width*cnt, _ydata, width=bar_width, align='center')
+        plt.bar(xdata_idx+bar_width*cnt, _ydata, width=bar_width, align='center', label=sample_labels[cnt])
+    
+    # --- ラベル，凡例設定 ---
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.xticks(xdata_idx+bar_width*0.5*(len(ydata)-1), xdata)
+    plt.legend()
     plt.tight_layout()
     
+    # --- 保存・表示 ---
     if (output_dir is not None):
         plt.savefig(os.path.join(output_dir, 'bar.png'))
     if (use_gui):
@@ -80,22 +99,27 @@ def draw_bar_graph(xdata, ydata, xlabel='x', ylabel='y', output_dir=None, use_gu
     
     return
 
-def draw_line_graph_with_bar(xdata, ydata_line, ydata_bar, xlabel='x', ylabel1='y1', ylabel2='y2', output_dir=None, use_gui=False):
-    # --- 第一軸(折れ線グラフ)と第二軸(棒グラフ)を定義 ---
+def draw_line_graph_with_bar(xdata, ydata_line, ydata_bar, xlabel='x', ylabel1='y1', ylabel2='y2', sample_labels_line=None, sample_labels_bar=None, output_dir=None, use_gui=False):
+    # --- グラフ描画準備：第一軸(折れ線グラフ)，第二軸(棒グラフ) ---
     fig, ax1 = plt.subplots()   # ax1 : 第一軸(折れ線グラフ)
     ax2 = ax1.twinx()           # ax2 : 第二軸(棒グラフ)
     color_idx = 0
     xdata_idx = np.arange(len(xdata))
     
-    # --- 第一軸をプロット ---
-    for _ydata in ydata_line:
-        plt.plot(xdata_idx, _ydata, marker='o', color=COLOR_LIST[color_idx % len(COLOR_LIST)])
+    if (sample_labels_line is None):
+        sample_labels_line = ['line_data{}'.format(i) for i in range(len(ydata_line))]
+    if (sample_labels_bar is None):
+        sample_labels_bar = ['bar_data{}'.format(i) for i in range(len(ydata_bar))]
+
+    # --- 第一軸を描画 ---
+    for cnt, _ydata in enumerate(ydata_line):
+        ax1.plot(xdata_idx, _ydata, marker='o', color=COLOR_LIST[color_idx % len(COLOR_LIST)], label=sample_labels_line[cnt])
         color_idx += 1
     
-    # -- 第二軸をプロット ---
+    # -- 第二軸を描画 ---
     bar_width = 0.8 / len(ydata_bar)
     for cnt, _ydata in enumerate(ydata_bar):
-        plt.bar(xdata_idx+bar_width*cnt, _ydata, width=bar_width, align='center', color=COLOR_LIST[color_idx % len(COLOR_LIST)])
+        ax2.bar(xdata_idx+bar_width*cnt, _ydata, width=bar_width, align='center', color=COLOR_LIST[color_idx % len(COLOR_LIST)], label=sample_labels_bar[cnt])
         color_idx += 1
     
     # --- 重ね順を設定 ---
@@ -106,11 +130,14 @@ def draw_line_graph_with_bar(xdata, ydata_line, ydata_bar, xlabel='x', ylabel1='
     # --- 折れ線グラフの背景を透明に設定 ---
     ax1.patch.set_alpha(0)
     
-    # --- ラベルを設定 ---
+    # --- ラベル，凡例設定 ---
     plt.xticks(xdata_idx+bar_width*0.5*(len(ydata_bar)-1), xdata)
     ax1.set_xlabel(xlabel)
     ax1.set_ylabel(ylabel1)
     ax2.set_ylabel(ylabel2)
+    ax1.legend(bbox_to_anchor=(0, 1), loc='upper left')
+    ax2.legend(bbox_to_anchor=(0, 1.0-0.07*len(ydata_line)), loc='upper left')  # 暫定
+    plt.tight_layout()
     
     # --- 保存・表示 ---
     if (output_dir is not None):
@@ -122,13 +149,22 @@ def draw_line_graph_with_bar(xdata, ydata_line, ydata_bar, xlabel='x', ylabel1='
     return
 
 def draw_scatter_graph(xdata, ydata, xlabel='x', ylabel='y', sample_labels=None, output_dir=None, use_gui=False):
+    # --- グラフ描画準備 ---
     plt.figure()
-    for _xdata, _ydata in zip(xdata, ydata):
-        plt.scatter(_xdata, _ydata)
+    if (sample_labels is None):
+        sample_labels = ['data{}'.format(i) for i in range(len(xdata))]
+    
+    # --- 散布図描画 ---
+    for cnt, (_xdata, _ydata) in enumerate(zip(xdata, ydata)):
+        plt.scatter(_xdata, _ydata, label=sample_labels[cnt])
+    
+    # --- ラベル，凡例設定 ---
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
+    plt.legend()
     plt.tight_layout()
     
+    # --- 保存・表示 ---
     if (output_dir is not None):
         plt.savefig(os.path.join(output_dir, 'scatter.png'))
     if (use_gui):
