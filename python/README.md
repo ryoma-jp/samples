@@ -9,5 +9,6 @@
 |multi_thread |マルチスレッドのサンプル |
 |read_csv_with_stringio |カンマ区切りの文字列をpandas.read_csvで読み込むサンプル |
 |subprocess_run |外部プログラムを実行するサンプル |
+|tsne_sample| t-SNEによる次元圧縮のサンプル |
 
 
