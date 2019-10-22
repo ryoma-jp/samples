@@ -111,8 +111,7 @@ class CalcMatrixTf(CalcMatrix):
         return
 
     def tf_radians(self, deg):
-        pi_on_180 = 0.017453292519943295
-        return tf.convert_to_tensor(deg * 0.017453292519943295)
+        return tf.convert_to_tensor(deg * 0.017453292519943295) # 2pi/360
 
 def main():
     # --- 引数処理 ---
