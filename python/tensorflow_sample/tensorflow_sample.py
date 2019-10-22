@@ -92,8 +92,7 @@ class CalcMatrixTf(CalcMatrix):
         tf_matmul = tf.matmul(tf_mat1, tf_transpose)    # 内積2
         tf_det = tf.linalg.det(tf_matmul)       # 行列式
         tf_inv = tf.linalg.inv(tf_matmul)       # 逆行列
-#        x = tf.constant([30. * 0.017453292519943295, 45. * 0.017453292519943295, 60. * 0.017453292519943295, 90. * 0.017453292519943295])
-        x = self.tf_radians(mat1 * 360)
+        x = self.tf_radians(tf_mat1 * 360)
         tf_sin = tf.compat.v1.math.sin(x)
         tf_cos = tf.compat.v1.math.cos(x)
         tf_tan = tf.compat.v1.math.tan(x)
@@ -111,7 +110,7 @@ class CalcMatrixTf(CalcMatrix):
         return
 
     def tf_radians(self, deg):
-        return tf.convert_to_tensor(deg * 0.017453292519943295) # 2pi/360
+        return deg * 0.017453292519943295 # 2pi/360
 
 def main():
     # --- 引数処理 ---
