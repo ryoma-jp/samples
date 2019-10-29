@@ -1,5 +1,5 @@
 /**
- * @file template.c
+ * @file main.c
  * @brief C言語ソースコードのテンプレート
  */
 
@@ -7,13 +7,15 @@
 #include <common.h>
 
 /**
- * @brief "Hello World!"を表示する関数
+ * @brief メイン関数
+ * @param[in] argc 引数の数
+ * @param[in] argv 引数
  * @return int 0固定
  * @details テンプレートでは"Hello World!"の表示のみを行う
  */
-int template_print()
+int main(int argc, char* argv[])
 {
-	MY_PRINT(MY_PRINT_LVL_INFO, "Hello World!\n");
+	template_print();
 
 	return 0;
 }
