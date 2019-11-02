@@ -324,6 +324,68 @@ SORT_RET heap_sort(int* src, int key_num, int* dst)
 }
 
 /**
+ * @brief マージソートのマージ処理
+ * @param[in] data ソート範囲
+ * @param[in] key_num ソート範囲のサイズ(キー数)
+ * @return SORT_RET
+ * @details マージソートによるソート処理
+ */
+static SORT_RET merge_sort_merge(int* data1, int data1_len, int* data2, int data2_len, int* dst)
+{
+	SORT_RET ret = SORT_RET_NOERROR;
+	int data1_idx = 0;
+	int data2_idx = 0;
+
+	while ((data1_idx < data1_len) || (data2_idx < data2_len)) {
+		if ((data1_idx < data1_len) && (data2_idx < data2_len)) {
+			if (data1[data1_idx] < data2[data2_idx]) {
+				dst[data1_idx+data2_idx] = data1[data1_idx];
+				data1_idx += 1;
+			} else {
+				dst[data1_idx+data2_idx] = data2[data2_idx];
+				data2_idx += 1;
+			}
+		} else if (data1_idx >= data1_len) {
+			dst[data1_idx+data2_idx] = data2[data2_idx];
+			data2_idx += 1;
+		} else {
+			dst[data1_idx+data2_idx] = data1[data1_idx];
+			data1_idx += 1;
+		}
+	}
+
+	return ret;
+}
+
+/**
+ * @brief マージソートのサブルーチン(再帰処理用)
+ * @param[in] data ソート範囲
+ * @param[in] key_num ソート範囲のサイズ(キー数)
+ * @return SORT_RET
+ * @details マージソートによるソート処理
+ */
+static SORT_RET merge_sort_sub(int* data, int key_num)
+{
+	SORT_RET ret = SORT_RET_NOERROR;
+	int data1_len = key_num/2;
+	int data2_len = key_num-data1_len;
+	int data1[data1_len];
+	int data2[data2_len];
+	int iter;
+
+	if (key_num > 1) {
+		for (iter = 0; iter < data1_len; iter++) data1[iter] = data[iter];
+		for (iter = 0; iter < data2_len; iter++) data2[iter] = data[data1_len+iter];
+
+		merge_sort_sub(data1, data1_len);
+		merge_sort_sub(data2, data2_len);
+		merge_sort_merge(data1, data1_len, data2, data2_len, data);
+	}
+
+	return ret;
+}
+
+/**
  * @brief マージソート
  * @param[in] src ソート範囲
  * @param[in] key_num ソート範囲のサイズ(キー数)
@@ -341,6 +403,8 @@ SORT_RET merge_sort(int* src, int key_num, int* dst)
 	} else {
 		memcpy(dst, src, key_num * sizeof(int));
 	}
+
+	merge_sort_sub(dst, key_num);
 
 	return ret;
 }

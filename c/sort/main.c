@@ -67,6 +67,48 @@ int show_usage()
 }
 
 /**
+ * @def TEST_SELECTION_SORT
+ * @brief 選択法によるソート処理を実行する場合にセット
+ */
+#define TEST_SELECTION_SORT
+
+/**
+ * @def TEST_BUBBLE_SORT
+ * @brief バブルソート処理を実行する場合にセット
+ */
+#define TEST_BUBBLE_SORT
+
+/**
+ * @def TEST_INSERT_SORT
+ * @brief 挿入法によるソート処理を実行する場合にセット
+ */
+#define TEST_INSERT_SORT
+
+/**
+ * @def TEST_SHELL_SORT
+ * @brief シェルソート処理を実行する場合にセット
+ */
+#define TEST_SHELL_SORT
+
+/**
+ * @def TEST_QUICK_SORT
+ * @brief クイックソート処理を実行する場合にセット
+ */
+#define TEST_QUICK_SORT
+
+/**
+ * @def TEST_HEAP_SORT
+ * @brief ヒープソート処理を実行する場合にセット
+ */
+#define TEST_HEAP_SORT
+
+/**
+ * @def TEST_MERGE_SORT
+ * @brief マージソート処理を実行する場合にセット
+ */
+#define TEST_MERGE_SORT
+
+/**
  * @brief メイン関数
  * @param[in] argc 引数の数
  * @param[in] argv 引数 @n
@@ -77,12 +119,6 @@ int show_usage()
  *            - ソート対象データ : data.csv
  *            - 各ソートアルゴリズムの処理時間計測結果 : result.csv
  */
-#define TEST_SELECTION_SORT
-#define TEST_BUBBLE_SORT
-#define TEST_INSERT_SORT
-#define TEST_SHELL_SORT
-#define TEST_QUICK_SORT
-#define TEST_HEAP_SORT
 int main(int argc, char* argv[])
 {
 	FILE* fp_data;
@@ -119,7 +155,6 @@ int main(int argc, char* argv[])
 		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", file_name);
 		exit(0);
 	}
-	fclose(fp_data);
 
 #ifdef TEST_SELECTION_SORT
 	/* --- 選択法 --- */
@@ -148,7 +183,6 @@ int main(int argc, char* argv[])
 		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", file_name);
 		exit(0);
 	}
-	fclose(fp_data);
 #endif	/* --- TEST_SELECTION_SORT --- */
 
 #ifdef TEST_BUBBLE_SORT
@@ -178,7 +212,6 @@ int main(int argc, char* argv[])
 		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", file_name);
 		exit(0);
 	}
-	fclose(fp_data);
 #endif	/* --- TEST_BUBBLE_SORT --- */
 
 #ifdef TEST_INSERT_SORT
@@ -208,7 +241,6 @@ int main(int argc, char* argv[])
 		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", file_name);
 		exit(0);
 	}
-	fclose(fp_data);
 #endif	/* --- TEST_INSERT_SORT --- */
 
 #ifdef TEST_SHELL_SORT
@@ -238,7 +270,6 @@ int main(int argc, char* argv[])
 		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", file_name);
 		exit(0);
 	}
-	fclose(fp_data);
 #endif	/* --- TEST_SHELL_SORT --- */
 
 #ifdef TEST_QUICK_SORT
@@ -268,7 +299,6 @@ int main(int argc, char* argv[])
 		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", file_name);
 		exit(0);
 	}
-	fclose(fp_data);
 #endif	/* --- TEST_QUICK_SORT --- */
 
 #ifdef TEST_HEAP_SORT
@@ -298,8 +328,36 @@ int main(int argc, char* argv[])
 		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", file_name);
 		exit(0);
 	}
-	fclose(fp_data);
 #endif	/* --- TEST_HEAP_SORT --- */
+
+#ifdef TEST_MERGE_SORT
+	/* --- マージソート --- */
+	memcpy(sorted_data, data, SAMPLE_NUM * sizeof(int));
+	clock_gettime(CLOCK_REALTIME, &tsStart);
+	merge_sort(sorted_data, SAMPLE_NUM, NULL);
+	clock_gettime(CLOCK_REALTIME, &tsEnd);
+	tsElapsedTime.tv_sec = tsEnd.tv_sec - tsStart.tv_sec;
+	tsElapsedTime.tv_nsec = tsEnd.tv_nsec - tsStart.tv_nsec;
+	if (tsElapsedTime.tv_nsec < 0) {
+		tsElapsedTime.tv_sec -= 1;
+		tsElapsedTime.tv_nsec += 1000000000;
+	}
+	MY_PRINT(MY_PRINT_LVL_INFO, "elapsed time (merge_sort) : %ld.%09ld[sec]\n", tsElapsedTime.tv_sec, tsElapsedTime.tv_nsec);
+	fprintf(fp_result, "マージソート,%ld.%09ld\n", tsElapsedTime.tv_sec, tsElapsedTime.tv_nsec);
+
+	sprintf(file_name, "%s/result-merge_sort.csv", output_dir);
+	fp_data = fopen(file_name, "w");
+	if (fp_data != NULL) {
+		fprintf(fp_data, "index,value\n");
+		for (i = 0; i < SAMPLE_NUM; i++) {
+			fprintf(fp_data, "%d,%d\n", i, sorted_data[i]);
+		}
+		fclose(fp_data);
+	} else {
+		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", file_name);
+		exit(0);
+	}
+#endif	/* --- TEST_MERGE_SORT --- */
 
 	fclose(fp_result);
 	return 0;
