@@ -232,6 +232,58 @@ SORT_RET quick_sort(int* src, int key_num, int* dst)
 }
 
 /**
+ * @def HEAP_GET_LEFT_NODE(x)
+ * @brief 左子ノードを取得
+ */
+#define HEAP_GET_LEFT_NODE(x)	(2*x+1)
+
+/**
+ * @def HEAP_GET_RIGHT_NODE(x)
+ * @brief 右子ノードを取得
+ */
+#define HEAP_GET_RIGHT_NODE(x)	(2*x+2)
+
+/**
+ * @def HEAP_GET_PARENT_NODE(x)
+ * @brief 親ノードを取得
+ */
+#define HEAP_GET_PARENT_NODE(x)	((x+1)/2-1)
+
+/**
+ * @brief ヒープ再構築
+ * @param[in] data 再構築するデータ
+ * @param[in] root_ptr 再構築対象の根の配列番号
+ * @param[in] tail_ptr 再構築するデータの末尾の配列番号
+ * @return SORT_RET
+ * @details root_ptrで指定された根以下ヒープを再構築する @n
+ *          根以外はヒープの条件を満たしていることが前提
+ */
+static SORT_RET heap_reconstruction(int* data, int root_ptr, int tail_ptr)
+{
+	SORT_RET ret = SORT_RET_NOERROR;
+	int data_root = data[root_ptr];
+	int swap_ptr = HEAP_GET_LEFT_NODE(root_ptr);
+
+	if ((swap_ptr < tail_ptr) && (data[swap_ptr] < data[swap_ptr+1])) {
+		swap_ptr += 1;
+	}
+
+	while ((swap_ptr <= tail_ptr) && (data_root < data[swap_ptr])) {
+		data[root_ptr] = data[swap_ptr];
+		root_ptr = swap_ptr;
+
+		swap_ptr = HEAP_GET_LEFT_NODE(root_ptr);
+		if ((swap_ptr < tail_ptr) && (data[swap_ptr] < data[swap_ptr+1])) {
+			swap_ptr += 1;
+		}
+	}
+
+	data[root_ptr] = data_root;
+
+	return ret;
+}
+
+/**
  * @brief ヒープソート
  * @param[in] src ソート範囲
  * @param[in] key_num ソート範囲のサイズ(キー数)
@@ -243,11 +295,29 @@ SORT_RET quick_sort(int* src, int key_num, int* dst)
 SORT_RET heap_sort(int* src, int key_num, int* dst)
 {
 	SORT_RET ret = SORT_RET_NOERROR;
+	int data_tmp;
+	int iter;
 
 	if (dst == NULL) {
 		dst = src;
 	} else {
 		memcpy(dst, src, key_num * sizeof(int));
+	}
+
+	for (iter = HEAP_GET_PARENT_NODE(key_num-1); iter >= 0; iter--) {
+		heap_reconstruction(dst, iter, key_num-1);
+	}
+
+	data_tmp = dst[key_num-1];
+	dst[key_num-1] = dst[0];
+	dst[0] = data_tmp;
+
+	for (iter = key_num-2; iter > 0; iter--) {
+		heap_reconstruction(dst, 0, iter);
+
+		data_tmp = dst[iter];
+		dst[iter] = dst[0];
+		dst[0] = data_tmp;
 	}
 
 	return ret;

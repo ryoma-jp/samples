@@ -82,6 +82,7 @@ int show_usage()
 #define TEST_INSERT_SORT
 #define TEST_SHELL_SORT
 #define TEST_QUICK_SORT
+#define TEST_HEAP_SORT
 int main(int argc, char* argv[])
 {
 	FILE* fp_data;
@@ -269,6 +270,36 @@ int main(int argc, char* argv[])
 	}
 	fclose(fp_data);
 #endif	/* --- TEST_QUICK_SORT --- */
+
+#ifdef TEST_HEAP_SORT
+	/* --- ヒープソート --- */
+	memcpy(sorted_data, data, SAMPLE_NUM * sizeof(int));
+	clock_gettime(CLOCK_REALTIME, &tsStart);
+	heap_sort(sorted_data, SAMPLE_NUM, NULL);
+	clock_gettime(CLOCK_REALTIME, &tsEnd);
+	tsElapsedTime.tv_sec = tsEnd.tv_sec - tsStart.tv_sec;
+	tsElapsedTime.tv_nsec = tsEnd.tv_nsec - tsStart.tv_nsec;
+	if (tsElapsedTime.tv_nsec < 0) {
+		tsElapsedTime.tv_sec -= 1;
+		tsElapsedTime.tv_nsec += 1000000000;
+	}
+	MY_PRINT(MY_PRINT_LVL_INFO, "elapsed time (heap_sort) : %ld.%09ld[sec]\n", tsElapsedTime.tv_sec, tsElapsedTime.tv_nsec);
+	fprintf(fp_result, "ヒープソート,%ld.%09ld\n", tsElapsedTime.tv_sec, tsElapsedTime.tv_nsec);
+
+	sprintf(file_name, "%s/result-heap_sort.csv", output_dir);
+	fp_data = fopen(file_name, "w");
+	if (fp_data != NULL) {
+		fprintf(fp_data, "index,value\n");
+		for (i = 0; i < SAMPLE_NUM; i++) {
+			fprintf(fp_data, "%d,%d\n", i, sorted_data[i]);
+		}
+		fclose(fp_data);
+	} else {
+		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", file_name);
+		exit(0);
+	}
+	fclose(fp_data);
+#endif	/* --- TEST_HEAP_SORT --- */
 
 	fclose(fp_result);
 	return 0;
