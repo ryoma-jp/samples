@@ -93,6 +93,8 @@ int main(int argc, char* argv[])
 	unsigned long addr_list[SAMPLE_NUM];
 	int i;
 	struct timespec tsStart, tsEnd, tsElapsedTime;
+	HASH_TABLE hash_table_open_address[HASH_TABLE_SIZE_OPEN_ADDRESS];
+	HASH_TABLE hash_table_chain[HASH_TABLE_SIZE_CHAIN];
 
 	if (argc != 2) {
 		show_usage();
@@ -179,6 +181,76 @@ int main(int argc, char* argv[])
 	fprintf(fp_result, "2分探索,%ld.%09ld\n", tsElapsedTime.tv_sec, tsElapsedTime.tv_nsec);
 
 	sprintf(file_name, "%s/result-binary_search.csv", output_dir);
+	fp_data = fopen(file_name, "w");
+	if (fp_data != NULL) {
+		fprintf(fp_data, "addr,value\n");
+		for (i = 0; i < SAMPLE_NUM; i++) {
+			fprintf(fp_data, "%p,%d\n", (int*)addr_list[i], *((int*)addr_list[i]));
+		}
+		fclose(fp_data);
+	} else {
+		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", file_name);
+		exit(0);
+	}
+
+	/* --- ハッシュ探索(オープンアドレス法) --- */
+	clock_gettime(CLOCK_REALTIME, &tsStart);
+	hash_table_create(data, SAMPLE_NUM, HASH_SEARCH_TYPE_OPEN_ADDRESS, hash_table_open_address);
+
+	for (i = 0; i < SAMPLE_NUM; i++) {
+		addr_list[i] = (unsigned long)hash_search(hash_table_open_address, i, HASH_SEARCH_TYPE_OPEN_ADDRESS);
+	}
+	clock_gettime(CLOCK_REALTIME, &tsEnd);
+	tsElapsedTime.tv_sec = tsEnd.tv_sec - tsStart.tv_sec;
+	tsElapsedTime.tv_nsec = tsEnd.tv_nsec - tsStart.tv_nsec;
+	if (tsElapsedTime.tv_nsec < 0) {
+		tsElapsedTime.tv_sec -= 1;
+		tsElapsedTime.tv_nsec += 1000000000;
+	}
+	MY_PRINT(MY_PRINT_LVL_INFO, "elapsed time (hash_search-open_address) : %ld.%09ld[sec]\n", tsElapsedTime.tv_sec, tsElapsedTime.tv_nsec);
+	fprintf(fp_result, "ハッシュ探索(オープンアドレス法),%ld.%09ld\n", tsElapsedTime.tv_sec, tsElapsedTime.tv_nsec);
+
+	sprintf(file_name, "%s/hash_table-open_address.csv", output_dir);
+	fp_data = fopen(file_name, "w");
+	hash_table_save(fp_data, hash_table_open_address, HASH_SEARCH_TYPE_OPEN_ADDRESS);
+	fclose(fp_data);
+
+	sprintf(file_name, "%s/result-hash_search-open_address.csv", output_dir);
+	fp_data = fopen(file_name, "w");
+	if (fp_data != NULL) {
+		fprintf(fp_data, "addr,value\n");
+		for (i = 0; i < SAMPLE_NUM; i++) {
+			fprintf(fp_data, "%p,%d\n", (int*)addr_list[i], *((int*)addr_list[i]));
+		}
+		fclose(fp_data);
+	} else {
+		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", file_name);
+		exit(0);
+	}
+
+	/* --- ハッシュ探索(チェイン法) --- */
+	clock_gettime(CLOCK_REALTIME, &tsStart);
+	hash_table_create(data, SAMPLE_NUM, HASH_SEARCH_TYPE_CHAIN, hash_table_chain);
+
+	for (i = 0; i < SAMPLE_NUM; i++) {
+		addr_list[i] = (unsigned long)hash_search(hash_table_chain, i, HASH_SEARCH_TYPE_CHAIN);
+	}
+	clock_gettime(CLOCK_REALTIME, &tsEnd);
+	tsElapsedTime.tv_sec = tsEnd.tv_sec - tsStart.tv_sec;
+	tsElapsedTime.tv_nsec = tsEnd.tv_nsec - tsStart.tv_nsec;
+	if (tsElapsedTime.tv_nsec < 0) {
+		tsElapsedTime.tv_sec -= 1;
+		tsElapsedTime.tv_nsec += 1000000000;
+	}
+	MY_PRINT(MY_PRINT_LVL_INFO, "elapsed time (hash_search-chain) : %ld.%09ld[sec]\n", tsElapsedTime.tv_sec, tsElapsedTime.tv_nsec);
+	fprintf(fp_result, "ハッシュ探索(チェイン法),%ld.%09ld\n", tsElapsedTime.tv_sec, tsElapsedTime.tv_nsec);
+
+	sprintf(file_name, "%s/hash_table-chain.csv", output_dir);
+	fp_data = fopen(file_name, "w");
+	hash_table_save(fp_data, hash_table_chain, HASH_SEARCH_TYPE_CHAIN);
+	fclose(fp_data);
+
+	sprintf(file_name, "%s/result-hash_search-chain.csv", output_dir);
 	fp_data = fopen(file_name, "w");
 	if (fp_data != NULL) {
 		fprintf(fp_data, "addr,value\n");
