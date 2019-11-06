@@ -5,5 +5,5 @@
 |measuring_proc_time |処理時間計測のサンプル |
 |search |探索アルゴリズムのサンプル |
 |sort |ソートアルゴリズムのサンプル |
-|tenplate |C言語ソースコードのテンプレート |
+|template |C言語ソースコードのテンプレート |
 
