@@ -6,6 +6,9 @@
 #include "runlength.h"
 #include "huffman.h"
 #include "common.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <string.h>
 
 /**
@@ -31,9 +34,9 @@ static int show_usage()
  * @brief エンコード処理またはデコード処理を示す
  */
 typedef enum _DEC_ENC_MODE {
-	DEC_MODE,
-	ENC_MODE,
-	ERROR
+	DEC_MODE,	//!< デコード処理
+	ENC_MODE,	//!< エンコード処理
+	ERROR		//!< エラー
 } DEC_ENC_MODE;
 
 /**
@@ -51,9 +54,14 @@ int main(int argc, char* argv[])
 	DEC_ENC_MODE dec_enc_mode;
 	FILE* fp_input;
 	FILE* fp_output;
+	unsigned int src_size;
 	char* src_buf;
 	char* dst_buf;
 	RUNLENGTH_ENC_PARAMS enc_params;
+	int fd_input;
+	struct stat stbuf_input;
+	int iter;
+	int dst_len;
 
 	if (argc != 4) {
 		show_usage();
@@ -69,35 +77,46 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 
-	fp_input = fopen(argv[2], "r");
+	fd_input = open(argv[2], O_RDONLY);
+	if (fd_input == -1) {
+		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", argv[2]);
+		exit(0);
+	}
+	fp_input = fdopen(fd_input, "rb");
 	if (fp_input == NULL) {
 		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", argv[2]);
 		exit(0);
 	}
+	if (fstat(fd_input, &stbuf_input) == -1) {
+		MY_PRINT(MY_PRINT_LVL_ERROR, "fstat() failed\n");
+		exit(0);
+	}
+	src_size = stbuf_input.st_size;
 
-	fp_output = fopen(argv[2], "w");
+	fp_output = fopen(argv[3], "wb");
 	if (fp_output == NULL) {
 		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", argv[3]);
 		exit(0);
 	}
 
-	src_buf = (char*)malloc(1024*1024);	/* T.B.D */
-	dst_buf = (char*)malloc(1024*1024);	/* T.B.D */
+	src_buf = (char*)malloc(src_size);
+	dst_buf = (char*)malloc(src_size+6);	/* T.B.D:圧縮できる前提でsrc_size+ヘッダサイズとしておく */
 
 	switch (dec_enc_mode) {
 		case DEC_MODE:
 			break;
 		case ENC_MODE:
 			enc_params.src = src_buf;
-			enc_params.src_len = 1024 * 1024;
+			enc_params.src_len = src_size;
 			enc_params.enc_unit = 8;
 			enc_params.enc_len_unit = 8;
 			enc_params.dst = dst_buf;
-			enc_params.dst_len = 1024 * 1024;
 			enc_params.header = NULL;
-			runlength_encode(enc_params);
+			dst_len = runlength_encode(enc_params);
 
-			printf("[DEBUG] %d, %d\n", dst_buf[0], dst_buf[1]);
+			for (iter = 0; iter < dst_len; iter++) {
+				fputc(dst_buf[iter], fp_output);
+			}
 			break;
 		default:
 			break;

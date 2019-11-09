@@ -22,6 +22,8 @@
  *       圧縮対象データ：aaaaaaaaaaaaaaa      15文字 @n
  *       連長 1文字：a9a6                     4文字 @n
  *       連長 2文字：a15                      3文字 @n
+ *   - エンコードしたデータのデコード結果を格納するバッファサイズを決めるために， @n
+ *     エンコード結果のヘッダにデコード後のデータサイズを格納しておく
  *   - 本プログラムの仕様 @n
  *     - 圧縮対象のデータの並びに依存して制御文字の有効性が変動する為， @n
  *       制御文字は使用せず，ランレングスデコード・エンコードはすべてのデータを対象とする @n
@@ -29,6 +31,7 @@
  *     - ヘッダの仕様
  *       - header[0:7]  : 圧縮単位[bit数]
  *       - header[8:15] : 連長[bit数]
+ *       - header[16:31] : デコード後のデータサイズ
  *     - ヘッダは圧縮後データに連結する仕様と分離する仕様を選択できるものとする @n
  *     - なお，適切な圧縮単位・連長桁を探索する仕組みは実装しない [T.B.D]
  */
@@ -93,7 +96,7 @@ static RUNLENGTH_RET put_bits(RUNLENGTH_PUT_BITS_PARAM* put_bits_param)
 	write_byte = RUNLENGTH_MIN(4, (put_bits_param->put_size+put_bits_param->bit_ptr)/8);
 	*(put_bits_param->dst + put_bits_param->byte_ptr) = (write_data >> 24) & 0xff;
 	for (iter = 1; iter < write_byte; iter++) {
-		*(put_bits_param->dst + put_bits_param->byte_ptr) = (write_data >> (24 - iter*8)) & 0xff;
+		*(put_bits_param->dst + put_bits_param->byte_ptr + iter) = (write_data >> (24 - iter*8)) & 0xff;
 	}
 	put_bits_param->byte_ptr += write_byte;
 
@@ -123,7 +126,8 @@ int runlength_encode(RUNLENGTH_ENC_PARAMS enc_params)
 {
 	unsigned int enc_unit;
 	unsigned int enc_len_unit;
-	int ret = -1;
+	int iter;
+	int ret = 0;
 	RUNLENGTH_PUT_BITS_PARAM put_bits_param = { 0 };
 
 	if (enc_params.enc_unit <= 0) {
@@ -136,19 +140,31 @@ int runlength_encode(RUNLENGTH_ENC_PARAMS enc_params)
 	} else {
 		enc_len_unit = enc_params.enc_len_unit;
 	}
+
 	if (enc_params.header == NULL) {
 		put_bits_param.dst = enc_params.dst;
 		put_bits_param.put_data = enc_unit;
 		put_bits_param.put_size = 8;
 		put_bits(&put_bits_param);
+		ret += 1;
 		
 		put_bits_param.dst = enc_params.dst;
 		put_bits_param.put_data = enc_len_unit;
 		put_bits_param.put_size = 8;
 		put_bits(&put_bits_param);
+		ret += 1;
+
+		put_bits_param.dst = enc_params.dst;
+		put_bits_param.put_data = enc_params.src_len;
+		put_bits_param.put_size = 32;
+		put_bits(&put_bits_param);
+		ret += 4;
 	} else {
 		enc_params.header[0] = enc_unit & 0xff;
 		enc_params.header[1] = enc_len_unit & 0xff;
+		for (iter = 0; iter < 4; iter++) {
+			enc_params.header[iter+2] = ((unsigned int)(enc_params.src_len) >> (24 - iter*8)) & 0xff;
+		}
 	}
 
 	return ret;

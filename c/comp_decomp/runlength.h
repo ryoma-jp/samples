@@ -36,7 +36,6 @@ typedef struct _RUNLENGTH_ENC_PARAMS {
 	int enc_unit;		//!< エンコード単位[bit単位]．0以下の指定はデフォルト値を使用する．
 	int enc_len_unit;	//!< 連長桁[bit単位]．0以下の指定はデフォルト値を使用する．
 	char* dst;		//!< エンコード結果を格納するバッファ
-	int dst_len;		//!< エンコード結果を格納するバッファ長[byte単位]
 	char* header;		//!< ヘッダを格納するバッファ．NULL指定でヘッダをdstに埋め込む．
 } RUNLENGTH_ENC_PARAMS;
 
