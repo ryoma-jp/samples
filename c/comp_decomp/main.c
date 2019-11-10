@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include <unistd.h>
 
 /**
  * @brief プログラムの使用方法の表示
@@ -87,6 +88,7 @@ int main(int argc, char* argv[])
 		MY_PRINT(MY_PRINT_LVL_ERROR, "Cannot open file : %s\n", argv[2]);
 		exit(0);
 	}
+
 	if (fstat(fd_input, &stbuf_input) == -1) {
 		MY_PRINT(MY_PRINT_LVL_ERROR, "fstat() failed\n");
 		exit(0);
@@ -101,6 +103,7 @@ int main(int argc, char* argv[])
 
 	src_buf = (char*)malloc(src_size);
 	dst_buf = (char*)malloc(src_size+6);	/* T.B.D:圧縮できる前提でsrc_size+ヘッダサイズとしておく */
+	fread(src_buf, 1, src_size, fp_input);
 
 	switch (dec_enc_mode) {
 		case DEC_MODE:
@@ -122,7 +125,7 @@ int main(int argc, char* argv[])
 			break;
 	}
 
-	fclose(fp_input);
+	close(fd_input);
 	fclose(fp_output);
 	free(src_buf);
 	free(dst_buf);

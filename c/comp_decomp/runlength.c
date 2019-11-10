@@ -60,7 +60,34 @@ typedef struct _RUNLENGTH_GET_BITS_PARAM {
  */
 static RUNLENGTH_RET get_bits(RUNLENGTH_GET_BITS_PARAM *get_bits_param)
 {
-	RUNLENGTH_RET ret;
+	RUNLENGTH_RET ret = RUNLENGTH_RET_NOERROR;
+	int remain_bits = 8-get_bits_param->bit_ptr;
+	unsigned char mask = ((1 << remain_bits) - 1);
+	int iter;
+	
+	iter = get_bits_param->byte_ptr;
+	if (remain_bits >= get_bits_param->read_size) {
+		mask &= ~((1 << (remain_bits - get_bits_param->read_size)) - 1);
+		get_bits_param->read_data = (get_bits_param->src[iter] & mask) >> (remain_bits - get_bits_param->read_size);
+	} else {
+		get_bits_param->read_data = get_bits_param->src[iter++] & mask;
+		for (; iter < get_bits_param->byte_ptr + ((get_bits_param->read_size - remain_bits) / 8); iter++) {
+			get_bits_param->read_data = (get_bits_param->read_data << 8) |
+							get_bits_param->src[iter];
+		}
+		remain_bits = (get_bits_param->read_size - remain_bits) % 8;
+		if (remain_bits > 0) {
+			get_bits_param->read_data = (get_bits_param->read_data << remain_bits) |
+							((get_bits_param->src[iter] >> (8 - remain_bits)) & ((1 << remain_bits) - 1));
+		}
+	}
+
+	get_bits_param->byte_ptr += get_bits_param->read_size / 8;
+	get_bits_param->bit_ptr += get_bits_param->read_size % 8;
+	if (get_bits_param->bit_ptr >= 8) {
+		get_bits_param->bit_ptr -= 8;
+		get_bits_param->byte_ptr += 1;
+	}
 
 	return ret;
 }
@@ -85,7 +112,7 @@ typedef struct _RUNLENGTH_PUT_BITS_PARAM {
  */
 static RUNLENGTH_RET put_bits(RUNLENGTH_PUT_BITS_PARAM* put_bits_param)
 {
-	RUNLENGTH_RET ret;
+	RUNLENGTH_RET ret = RUNLENGTH_RET_NOERROR;
 	unsigned int write_data;
 	int write_byte;
 	int remain_bits;
@@ -129,6 +156,7 @@ int runlength_encode(RUNLENGTH_ENC_PARAMS enc_params)
 	int iter;
 	int ret = 0;
 	RUNLENGTH_PUT_BITS_PARAM put_bits_param = { 0 };
+	RUNLENGTH_GET_BITS_PARAM get_bits_param = { 0 };
 
 	if (enc_params.enc_unit <= 0) {
 		enc_unit = RUNLENGTH_ENC_UNIT_DEFAULT;
