@@ -23,7 +23,11 @@
  *       連長 1文字：a9a6                     4文字 @n
  *       連長 2文字：a15                      3文字 @n
  *   - エンコードしたデータのデコード結果を格納するバッファサイズを決めるために， @n
- *     エンコード結果のヘッダにデコード後のデータサイズを格納しておく
+ *     エンコード結果のヘッダにデコード後のデータサイズを格納しておく @n
+ *     このパラメータはデコード時，ファイル終端の端数を判断する用途でも使用する @n
+ *     - 端数 @n
+ *       圧縮単位16byte，データサイズ24byteのように，エンコード対象のデータサイズが圧縮単位となる保証がなく，端数が生じる @n
+ *       端数に対して0を埋めてエンコードし，デコード時はヘッダに格納されたデコード後のデータサイズを見てゼロ埋めしたデータ数を判断する @n
  *   - 本プログラムの仕様 @n
  *     - 圧縮対象のデータの並びに依存して制御文字の有効性が変動する為， @n
  *       制御文字は使用せず，ランレングスデコード・エンコードはすべてのデータを対象とする @n
@@ -55,10 +59,13 @@ typedef struct _RUNLENGTH_GET_BITS_PARAM {
  * @brief srcからデータを読み出す
  * @param[in,out] get_bits_param ビット取得処理用パラメータ @n
  *                               read_dataに取得データを格納する
+ * @param[in] read_only リードポインタの更新有無を指定する @n
+ *                      - RUNLENGTH_FALSE : リードポインタを更新しない (データの先読み時などで使用) @n
+ *                      - RUNLENGTH_TRUE : リードポインタを更新する
  * @return RUNLENGTH_RET
  * @details srcからデータを読み出す
  */
-static RUNLENGTH_RET get_bits(RUNLENGTH_GET_BITS_PARAM *get_bits_param)
+static RUNLENGTH_RET get_bits(RUNLENGTH_GET_BITS_PARAM *get_bits_param, RUNLENGTH_FLAG read_only)
 {
 	RUNLENGTH_RET ret = RUNLENGTH_RET_NOERROR;
 	int remain_bits = 8-get_bits_param->bit_ptr;
@@ -82,11 +89,13 @@ static RUNLENGTH_RET get_bits(RUNLENGTH_GET_BITS_PARAM *get_bits_param)
 		}
 	}
 
-	get_bits_param->byte_ptr += get_bits_param->read_size / 8;
-	get_bits_param->bit_ptr += get_bits_param->read_size % 8;
-	if (get_bits_param->bit_ptr >= 8) {
-		get_bits_param->bit_ptr -= 8;
-		get_bits_param->byte_ptr += 1;
+	if (!read_only) {
+		get_bits_param->byte_ptr += get_bits_param->read_size / 8;
+		get_bits_param->bit_ptr += get_bits_param->read_size % 8;
+		if (get_bits_param->bit_ptr >= 8) {
+			get_bits_param->bit_ptr -= 8;
+			get_bits_param->byte_ptr += 1;
+		}
 	}
 
 	return ret;
@@ -143,6 +152,81 @@ static RUNLENGTH_RET put_bits(RUNLENGTH_PUT_BITS_PARAM* put_bits_param)
 }
 
 /**
+ * @brief ランレングスエンコード処理のコア部分
+ * @param[in] enc_params エンコードパラメータ
+ * @param[in] get_bits_param エンコード対象のデータのアドレス設定済みの取得パラメータ
+ * @param[in,out] put_bits_param エンコード結果を格納するアドレス設定済みの書き出しパラメータ @n
+ *                               put_bits_param.dstにエンコード結果を格納する
+ * @return int エンコード後のデータ長を返す @n
+ *             エラー時は-1を返す
+ * @details ランレングスエンコードを行う
+ */
+static int runlength_encode_core(RUNLENGTH_ENC_PARAMS enc_params, 
+					RUNLENGTH_GET_BITS_PARAM get_bits_param,
+					RUNLENGTH_PUT_BITS_PARAM put_bits_param)
+{
+	int ret = 0;
+	int remain = enc_params.src_len * 8;
+	int enc_len_unit;
+	unsigned int enc_unit_data;
+	unsigned int enc_unit_data_next;
+
+	get_bits_param.read_size = enc_params.enc_unit;
+	while (remain >= enc_params.enc_unit) {
+		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		remain -= enc_params.enc_unit;
+		enc_unit_data = get_bits_param.read_data;
+		enc_len_unit = 1;
+
+		if (remain >= enc_params.enc_unit) {
+			get_bits(&get_bits_param, RUNLENGTH_TRUE);
+			enc_unit_data_next = get_bits_param.read_data;
+			while (enc_unit_data == enc_unit_data_next) {
+				get_bits(&get_bits_param, RUNLENGTH_FALSE);
+				remain -= enc_params.enc_unit;
+				enc_len_unit += 1;
+
+				if (remain >= enc_params.enc_unit) {
+					get_bits(&get_bits_param, RUNLENGTH_TRUE);
+					enc_unit_data_next = get_bits_param.read_data;
+				} else {
+					break;
+				}
+			}
+		}
+
+		put_bits_param.put_data = enc_unit_data;
+		put_bits_param.put_size = enc_params.enc_unit;
+		put_bits(&put_bits_param);
+
+		put_bits_param.put_data = enc_len_unit;
+		put_bits_param.put_size = enc_params.enc_len_unit;
+		put_bits(&put_bits_param);
+
+		ret += 2;
+	}
+
+	if (remain > 0) {
+		get_bits_param.read_size = remain;
+		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		enc_unit_data = get_bits_param.read_data << (8 - (remain % 8));
+		enc_len_unit = 1;
+
+		put_bits_param.put_data = enc_unit_data;
+		put_bits_param.put_size = enc_params.enc_unit;
+		put_bits(&put_bits_param);
+
+		put_bits_param.put_data = enc_len_unit;
+		put_bits_param.put_size = enc_params.enc_len_unit;
+		put_bits(&put_bits_param);
+
+		ret += 2;
+	}
+
+	return ret;
+}
+
+/**
  * @brief ランレングスエンコード
  * @param[in] enc_params エンコードパラメータ
  * @return int エンコード後のデータ長を返す @n
@@ -151,33 +235,27 @@ static RUNLENGTH_RET put_bits(RUNLENGTH_PUT_BITS_PARAM* put_bits_param)
  */
 int runlength_encode(RUNLENGTH_ENC_PARAMS enc_params)
 {
-	unsigned int enc_unit;
-	unsigned int enc_len_unit;
 	int iter;
 	int ret = 0;
 	RUNLENGTH_PUT_BITS_PARAM put_bits_param = { 0 };
 	RUNLENGTH_GET_BITS_PARAM get_bits_param = { 0 };
 
 	if (enc_params.enc_unit <= 0) {
-		enc_unit = RUNLENGTH_ENC_UNIT_DEFAULT;
-	} else {
-		enc_unit = enc_params.enc_unit;
-	}
+		enc_params.enc_unit = RUNLENGTH_ENC_UNIT_DEFAULT;
+	} 
 	if (enc_params.enc_len_unit <= 0) {
-		enc_len_unit = RUNLENGTH_LEN_UNIT_DEFAULT;
-	} else {
-		enc_len_unit = enc_params.enc_len_unit;
+		enc_params.enc_len_unit = RUNLENGTH_LEN_UNIT_DEFAULT;
 	}
 
 	if (enc_params.header == NULL) {
 		put_bits_param.dst = enc_params.dst;
-		put_bits_param.put_data = enc_unit;
+		put_bits_param.put_data = enc_params.enc_unit;
 		put_bits_param.put_size = 8;
 		put_bits(&put_bits_param);
 		ret += 1;
 		
 		put_bits_param.dst = enc_params.dst;
-		put_bits_param.put_data = enc_len_unit;
+		put_bits_param.put_data = enc_params.enc_len_unit;
 		put_bits_param.put_size = 8;
 		put_bits(&put_bits_param);
 		ret += 1;
@@ -188,12 +266,15 @@ int runlength_encode(RUNLENGTH_ENC_PARAMS enc_params)
 		put_bits(&put_bits_param);
 		ret += 4;
 	} else {
-		enc_params.header[0] = enc_unit & 0xff;
-		enc_params.header[1] = enc_len_unit & 0xff;
+		enc_params.header[0] = enc_params.enc_unit & 0xff;
+		enc_params.header[1] = enc_params.enc_len_unit & 0xff;
 		for (iter = 0; iter < 4; iter++) {
 			enc_params.header[iter+2] = ((unsigned int)(enc_params.src_len) >> (24 - iter*8)) & 0xff;
 		}
 	}
+
+	get_bits_param.src = enc_params.src;
+	ret += runlength_encode_core(enc_params, get_bits_param, put_bits_param);
 
 	return ret;
 }

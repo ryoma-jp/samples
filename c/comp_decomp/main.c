@@ -61,7 +61,6 @@ int main(int argc, char* argv[])
 	RUNLENGTH_ENC_PARAMS enc_params;
 	int fd_input;
 	struct stat stbuf_input;
-	int iter;
 	int dst_len;
 
 	if (argc != 4) {
@@ -102,7 +101,7 @@ int main(int argc, char* argv[])
 	}
 
 	src_buf = (char*)malloc(src_size);
-	dst_buf = (char*)malloc(src_size+6);	/* T.B.D:圧縮できる前提でsrc_size+ヘッダサイズとしておく */
+	dst_buf = (char*)malloc(src_size*2+64);	/* T.B.D:安全のため，src_sizeの2倍+ヘッダを確保 */
 	fread(src_buf, 1, src_size, fp_input);
 
 	switch (dec_enc_mode) {
@@ -117,9 +116,7 @@ int main(int argc, char* argv[])
 			enc_params.header = NULL;
 			dst_len = runlength_encode(enc_params);
 
-			for (iter = 0; iter < dst_len; iter++) {
-				fputc(dst_buf[iter], fp_output);
-			}
+			fwrite(dst_buf, 1, dst_len, fp_output);
 			break;
 		default:
 			break;
