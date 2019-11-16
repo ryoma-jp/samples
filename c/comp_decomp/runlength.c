@@ -117,7 +117,7 @@ typedef struct _RUNLENGTH_PUT_BITS_PARAM {
  * @brief dstへデータを書き出す
  * @param[in] put_bits_param ビット取得処理用パラメータ
  * @return RUNLENGTH_RET
- * @details srcからデータを読み出す
+ * @details dstへデータを書き出す
  */
 static RUNLENGTH_RET put_bits(RUNLENGTH_PUT_BITS_PARAM* put_bits_param)
 {
@@ -134,7 +134,9 @@ static RUNLENGTH_RET put_bits(RUNLENGTH_PUT_BITS_PARAM* put_bits_param)
 	for (iter = 1; iter < write_byte; iter++) {
 		*(put_bits_param->dst + put_bits_param->byte_ptr + iter) = (write_data >> (24 - iter*8)) & 0xff;
 	}
-	put_bits_param->byte_ptr += write_byte;
+	if (iter > 0) {
+		put_bits_param->byte_ptr += write_byte;
+	}
 
 	if ((put_bits_param->put_size + put_bits_param->bit_ptr) > 32) {
 		remain_bits = 32 - (put_bits_param->put_size + put_bits_param->bit_ptr);
@@ -146,7 +148,6 @@ static RUNLENGTH_RET put_bits(RUNLENGTH_PUT_BITS_PARAM* put_bits_param)
 	if (put_bits_param->bit_ptr >= 8) {
 		put_bits_param->bit_ptr -= 8;
 	}
-
 
 	return ret;
 }
@@ -168,6 +169,7 @@ static int runlength_encode_core(RUNLENGTH_ENC_PARAMS enc_params,
 	int ret = 0;
 	int remain = enc_params.src_len * 8;
 	int enc_len_unit;
+	long enc_bit = 0;
 	unsigned int enc_unit_data;
 	unsigned int enc_unit_data_next;
 
@@ -203,7 +205,7 @@ static int runlength_encode_core(RUNLENGTH_ENC_PARAMS enc_params,
 		put_bits_param.put_size = enc_params.enc_len_unit;
 		put_bits(&put_bits_param);
 
-		ret += 2;
+		enc_bit += enc_params.enc_unit + enc_params.enc_len_unit;
 	}
 
 	if (remain > 0) {
@@ -220,7 +222,12 @@ static int runlength_encode_core(RUNLENGTH_ENC_PARAMS enc_params,
 		put_bits_param.put_size = enc_params.enc_len_unit;
 		put_bits(&put_bits_param);
 
-		ret += 2;
+		enc_bit += enc_params.enc_unit + enc_params.enc_len_unit;
+	}
+
+	ret = enc_bit / 8;
+	if (enc_bit % 8 > 0) {
+		ret += 1;
 	}
 
 	return ret;

@@ -26,6 +26,8 @@ static int show_usage()
 	printf("             --enc : エンコード\n");
 	printf("    input_file : エンコードまたはデコード対象のファイル\n");
 	printf("    output_file : エンコードまたはデコード結果を出力するファイル\n");
+	printf("    enc_unit (エンコード時のみ指定) 符号化単位(ビット数で指定，最大32)\n");
+	printf("    enc_len_unit (エンコード時のみ指定) 連長ビット数(最大32)\n");
 
 	return 0;
 }
@@ -46,7 +48,9 @@ typedef enum _DEC_ENC_MODE {
  * @param[in] argv 引数 @n
  *              argv[1] : flag エンコード処理またはデコード処理を選択するフラグ @n
  *              argv[2] : input_file エンコードまたはデコード対象のファイル @n
- *              argv[3] : output_file エンコードまたはデコード結果を出力するファイル
+ *              argv[3] : output_file エンコードまたはデコード結果を出力するファイル @n
+ *              argv[4] : enc_unit (エンコード時のみ指定) 符号化単位(ビット数で指定，最大32) @n
+ *              argv[5] : enc_len_unit (エンコード時のみ指定) 連長ビット数(最大32)
  * @return int 0固定
  * @details flagの指示にもとづきinput_fileをエンコードまたはデコードしoutput_fileへ出力する
  */
@@ -62,16 +66,23 @@ int main(int argc, char* argv[])
 	int fd_input;
 	struct stat stbuf_input;
 	int dst_len;
-
-	if (argc != 4) {
-		show_usage();
-		exit(0);
-	}
+	int enc_unit;
+	int enc_len_unit;
 
 	if (strcmp(argv[1], "--dec") == 0) {
-		dec_enc_mode = DEC_MODE;
+		if (argc != 4) {
+			show_usage();
+			exit(0);
+		} else {
+			dec_enc_mode = DEC_MODE;
+		}
 	} else if (strcmp(argv[1], "--enc") == 0) {
-		dec_enc_mode = ENC_MODE;
+		if (argc != 6) {
+			show_usage();
+			exit(0);
+		} else {
+			dec_enc_mode = ENC_MODE;
+		}
 	} else {
 		MY_PRINT(MY_PRINT_LVL_ERROR, "Unknown mode\n");
 		exit(0);
@@ -100,18 +111,33 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 
-	src_buf = (char*)malloc(src_size);
-	dst_buf = (char*)malloc(src_size*2+64);	/* T.B.D:安全のため，src_sizeの2倍+ヘッダを確保 */
-	fread(src_buf, 1, src_size, fp_input);
-
 	switch (dec_enc_mode) {
 		case DEC_MODE:
+			src_buf = (char*)malloc(src_size);
+			dst_buf = (char*)malloc(src_size);	/* T.B.D:src_sizeと同じサイズを確保 */
+			fread(src_buf, 1, src_size, fp_input);
+
 			break;
 		case ENC_MODE:
+			enc_unit = atoi(argv[4]);
+			if ((enc_unit < 1) && (enc_unit > 32)) {
+				MY_PRINT(MY_PRINT_LVL_ERROR, "enc_unit must set to under 32bit\n");
+				exit(0);
+			}
+			enc_len_unit = atoi(argv[5]);
+			if ((enc_len_unit < 1) && (enc_len_unit > 32)) {
+				MY_PRINT(MY_PRINT_LVL_ERROR, "enc_len_unit must set to under 32bit\n");
+				exit(0);
+			}
+
+			src_buf = (char*)malloc(src_size);
+			dst_buf = (char*)malloc(src_size * (enc_len_unit / enc_unit + 1));
+			fread(src_buf, 1, src_size, fp_input);
+
 			enc_params.src = src_buf;
 			enc_params.src_len = src_size;
-			enc_params.enc_unit = 8;
-			enc_params.enc_len_unit = 8;
+			enc_params.enc_unit = enc_unit;
+			enc_params.enc_len_unit = enc_len_unit;
 			enc_params.dst = dst_buf;
 			enc_params.header = NULL;
 			dst_len = runlength_encode(enc_params);
