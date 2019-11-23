@@ -50,7 +50,7 @@
 typedef struct _RUNLENGTH_GET_BITS_PARAM {
 	char* src;		//!< データを読み出すバッファ
 	unsigned int read_data;	//!< 取得データ
-	int read_size;		//!< 取得データのサイズ(32bit以下をbit単位で指定)
+	unsigned int read_size;	//!< 取得データのサイズ(32bit以下をbit単位で指定)
 	unsigned int byte_ptr;	//!< バイト単位のリードポインタ
 	unsigned int bit_ptr;	//!< byte_ptr内のビット位置を示すリードポインタ
 } RUNLENGTH_GET_BITS_PARAM;
@@ -78,7 +78,7 @@ static RUNLENGTH_RET get_bits(RUNLENGTH_GET_BITS_PARAM *get_bits_param, RUNLENGT
 		get_bits_param->read_data = (get_bits_param->src[iter] & mask) >> (remain_bits - get_bits_param->read_size);
 	} else {
 		get_bits_param->read_data = get_bits_param->src[iter++] & mask;
-		for (; iter < get_bits_param->byte_ptr + ((get_bits_param->read_size - remain_bits) / 8); iter++) {
+		for (; iter <= get_bits_param->byte_ptr + ((get_bits_param->read_size - remain_bits) / 8); iter++) {
 			get_bits_param->read_data = (get_bits_param->read_data << 8) |
 							get_bits_param->src[iter];
 		}
@@ -287,6 +287,44 @@ int runlength_encode(RUNLENGTH_ENC_PARAMS enc_params)
 }
 
 /**
+ * @brief ランレングスデコード処理のコア部分
+ * @param[in] dec_params デコードパラメータ
+ * @param[in] get_bits_param デコード対象のデータのアドレス設定済みの取得パラメータ
+ * @param[in,out] put_bits_param デコード結果を格納するアドレス設定済みの書き出しパラメータ @n
+ *                               put_bits_param.dstにデコード結果を格納する
+ * @return int デコード後のデータ長を返す @n
+ *             エラー時は-1を返す
+ * @details ランレングスデコードを行う
+ */
+static int runlength_decode_core(RUNLENGTH_DEC_PARAMS dec_params, 
+					RUNLENGTH_GET_BITS_PARAM get_bits_param,
+					RUNLENGTH_PUT_BITS_PARAM put_bits_param,
+					int enc_unit, int enc_len_unit, unsigned int dst_size)
+{
+	unsigned int enc_data;
+	int enc_len;
+	int iter;
+
+	while (put_bits_param.byte_ptr < dst_size) {
+		get_bits_param.read_size = enc_unit;
+		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		enc_data = get_bits_param.read_data;
+	
+		get_bits_param.read_size = enc_len_unit;
+		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		enc_len = get_bits_param.read_data;
+	
+		put_bits_param.put_data = enc_data;
+		put_bits_param.put_size = enc_unit;
+		for (iter = 0; iter < enc_len; iter++) {
+			put_bits(&put_bits_param);
+		}
+	}
+
+	return put_bits_param.byte_ptr;
+}
+
+/**
  * @brief ランレングスデコード
  * @param[in] src デコード対象のデータ
  * @param[in] src_len デコード対象のデータ長
@@ -295,9 +333,40 @@ int runlength_encode(RUNLENGTH_ENC_PARAMS enc_params)
  *             エラー時は-1を返す
  * @details ランレングスデコードを行う
  */
-int runlength_decode(char* src, int src_len, char* dst)
+int runlength_decode(RUNLENGTH_DEC_PARAMS dec_params)
 {
-	int ret = -1;
+	unsigned int dst_size = 0;
+	int enc_unit = 0;
+	int enc_len_unit = 0;
+	int iter;
+	int ret = 0;
+	RUNLENGTH_PUT_BITS_PARAM put_bits_param = { 0 };
+	RUNLENGTH_GET_BITS_PARAM get_bits_param = { 0 };
+
+	if (dec_params.header == NULL) {
+		get_bits_param.src = dec_params.src;
+		get_bits_param.read_size = 8;
+		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		enc_unit = get_bits_param.read_data;
+		
+		get_bits_param.read_size = 8;
+		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		enc_len_unit = get_bits_param.read_data;
+
+		get_bits_param.read_size = 32;
+		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		dst_size = get_bits_param.read_data;
+	} else {
+		enc_unit = dec_params.header[0];
+		enc_len_unit = dec_params.header[1];
+		for (iter = 0; iter < 4; iter++) {
+			dst_size = (dst_size << 8) | dec_params.header[iter+2];
+		}
+	}
+
+	put_bits_param.dst = dec_params.dst;
+	ret = runlength_decode_core(dec_params, get_bits_param, put_bits_param,
+			enc_unit, enc_len_unit, dst_size);
 
 	return ret;
 }

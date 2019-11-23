@@ -63,6 +63,7 @@ int main(int argc, char* argv[])
 	char* src_buf;
 	char* dst_buf;
 	RUNLENGTH_ENC_PARAMS enc_params;
+	RUNLENGTH_DEC_PARAMS dec_params;
 	int fd_input;
 	struct stat stbuf_input;
 	int dst_len;
@@ -116,6 +117,14 @@ int main(int argc, char* argv[])
 			src_buf = (char*)malloc(src_size);
 			dst_buf = (char*)malloc(src_size);	/* T.B.D:src_sizeと同じサイズを確保 */
 			fread(src_buf, 1, src_size, fp_input);
+
+			dec_params.src = src_buf;
+			dec_params.src_len = src_size;
+			dec_params.dst = dst_buf;
+			dec_params.header = NULL;
+			dst_len = runlength_decode(dec_params);
+
+			fwrite(dst_buf, 1, dst_len, fp_output);
 
 			break;
 		case ENC_MODE:

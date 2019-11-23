@@ -40,6 +40,17 @@ typedef struct _RUNLENGTH_ENC_PARAMS {
 } RUNLENGTH_ENC_PARAMS;
 
 /**
+ * @struct _RUNLENGTH_DEC_PARAMS
+ * @brief ランレングスデコードのパラメータ
+ */
+typedef struct _RUNLENGTH_DEC_PARAMS {
+	char* src;		//!< デコード対象のデータ
+	int src_len;		//!< デコード対象のデータ長[byte単位]
+	char* dst;		//!< デコード結果を格納するバッファ
+	char* header;		//!< ヘッダが格納されているバッファ．NULL指定でヘッダをdstから読み込む．
+} RUNLENGTH_DEC_PARAMS;
+
+/**
  * @enum _RUNLENGTH_RET
  * @brief ランレングスエンコード・デコード処理の戻り値
  */
@@ -57,6 +68,6 @@ typedef enum _RUNLENGTH_FLAG {
 } RUNLENGTH_FLAG;
 
 extern int runlength_encode(RUNLENGTH_ENC_PARAMS enc_params);
-extern int runlength_decode();
+extern int runlength_decode(RUNLENGTH_DEC_PARAMS dec_params);
 
 #endif /*__RUNLENGTH_H__ */
