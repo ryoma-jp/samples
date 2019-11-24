@@ -45,4 +45,47 @@
 		} \
 }
 
+/**
+ * @def MIN(a, b)
+ * @brief 引数で指定されたa, bのうち小さい方を返す
+ */
+#ifndef  MIN
+#define MIN(a, b)	(((a) < (b)) ? (a) : (b))
+#endif
+/**
+ * @struct _GET_BITS_PARAM
+ * @brief ビット取得処理用パラメータ
+ */
+typedef struct _GET_BITS_PARAM {
+	char* src;		//!< データを読み出すバッファ
+	unsigned int read_data;	//!< 取得データ
+	unsigned int read_size;	//!< 取得データのサイズ(32bit以下をbit単位で指定)
+	unsigned int byte_ptr;	//!< バイト単位のリードポインタ
+	unsigned int bit_ptr;	//!< byte_ptr内のビット位置を示すリードポインタ
+} GET_BITS_PARAM;
+
+/**
+ * @enum _GET_BITS_FLAG
+ * @brief 2値データを表現するフラグ
+ */
+typedef enum _GET_BITS_FLAG {
+	GET_BITS_FALSE=0,	//!< False
+	GET_BITS_TRUE=1,	//!< True
+} GET_BITS_FLAG;
+
+/**
+ * @struct _PUT_BITS_PARAM
+ * @brief ビット書き込み処理用パラメータ
+ */
+typedef struct _PUT_BITS_PARAM {
+	char* dst;		//!< 書き込み先のバッファ
+	unsigned int put_data;	//!< 書き込むデータ
+	int put_size;		//!< 書き込むデータのサイズ(32bit以下でbit単位で指定)
+	unsigned int byte_ptr;	//!< バイト単位のリードポインタ
+	unsigned int bit_ptr;	//!< byte_ptr内のビット位置を示すリードポインタ
+} PUT_BITS_PARAM;
+
+extern int get_bits(GET_BITS_PARAM *get_bits_param, GET_BITS_FLAG read_only);
+extern int put_bits(PUT_BITS_PARAM* put_bits_param);
+
 #endif /*__COMMON_H__ */

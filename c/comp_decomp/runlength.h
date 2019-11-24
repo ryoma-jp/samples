@@ -21,12 +21,6 @@
 #define RUNLENGTH_HEADER_LEN	(2)
 
 /**
- * @def RUNLENGTH_MIN(a, b)
- * @brief 引数で指定されたa, bのうち小さい方を返す
- */
-#define RUNLENGTH_MIN(a, b)	(((a) < (b)) ? (a) : (b))
-
-/**
  * @struct _RUNLENGTH_ENC_PARAMS
  * @brief ランレングスエンコードのパラメータ
  */
@@ -57,15 +51,6 @@ typedef struct _RUNLENGTH_DEC_PARAMS {
 typedef enum _RUNLENGTH_RET {
 	RUNLENGTH_RET_NOERROR,	//!< エラーなし
 } RUNLENGTH_RET;
-
-/**
- * @enum _RUNLENGTH_FLAG
- * @brief ランレングスエンコード・デコード処理で使用する2値データを表現するフラグ
- */
-typedef enum _RUNLENGTH_FLAG {
-	RUNLENGTH_FALSE=0,	//!< False
-	RUNLENGTH_TRUE=1,	//!< True
-} RUNLENGTH_FLAG;
 
 extern int runlength_encode(RUNLENGTH_ENC_PARAMS enc_params);
 extern int runlength_decode(RUNLENGTH_DEC_PARAMS dec_params);

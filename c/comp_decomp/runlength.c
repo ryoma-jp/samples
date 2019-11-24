@@ -43,114 +43,6 @@
 #include "runlength.h"
 #include "common.h"
 
-/**
- * @struct _RUNLENGTH_GET_BITS_PARAM
- * @brief ビット取得処理用パラメータ
- */
-typedef struct _RUNLENGTH_GET_BITS_PARAM {
-	char* src;		//!< データを読み出すバッファ
-	unsigned int read_data;	//!< 取得データ
-	unsigned int read_size;	//!< 取得データのサイズ(32bit以下をbit単位で指定)
-	unsigned int byte_ptr;	//!< バイト単位のリードポインタ
-	unsigned int bit_ptr;	//!< byte_ptr内のビット位置を示すリードポインタ
-} RUNLENGTH_GET_BITS_PARAM;
-
-/**
- * @brief srcからデータを読み出す
- * @param[in,out] get_bits_param ビット取得処理用パラメータ @n
- *                               read_dataに取得データを格納する
- * @param[in] read_only リードポインタの更新有無を指定する @n
- *                      - RUNLENGTH_FALSE : リードポインタを更新しない (データの先読み時などで使用) @n
- *                      - RUNLENGTH_TRUE : リードポインタを更新する
- * @return RUNLENGTH_RET
- * @details srcからデータを読み出す
- */
-static RUNLENGTH_RET get_bits(RUNLENGTH_GET_BITS_PARAM *get_bits_param, RUNLENGTH_FLAG read_only)
-{
-	RUNLENGTH_RET ret = RUNLENGTH_RET_NOERROR;
-	int remain_bits = 8-get_bits_param->bit_ptr;
-	unsigned char mask = ((1 << remain_bits) - 1);
-	int iter;
-	
-	iter = get_bits_param->byte_ptr;
-	if (remain_bits >= get_bits_param->read_size) {
-		mask &= ~((1 << (remain_bits - get_bits_param->read_size)) - 1);
-		get_bits_param->read_data = (get_bits_param->src[iter] & mask) >> (remain_bits - get_bits_param->read_size);
-	} else {
-		get_bits_param->read_data = get_bits_param->src[iter++] & mask;
-		for (; iter <= get_bits_param->byte_ptr + ((get_bits_param->read_size - remain_bits) / 8); iter++) {
-			get_bits_param->read_data = (get_bits_param->read_data << 8) |
-							get_bits_param->src[iter];
-		}
-		remain_bits = (get_bits_param->read_size - remain_bits) % 8;
-		if (remain_bits > 0) {
-			get_bits_param->read_data = (get_bits_param->read_data << remain_bits) |
-							((get_bits_param->src[iter] >> (8 - remain_bits)) & ((1 << remain_bits) - 1));
-		}
-	}
-
-	if (!read_only) {
-		get_bits_param->byte_ptr += get_bits_param->read_size / 8;
-		get_bits_param->bit_ptr += get_bits_param->read_size % 8;
-		if (get_bits_param->bit_ptr >= 8) {
-			get_bits_param->bit_ptr -= 8;
-			get_bits_param->byte_ptr += 1;
-		}
-	}
-
-	return ret;
-}
-
-/**
- * @struct _RUNLENGTH_PUT_BITS_PARAM
- * @brief ビット書き込み処理用パラメータ
- */
-typedef struct _RUNLENGTH_PUT_BITS_PARAM {
-	char* dst;		//!< 書き込み先のバッファ
-	unsigned int put_data;	//!< 書き込むデータ
-	int put_size;		//!< 書き込むデータのサイズ(32bit以下でbit単位で指定)
-	unsigned int byte_ptr;	//!< バイト単位のリードポインタ
-	unsigned int bit_ptr;	//!< byte_ptr内のビット位置を示すリードポインタ
-} RUNLENGTH_PUT_BITS_PARAM;
-
-/**
- * @brief dstへデータを書き出す
- * @param[in] put_bits_param ビット取得処理用パラメータ
- * @return RUNLENGTH_RET
- * @details dstへデータを書き出す
- */
-static RUNLENGTH_RET put_bits(RUNLENGTH_PUT_BITS_PARAM* put_bits_param)
-{
-	RUNLENGTH_RET ret = RUNLENGTH_RET_NOERROR;
-	unsigned int write_data;
-	int write_byte;
-	int remain_bits;
-	int iter;
-
-	write_data = (*(put_bits_param->dst+put_bits_param->byte_ptr) << 24) |
-			(put_bits_param->put_data << (32-put_bits_param->put_size-put_bits_param->bit_ptr));
-	write_byte = RUNLENGTH_MIN(4, (put_bits_param->put_size+put_bits_param->bit_ptr)/8);
-	*(put_bits_param->dst + put_bits_param->byte_ptr) = (write_data >> 24) & 0xff;
-	for (iter = 1; iter < write_byte; iter++) {
-		*(put_bits_param->dst + put_bits_param->byte_ptr + iter) = (write_data >> (24 - iter*8)) & 0xff;
-	}
-	if (iter > 0) {
-		put_bits_param->byte_ptr += write_byte;
-	}
-
-	if ((put_bits_param->put_size + put_bits_param->bit_ptr) > 32) {
-		remain_bits = 32 - (put_bits_param->put_size + put_bits_param->bit_ptr);
-		write_data = (put_bits_param->put_data & ((1 << remain_bits) - 1) << (8 - remain_bits));
-		*(put_bits_param->dst + put_bits_param->byte_ptr) = write_data & 0xff;
-		put_bits_param->byte_ptr += 1;
-	}
-	put_bits_param->bit_ptr += put_bits_param->put_size % 8;
-	if (put_bits_param->bit_ptr >= 8) {
-		put_bits_param->bit_ptr -= 8;
-	}
-
-	return ret;
-}
 
 /**
  * @brief ランレングスエンコード処理のコア部分
@@ -163,8 +55,8 @@ static RUNLENGTH_RET put_bits(RUNLENGTH_PUT_BITS_PARAM* put_bits_param)
  * @details ランレングスエンコードを行う
  */
 static int runlength_encode_core(RUNLENGTH_ENC_PARAMS enc_params, 
-					RUNLENGTH_GET_BITS_PARAM get_bits_param,
-					RUNLENGTH_PUT_BITS_PARAM put_bits_param)
+					GET_BITS_PARAM get_bits_param,
+					PUT_BITS_PARAM put_bits_param)
 {
 	int ret = 0;
 	int remain = enc_params.src_len * 8;
@@ -175,21 +67,21 @@ static int runlength_encode_core(RUNLENGTH_ENC_PARAMS enc_params,
 
 	get_bits_param.read_size = enc_params.enc_unit;
 	while (remain >= enc_params.enc_unit) {
-		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		get_bits(&get_bits_param, GET_BITS_FALSE);
 		remain -= enc_params.enc_unit;
 		enc_unit_data = get_bits_param.read_data;
 		enc_len_unit = 1;
 
 		if (remain >= enc_params.enc_unit) {
-			get_bits(&get_bits_param, RUNLENGTH_TRUE);
+			get_bits(&get_bits_param, GET_BITS_TRUE);
 			enc_unit_data_next = get_bits_param.read_data;
 			while (enc_unit_data == enc_unit_data_next) {
-				get_bits(&get_bits_param, RUNLENGTH_FALSE);
+				get_bits(&get_bits_param, GET_BITS_FALSE);
 				remain -= enc_params.enc_unit;
 				enc_len_unit += 1;
 
 				if (remain >= enc_params.enc_unit) {
-					get_bits(&get_bits_param, RUNLENGTH_TRUE);
+					get_bits(&get_bits_param, GET_BITS_TRUE);
 					enc_unit_data_next = get_bits_param.read_data;
 				} else {
 					break;
@@ -210,7 +102,7 @@ static int runlength_encode_core(RUNLENGTH_ENC_PARAMS enc_params,
 
 	if (remain > 0) {
 		get_bits_param.read_size = remain;
-		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		get_bits(&get_bits_param, GET_BITS_FALSE);
 		enc_unit_data = get_bits_param.read_data << (8 - (remain % 8));
 		enc_len_unit = 1;
 
@@ -244,8 +136,8 @@ int runlength_encode(RUNLENGTH_ENC_PARAMS enc_params)
 {
 	int iter;
 	int ret = 0;
-	RUNLENGTH_PUT_BITS_PARAM put_bits_param = { 0 };
-	RUNLENGTH_GET_BITS_PARAM get_bits_param = { 0 };
+	PUT_BITS_PARAM put_bits_param = { 0 };
+	GET_BITS_PARAM get_bits_param = { 0 };
 
 	if (enc_params.enc_unit <= 0) {
 		enc_params.enc_unit = RUNLENGTH_ENC_UNIT_DEFAULT;
@@ -297,8 +189,8 @@ int runlength_encode(RUNLENGTH_ENC_PARAMS enc_params)
  * @details ランレングスデコードを行う
  */
 static int runlength_decode_core(RUNLENGTH_DEC_PARAMS dec_params, 
-					RUNLENGTH_GET_BITS_PARAM get_bits_param,
-					RUNLENGTH_PUT_BITS_PARAM put_bits_param,
+					GET_BITS_PARAM get_bits_param,
+					PUT_BITS_PARAM put_bits_param,
 					int enc_unit, int enc_len_unit, unsigned int dst_size)
 {
 	unsigned int enc_data;
@@ -307,11 +199,11 @@ static int runlength_decode_core(RUNLENGTH_DEC_PARAMS dec_params,
 
 	while (put_bits_param.byte_ptr < dst_size) {
 		get_bits_param.read_size = enc_unit;
-		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		get_bits(&get_bits_param, GET_BITS_FALSE);
 		enc_data = get_bits_param.read_data;
 	
 		get_bits_param.read_size = enc_len_unit;
-		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		get_bits(&get_bits_param, GET_BITS_FALSE);
 		enc_len = get_bits_param.read_data;
 	
 		put_bits_param.put_data = enc_data;
@@ -340,21 +232,21 @@ int runlength_decode(RUNLENGTH_DEC_PARAMS dec_params)
 	int enc_len_unit = 0;
 	int iter;
 	int ret = 0;
-	RUNLENGTH_PUT_BITS_PARAM put_bits_param = { 0 };
-	RUNLENGTH_GET_BITS_PARAM get_bits_param = { 0 };
+	PUT_BITS_PARAM put_bits_param = { 0 };
+	GET_BITS_PARAM get_bits_param = { 0 };
 
 	if (dec_params.header == NULL) {
 		get_bits_param.src = dec_params.src;
 		get_bits_param.read_size = 8;
-		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		get_bits(&get_bits_param, GET_BITS_FALSE);
 		enc_unit = get_bits_param.read_data;
 		
 		get_bits_param.read_size = 8;
-		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		get_bits(&get_bits_param, GET_BITS_FALSE);
 		enc_len_unit = get_bits_param.read_data;
 
 		get_bits_param.read_size = 32;
-		get_bits(&get_bits_param, RUNLENGTH_FALSE);
+		get_bits(&get_bits_param, GET_BITS_FALSE);
 		dst_size = get_bits_param.read_data;
 	} else {
 		enc_unit = dec_params.header[0];
