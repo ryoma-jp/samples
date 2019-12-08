@@ -120,6 +120,7 @@ static int* linear_search(int* keys, int key_num, int search_key)
 static HUFFMAN_RET create_huffman_tree(char* src, int src_len, HUFFMAN_TREE* tree)
 {
 	HUFFMAN_RET ret = HUFFMAN_RET_NOERROR;
+	HUFFMAN_TREE_LIST* list_work;
 	GET_BITS_PARAM get_bits_param = { 0 };
 	int code_num = 1 << tree->enc_unit;
 	int code_count[code_num];
@@ -147,17 +148,7 @@ static HUFFMAN_RET create_huffman_tree(char* src, int src_len, HUFFMAN_TREE* tre
 
 	quick_sort(code_count, code_num, code_count_sorted);
 
-	printf("<< code_count >>\n");
-	for (iter = 0; iter < code_num; iter++) {
-		printf("  [%03d] %d\n", iter, code_count[iter]);
-	}
-	printf("<< code_count_sorted>>\n");
-	for (iter = 0; iter < code_num; iter++) {
-		printf("  [%03d] %d\n", iter, code_count_sorted[iter]);
-	}
-
 	iter = 0;
-	printf("<< code_list >>\n");
 	while ((iter < code_num) && (code_count_sorted[iter] > 0)) {
 		code_addr = linear_search(code_count, code_num, code_count_sorted[iter]);
 		if (iter > 0) {
@@ -170,7 +161,6 @@ static HUFFMAN_RET create_huffman_tree(char* src, int src_len, HUFFMAN_TREE* tre
 					code_addr = linear_search(code_addr+1, code_num-(code_count-code_addr)-1, code_count_sorted[iter+same_code_count]);
 					code_list[iter+same_code_count].code = (int)(code_addr-code_count);
 					code_list[iter+same_code_count].count = code_count_sorted[iter+same_code_count];
-					printf("  *code_list[%d] : %d, %d\n", iter+same_code_count, code_list[iter+same_code_count].code, code_list[iter+same_code_count].count);
 
 					same_code_count += 1;
 				}
@@ -178,17 +168,27 @@ static HUFFMAN_RET create_huffman_tree(char* src, int src_len, HUFFMAN_TREE* tre
 			} else {
 				code_list[iter].code = (int)(code_addr-code_count);
 				code_list[iter].count = code_count_sorted[iter];
-				printf("  code_list[%d] : %d, %d\n", iter, code_list[iter].code, code_list[iter].count);
 
 				iter += 1;
 			}
 		} else {
 			code_list[iter].code = (int)(code_addr-code_count);
 			code_list[iter].count = code_count_sorted[iter];
-			printf("  code_list[%d] : %d, %d\n", iter, code_list[iter].code, code_list[iter].count);
 
 			iter += 1;
 		}
+	}
+
+	code_num = iter;
+	tree->list = (HUFFMAN_TREE_LIST*)malloc(sizeof(HUFFMAN_TREE_LIST));
+	tree->list->data = code_list[0].code;
+	tree->list->right = NULL;
+	list_work = tree->list;
+	for (iter = 1; iter < code_num; iter++) {
+		list_work->right = (HUFFMAN_TREE_LIST*)malloc(sizeof(HUFFMAN_TREE_LIST));
+		list_work = list_work->right;
+		list_work->data = code_list[iter].code;
+		list_work->right = NULL;
 	}
 
 	return ret;
@@ -200,9 +200,18 @@ static HUFFMAN_RET create_huffman_tree(char* src, int src_len, HUFFMAN_TREE* tre
  * @return HUFFMAN_RET 処理結果
  * @details ハフマン木を削除する
  */
-static HUFFMAN_RET delete_huffman_tree(HUFFMAN_TREE tree)
+static HUFFMAN_RET delete_huffman_tree(HUFFMAN_TREE* tree)
 {
 	HUFFMAN_RET ret = HUFFMAN_RET_NOERROR;
+	HUFFMAN_TREE_LIST* list_work;
+	HUFFMAN_TREE_LIST* list_work_del;
+
+	while (list_work != NULL) {
+		list_work_del = list_work;
+		list_work = list_work->right;
+		free(list_work_del);
+	}
+	tree->list = NULL;
 
 	return ret;
 }
@@ -223,7 +232,7 @@ int huffman_encode(HUFFMAN_ENC_PARAMS enc_params)
 	huffman_tree.enc_unit = enc_params.enc_unit;
 	create_huffman_tree(enc_params.src, enc_params.src_len, &huffman_tree);
 
-	delete_huffman_tree(huffman_tree);
+	delete_huffman_tree(&huffman_tree);
 
 	return ret;
 }

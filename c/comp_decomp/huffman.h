@@ -10,12 +10,13 @@
 
 /**
  * @struct _HUFFMAN_TREE_LIST
- * @brief ハフマン木をリスト構造で表現する
+ * @brief ハフマン木をリスト構造で表現する @n
+ *        リストを線形探索しながらdataにヒットすれば0を付与，@n
+ *        ヒットしなければ1を付与してrightを判定する @n
  */
 typedef struct _HUFFMAN_TREE_LIST {
 	unsigned int data;	//!< エンコード対象のデータ
-	unsigned int code;	//!< エンコード結果	[MEMO] エンコード単位が決まれば，codeも決まる
-	struct _HUFFMAN_TREE_LIST* left;	//!< ハフマン木の左枝
+//	struct _HUFFMAN_TREE_LIST* left;	//!< ハフマン木の左枝
 	struct _HUFFMAN_TREE_LIST* right;	//!< ハフマン木の右枝
 } HUFFMAN_TREE_LIST;
 
