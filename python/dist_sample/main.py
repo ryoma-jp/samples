@@ -30,6 +30,7 @@ def main():
 	print(sub(13, 17))
 	print(mul(13, 17))
 	print(dev(13, 17))
+	print(dot([2, 3], [4, 5]))
 
 	return
 
