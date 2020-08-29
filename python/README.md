@@ -4,6 +4,7 @@
 |---|---|
 |argparse_sample |argparseモジュールで引数を入力するサンプル |
 |dist_sample |配布用パッケージ作成サンプル |
+|filter |信号処理フィルタのサンプル |
 |float2byte |floatをbyteデータに変換するサンプル |
 |glob_sample |globモジュールを用いたファイル探索のサンプル |
 |matplotlib_sample |matplotlibを用いたグラフ描画のサンプル |
