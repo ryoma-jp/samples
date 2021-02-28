@@ -10,6 +10,7 @@ DockerでのNode.js Webアプリケーションのサンプル．
 $ cd web_app/01_docker_nodejs
 $ ./docker_build.sh
 $ ./docker_run.sh
+# node server.js
 </pre>
 
 * クライアント用の端末で下記を実行
