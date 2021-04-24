@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import yaml
 
 class TF_Model():
 	def __init__(self):
@@ -151,6 +152,38 @@ class TF_Model():
 
 		return x, y, y_
 
+	def get_ops(self, outfile, inference_ops=None):
+		"""
+			outfile: オペレーション出力先
+			inference_ops: 推論グラフのオペレーション
+							[0]: input, [1]: output
+		"""
+		graph = tf.compat.v1.get_default_graph()
+		all_ops = graph.get_operations()
+		flg_inference_ops = False
+		
+		with open(outfile, 'w') as f:
+			ret_ops = []
+			for _op in all_ops:
+#				f.write('{}'.format(_op.op_def))
+#				if ((_op.op_def.name == 'MatMul') or (_op.op_def.name == 'Add')):
+#					f.write('<< {} >>\n'.format(_op.op_def.name))
+#					for _input in _op.inputs:
+#						f.write(' * {}\n'.format(_input))
+				if (flg_inference_ops):
+					if ((_op.op_def.name == 'Conv2D') or (_op.op_def.name == 'AddV2')):
+						ret_ops.append(_op)
+					if (inference_ops[1] in _op.name):
+						flg_inference_ops = False
+				else:
+					if (inference_ops[0] in _op.name):
+						flg_inference_ops = True
+						if ((_op.op_def.name == 'Conv2D') or (_op.op_def.name == 'AddV2')):
+							ret_ops.append(_op)
+				f.write('{}\n'.format(_op))
+		
+		return ret_ops
+
 	def fit(self, dataset,
 				train_x, train_y, train_y_, 
 				test_x, test_y, test_y_, 
@@ -189,6 +222,15 @@ class TF_Model():
 		sess = tf.compat.v1.Session(config=config)
 		sess.run(init)
 		saver = tf.compat.v1.train.Saver()
+		
+		inference_ops = self.get_ops(os.path.join(model_dir, 'ops.txt'), 
+						inference_ops=[test_x.name[:test_x.name.find(':')], test_y.name[:test_y.name.find(':')]])
+		print(inference_ops)
+		with open(os.path.join(model_dir, 'node_name.yaml'), 'w') as f:
+			f.write('input_node_name: \'{}\'\n'.format(test_x.name[:test_x.name.find(':')]))
+			f.write('output_node_name: \'{}\'\n'.format(test_y.name[:test_y.name.find(':')]))
+			for i, _inference_ops in enumerate(inference_ops):
+				f.write('hidden_{}: \'{}\'\n'.format(i+1, _inference_ops.name))
 
 		log_label = ['epoch', 'train_loss', 'test_loss', 'train_acc', 'test_acc']
 		log = []
@@ -285,4 +327,102 @@ class TF_Model():
 		pd.DataFrame(result_csv).to_csv(os.path.join(model_dir, 'result.csv'), header=['prediction', 'labels'])
 
 		return accuracy
+
+	def tflite_convert(self, saved_model_dir, node_names, output_dir):
+		def saved_model_to_frozen_graph(saved_model_dir, saved_model_prefix, output_node_names, output_dir):
+			input_meta_graph = os.path.join(saved_model_dir, saved_model_prefix+'.meta')
+			checkpoint = os.path.join(saved_model_dir, saved_model_prefix)
+			output_graph_filename = os.path.join(output_dir, 'output_graph.pb')
+
+			input_graph = ''
+			input_saver_def_path = ''
+			input_binary = True
+			restore_op_name = ''
+			filename_tensor_name = ''
+			clear_devices = False
+
+			os.makedirs(output_dir, exist_ok=True)
+
+			'''
+				check ops name
+			'''
+#			config = tf.compat.v1.ConfigProto(
+#				gpu_options=tf.compat.v1.GPUOptions(
+#					allow_growth = True
+#				)
+#			)
+#			sess = tf.compat.v1.Session(config=config)
+#			
+#			saver = tf.compat.v1.train.import_meta_graph(input_meta_graph, clear_devices=True)
+#			saver.restore(sess, checkpoint)
+#		
+#			graph = tf.get_default_graph()
+#			all_ops = graph.get_operations()
+#			
+#			outfile = 'ops.txt'
+#			with open(outfile, 'w') as f:
+#				for _op in all_ops:
+#					f.write('{}\n'.format(_op))
+
+			freeze_graph.freeze_graph(
+				input_graph, input_saver_def_path, input_binary, checkpoint,
+				output_node_names, restore_op_name, filename_tensor_name,
+				output_graph_filename, clear_devices, '', '', '', input_meta_graph)
+
+			return output_graph_filename
+
+		def frozen_graph_to_tflite(pb_file, input_node_name, output_node_name, output_dir):
+			input_arrays = [input_node_name]
+			output_arrays = [output_node_name]
+
+			converter = tf.compat.v1.lite.TFLiteConverter.from_frozen_graph(
+					pb_file, input_arrays, output_arrays)
+			tflite_model = converter.convert()
+
+			output_tflite_filename = os.path.join(output_dir, 'converted_model.tflite')
+			open(output_tflite_filename, 'wb').write(tflite_model)
+
+			return output_tflite_filename
+
+		# --- parameters ---
+		saved_model_dir = args.saved_model_dir
+		saved_model_prefix = args.saved_model_prefix
+		node_name_yaml = os.path.join(saved_model_dir, args.node_name_yaml)
+		output_dir = args.output_dir
+
+		try:
+			with open(node_name_yaml) as f:
+				node_name = yaml.safe_load(f)
+		except Exception as e:
+			print('[ERROR] Exception occurred: {} load failed'.format(node_name_yaml))
+			quit()
+		input_node_names = node_name['input_node_name']
+		output_node_names = node_name['output_node_name']
+
+		pb_file = saved_model_to_frozen_graph(saved_model_dir, saved_model_prefix, output_node_names, output_dir)
+		tflite_file = frozen_graph_to_tflite(pb_file, input_node_names, output_node_names, output_dir)
+		
+		return
+
+	def inference(self, tflite_file, input_data):
+		interpreter = tf.compat.v1.lite.Interpreter(model_path=tflite_file)
+		interpreter.allocate_tensors()
+
+		input_details = interpreter.get_input_details()
+		output_details = interpreter.get_output_details()
+
+		input_shape = input_details[0]['shape']
+		print(input_shape)
+		print(input_data.shape)
+		print(input_data.dtype)
+
+		output_data = []
+		for _i, _input_data in enumerate(input_data):
+			if (((_i+1) % 1000) == 0):
+				print('{} of {}'.format((_i+1), len(input_data)))
+			interpreter.set_tensor(input_details[0]['index'], _input_data.reshape(input_shape))
+			interpreter.invoke()
+			output_data.append(np.argmax(interpreter.get_tensor(output_details[0]['index'])))
+
+		return np.array(output_data)
 
