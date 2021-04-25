@@ -277,7 +277,8 @@ class TF_Model():
 		test_acc = sess.run(test_accuracy, feed_dict={test_x: test_data_norm, test_y_: dataset.test_label})
 
 		saver.save(sess, os.path.join(model_dir, 'model.ckpt'))
-		pd.DataFrame(log).to_csv(os.path.join(model_dir, 'log.csv'), header=log_label)
+		if (len(log) > 0):
+			pd.DataFrame(log).to_csv(os.path.join(model_dir, 'log.csv'), header=log_label)
 
 		# --- save weights ---
 		for weight in weights:
@@ -298,6 +299,12 @@ class TF_Model():
 			os.path.join(model_dir, 'node_name.yaml'),
 			os.path.join(model_dir, 'tflite'))
 
+		# --- get prediction of tflite file ---
+		tflite_prediction = self.tflite_predict(os.path.join(model_dir, 'tflite', 'converted_model.tflite'), test_data_norm)
+		test_label = np.argmax(dataset.test_label, axis=1)
+		comp_data = (tflite_prediction==test_label)
+		print('tflite accuracy: {}'.format(len(comp_data[comp_data==True]) / len(test_label)))
+		
 		sess.close()
 		tf.compat.v1.reset_default_graph()
 
@@ -411,7 +418,7 @@ class TF_Model():
 		
 		return
 
-	def inference(self, tflite_file, input_data):
+	def tflite_predict(self, tflite_file, input_data):
 		interpreter = tf.compat.v1.lite.Interpreter(model_path=tflite_file)
 		interpreter.allocate_tensors()
 
@@ -427,7 +434,7 @@ class TF_Model():
 		for _i, _input_data in enumerate(input_data):
 			if (((_i+1) % 1000) == 0):
 				print('{} of {}'.format((_i+1), len(input_data)))
-			interpreter.set_tensor(input_details[0]['index'], _input_data.reshape(input_shape))
+			interpreter.set_tensor(input_details[0]['index'], _input_data.reshape(input_shape).astype(np.float32))
 			interpreter.invoke()
 			output_data.append(np.argmax(interpreter.get_tensor(output_details[0]['index'])))
 
