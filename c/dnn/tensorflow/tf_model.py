@@ -4,8 +4,10 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import tensorflow as tf
 import yaml
+
+import tensorflow as tf
+from tensorflow.python.tools import freeze_graph
 
 class TF_Model():
 	def __init__(self):
@@ -225,7 +227,6 @@ class TF_Model():
 		
 		inference_ops = self.get_ops(os.path.join(model_dir, 'ops.txt'), 
 						inference_ops=[test_x.name[:test_x.name.find(':')], test_y.name[:test_y.name.find(':')]])
-		print(inference_ops)
 		with open(os.path.join(model_dir, 'node_name.yaml'), 'w') as f:
 			f.write('input_node_name: \'{}\'\n'.format(test_x.name[:test_x.name.find(':')]))
 			f.write('output_node_name: \'{}\'\n'.format(test_y.name[:test_y.name.find(':')]))
@@ -291,6 +292,11 @@ class TF_Model():
 			plt.tight_layout()
 			plt.savefig(os.path.join(weight_dir, '{}.png'.format(weight_name)))
 			plt.close()
+		
+		# --- convert to tflite file ---
+		self.tflite_convert(model_dir, 'model.ckpt',
+			os.path.join(model_dir, 'node_name.yaml'),
+			os.path.join(model_dir, 'tflite'))
 
 		sess.close()
 		tf.compat.v1.reset_default_graph()
@@ -328,7 +334,7 @@ class TF_Model():
 
 		return accuracy
 
-	def tflite_convert(self, saved_model_dir, node_names, output_dir):
+	def tflite_convert(self, saved_model_dir, model_name, node_name_yaml, output_dir):
 		def saved_model_to_frozen_graph(saved_model_dir, saved_model_prefix, output_node_names, output_dir):
 			input_meta_graph = os.path.join(saved_model_dir, saved_model_prefix+'.meta')
 			checkpoint = os.path.join(saved_model_dir, saved_model_prefix)
@@ -385,10 +391,10 @@ class TF_Model():
 			return output_tflite_filename
 
 		# --- parameters ---
-		saved_model_dir = args.saved_model_dir
-		saved_model_prefix = args.saved_model_prefix
-		node_name_yaml = os.path.join(saved_model_dir, args.node_name_yaml)
-		output_dir = args.output_dir
+		saved_model_dir = saved_model_dir
+		saved_model_prefix = model_name
+		node_name_yaml = node_name_yaml
+		output_dir = output_dir
 
 		try:
 			with open(node_name_yaml) as f:
@@ -399,6 +405,7 @@ class TF_Model():
 		input_node_names = node_name['input_node_name']
 		output_node_names = node_name['output_node_name']
 
+		os.makedirs(output_dir, exist_ok=True)
 		pb_file = saved_model_to_frozen_graph(saved_model_dir, saved_model_prefix, output_node_names, output_dir)
 		tflite_file = frozen_graph_to_tflite(pb_file, input_node_names, output_node_names, output_dir)
 		
