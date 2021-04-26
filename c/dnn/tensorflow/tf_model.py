@@ -160,6 +160,12 @@ class TF_Model():
 			inference_ops: 推論グラフのオペレーション
 							[0]: input, [1]: output
 		"""
+		def append_ops(ops_list, ops, ops_name):
+			if ((ops_name == 'Conv2D') or (ops_name == 'AddV2')):
+				if (not 'batchnorm' in ops.name):
+					ops_list.append(ops)
+			return ops_list
+		
 		graph = tf.compat.v1.get_default_graph()
 		all_ops = graph.get_operations()
 		flg_inference_ops = False
@@ -173,15 +179,13 @@ class TF_Model():
 #					for _input in _op.inputs:
 #						f.write(' * {}\n'.format(_input))
 				if (flg_inference_ops):
-					if ((_op.op_def.name == 'Conv2D') or (_op.op_def.name == 'AddV2')):
-						ret_ops.append(_op)
+					ret_ops = append_ops(ret_ops, _op, _op.op_def.name)
 					if (inference_ops[1] in _op.name):
 						flg_inference_ops = False
 				else:
 					if (inference_ops[0] in _op.name):
 						flg_inference_ops = True
-						if ((_op.op_def.name == 'Conv2D') or (_op.op_def.name == 'AddV2')):
-							ret_ops.append(_op)
+						ret_ops = append_ops(ret_ops, _op, _op.op_def.name)
 				f.write('{}\n'.format(_op))
 		
 		return ret_ops
@@ -239,6 +243,8 @@ class TF_Model():
 		train_data_norm = dataset.get_normalized_data('train')
 		test_data_norm = dataset.get_normalized_data('test')
 		iter_minibatch = len(train_data_norm) // n_minibatch
+		
+#		n_epoch = 0
 		for epoch in range(n_epoch):
 			for _iter in range(iter_minibatch):
 				batch_x, batch_y = dataset.next_batch(n_minibatch)
@@ -342,10 +348,9 @@ class TF_Model():
 		return accuracy
 
 	def tflite_convert(self, saved_model_dir, model_name, node_name_yaml, output_dir):
-		def saved_model_to_frozen_graph(saved_model_dir, saved_model_prefix, output_node_names, output_dir):
+		def saved_model_to_frozen_graph(saved_model_dir, saved_model_prefix, output_node_names, output_graph_filename):
 			input_meta_graph = os.path.join(saved_model_dir, saved_model_prefix+'.meta')
 			checkpoint = os.path.join(saved_model_dir, saved_model_prefix)
-			output_graph_filename = os.path.join(output_dir, 'output_graph.pb')
 
 			input_graph = ''
 			input_saver_def_path = ''
@@ -353,8 +358,6 @@ class TF_Model():
 			restore_op_name = ''
 			filename_tensor_name = ''
 			clear_devices = False
-
-			os.makedirs(output_dir, exist_ok=True)
 
 			'''
 				check ops name
@@ -384,7 +387,7 @@ class TF_Model():
 
 			return output_graph_filename
 
-		def frozen_graph_to_tflite(pb_file, input_node_name, output_node_name, output_dir):
+		def frozen_graph_to_tflite(pb_file, input_node_name, output_node_name, output_tflite_filename):
 			input_arrays = [input_node_name]
 			output_arrays = [output_node_name]
 
@@ -392,7 +395,6 @@ class TF_Model():
 					pb_file, input_arrays, output_arrays)
 			tflite_model = converter.convert()
 
-			output_tflite_filename = os.path.join(output_dir, 'converted_model.tflite')
 			open(output_tflite_filename, 'wb').write(tflite_model)
 
 			return output_tflite_filename
@@ -411,10 +413,24 @@ class TF_Model():
 			quit()
 		input_node_names = node_name['input_node_name']
 		output_node_names = node_name['output_node_name']
-
 		os.makedirs(output_dir, exist_ok=True)
-		pb_file = saved_model_to_frozen_graph(saved_model_dir, saved_model_prefix, output_node_names, output_dir)
-		tflite_file = frozen_graph_to_tflite(pb_file, input_node_names, output_node_names, output_dir)
+		
+		# --- input layer to output layer ---
+		pb_file_name = os.path.join(output_dir, 'output_graph.pb')
+		pb_file = saved_model_to_frozen_graph(saved_model_dir, saved_model_prefix, output_node_names, pb_file_name)
+		
+		tflite_file_name = os.path.join(output_dir, 'converted_model.tflite')
+		tflite_file = frozen_graph_to_tflite(pb_file, input_node_names, output_node_names, tflite_file_name)
+
+		# --- input layer to hidden layer ---
+		for _key in list(node_name.keys())[2:]:
+			output_node_names = node_name[_key]
+			
+			pb_file_name = os.path.join(output_dir, 'output_graph-{}.pb'.format(_key))
+			pb_file = saved_model_to_frozen_graph(saved_model_dir, saved_model_prefix, output_node_names, pb_file_name)
+			
+			tflite_file_name = os.path.join(output_dir, 'converted_model-{}.tflite'.format(_key))
+			tflite_file = frozen_graph_to_tflite(pb_file, input_node_names, output_node_names, tflite_file_name)
 		
 		return
 
