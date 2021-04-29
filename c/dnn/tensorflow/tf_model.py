@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import yaml
+import glob
 
 import tensorflow as tf
 from tensorflow.python.tools import freeze_graph
@@ -307,9 +308,19 @@ class TF_Model():
 
 		# --- get prediction of tflite file ---
 		tflite_prediction = self.tflite_predict(os.path.join(model_dir, 'tflite', 'converted_model.tflite'), test_data_norm)
+		tflite_prediction = np.argmax(tflite_prediction, axis=1)
 		test_label = np.argmax(dataset.test_label, axis=1)
 		comp_data = (tflite_prediction==test_label)
 		print('tflite accuracy: {}'.format(len(comp_data[comp_data==True]) / len(test_label)))
+		
+		# --- get prediction of tflite file(hidden layer) ---
+		pd.DataFrame(test_data_norm[0].reshape(test_data_norm[0].shape[0], -1)).to_csv(os.path.join(model_dir, 'tflite', 'input_data.csv'))
+		tflite_file_list = glob.glob(os.path.join(model_dir, 'tflite', 'converted_model*hidden*.tflite'))
+		for _i, _tflite_file in enumerate(tflite_file_list):
+			print(_tflite_file)
+			tflite_prediction = self.tflite_predict(_tflite_file, test_data_norm)
+			if (_i == 0):
+				pd.DataFrame(tflite_prediction[0].reshape(tflite_prediction[0].shape[0], -1)).to_csv(_tflite_file.replace('.tflite', '.csv'))
 		
 		sess.close()
 		tf.compat.v1.reset_default_graph()
@@ -452,7 +463,8 @@ class TF_Model():
 				print('{} of {}'.format((_i+1), len(input_data)))
 			interpreter.set_tensor(input_details[0]['index'], _input_data.reshape(input_shape).astype(np.float32))
 			interpreter.invoke()
-			output_data.append(np.argmax(interpreter.get_tensor(output_details[0]['index'])))
+			prediction = interpreter.get_tensor(output_details[0]['index'])
+			output_data.append(prediction[0])
 
 		return np.array(output_data)
 
