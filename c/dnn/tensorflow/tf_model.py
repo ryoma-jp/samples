@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import yaml
 import glob
+import struct
 
 import tensorflow as tf
 from tensorflow.python.tools import freeze_graph
@@ -313,8 +314,41 @@ class TF_Model():
 		comp_data = (tflite_prediction==test_label)
 		print('tflite accuracy: {}'.format(len(comp_data[comp_data==True]) / len(test_label)))
 		
-		# --- get prediction of tflite file(hidden layer) ---
+		# --- save input data (to csv and to bin) ---
 		pd.DataFrame(test_data_norm[0].reshape(test_data_norm[0].shape[0], -1)).to_csv(os.path.join(model_dir, 'tflite', 'input_data.csv'))
+		with open(os.path.join(model_dir, 'tflite', 'input_data.bin'), 'wb') as f:
+			# --- バイナリデータ形式 ---
+			#   4byte: データ数(n_data)
+			#   4byte: データ種別(d_type, 0:画像データ)
+			#   if (d_type==0) {
+			#     4byte: Height(height)
+			#     4byte: Width(width)
+			#     4byte: Channel(channel)
+			#   } else {
+			#     T.B.D
+			#   }
+			#   <n_data>byte: 入力データ
+			n_data = len(test_data_norm[0].reshape(-1))
+			pack_data = struct.pack('<I', n_data)
+			f.write(pack_data)
+			d_type = 0		# T.B.D
+			pack_data = struct.pack('<I', d_type)
+			f.write(pack_data)
+			if (d_type == 0):
+				# height
+				pack_data = struct.pack('<I', test_data_norm[0].shape[0])
+				f.write(pack_data)
+				# width
+				pack_data = struct.pack('<I', test_data_norm[0].shape[1])
+				f.write(pack_data)
+				# channel
+				pack_data = struct.pack('<I', test_data_norm[0].shape[2])
+				f.write(pack_data)
+			for _data in test_data_norm[0].reshape(-1):
+				pack_data = struct.pack('<f', _data)
+				f.write(pack_data)
+		
+		# --- get prediction of tflite file(hidden layer) ---
 		tflite_file_list = glob.glob(os.path.join(model_dir, 'tflite', 'converted_model*hidden*.tflite'))
 		for _i, _tflite_file in enumerate(tflite_file_list):
 			print(_tflite_file)
