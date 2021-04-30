@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
 	float* output = interpreter->typed_output_tensor<float>(0);
 	printf("[OUTPUT]\n");
 	for (int o = 0; o < 10; o++) {
-		printf("  * [%d] %f\n", o, output[o]);
+		printf("  * [%d] %e\n", o, output[o]);
 	}
 	
 	return 0;
