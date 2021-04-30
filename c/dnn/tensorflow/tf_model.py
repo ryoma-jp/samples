@@ -289,6 +289,7 @@ class TF_Model():
 			pd.DataFrame(log).to_csv(os.path.join(model_dir, 'log.csv'), header=log_label)
 
 		# --- save weights ---
+		print('[INFO] save weights')
 		for weight in weights:
 			weight_dir = os.path.join(model_dir, 'weights')
 			os.makedirs(weight_dir, exist_ok=True)
@@ -303,18 +304,22 @@ class TF_Model():
 			plt.close()
 		
 		# --- convert to tflite file ---
+		print('[INFO] convert to tflite file')
 		self.tflite_convert(model_dir, 'model.ckpt',
 			os.path.join(model_dir, 'node_name.yaml'),
 			os.path.join(model_dir, 'tflite'))
 
 		# --- get prediction of tflite file ---
+		print('[INFO] get prediction (tflite file)')
 		tflite_prediction = self.tflite_predict(os.path.join(model_dir, 'tflite', 'converted_model.tflite'), test_data_norm)
+		pd.DataFrame(tflite_prediction[0].reshape(tflite_prediction[0].shape[0], -1)).to_csv(os.path.join(model_dir, 'tflite', 'converted_model.csv'))
 		tflite_prediction = np.argmax(tflite_prediction, axis=1)
 		test_label = np.argmax(dataset.test_label, axis=1)
 		comp_data = (tflite_prediction==test_label)
 		print('tflite accuracy: {}'.format(len(comp_data[comp_data==True]) / len(test_label)))
 		
 		# --- save input data (to csv and to bin) ---
+		print('[INFO] save input data')
 		pd.DataFrame(test_data_norm[0].reshape(test_data_norm[0].shape[0], -1)).to_csv(os.path.join(model_dir, 'tflite', 'input_data.csv'))
 		with open(os.path.join(model_dir, 'tflite', 'input_data.bin'), 'wb') as f:
 			# --- バイナリデータ形式 ---
@@ -349,6 +354,7 @@ class TF_Model():
 				f.write(pack_data)
 		
 		# --- get prediction of tflite file(hidden layer) ---
+		print('[INFO] get prediction(tflite file, hidden layer')
 		tflite_file_list = glob.glob(os.path.join(model_dir, 'tflite', 'converted_model*hidden*.tflite'))
 		for _i, _tflite_file in enumerate(tflite_file_list):
 			print(_tflite_file)
