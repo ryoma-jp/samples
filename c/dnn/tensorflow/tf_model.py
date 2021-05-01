@@ -359,8 +359,7 @@ class TF_Model():
 		for _i, _tflite_file in enumerate(tflite_file_list):
 			print(_tflite_file)
 			tflite_prediction = self.tflite_predict(_tflite_file, test_data_norm)
-			if (_i == 0):
-				pd.DataFrame(tflite_prediction[0].reshape(tflite_prediction[0].shape[0], -1)).to_csv(_tflite_file.replace('.tflite', '.csv'))
+			pd.DataFrame(tflite_prediction[0].reshape(tflite_prediction[0].shape[0], -1)).to_csv(_tflite_file.replace('.tflite', '.csv'))
 		
 		sess.close()
 		tf.compat.v1.reset_default_graph()
