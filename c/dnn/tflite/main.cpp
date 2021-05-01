@@ -75,6 +75,7 @@ static int show_usage()
 	printf("  ./tflite_inference <tflite_file> <input_file>\n");
 	printf("    tflite_file: TensorFlow Liteファイル\n");
 	printf("    input_file: 入力データファイル\n");
+	printf("    output_csv: 推論結果の出力先csvファイル\n");
 
 	return 0;
 }
@@ -91,14 +92,16 @@ int main(int argc, char* argv[])
 	/* --- 変数宣言 --- */
 	char* tflite_file;
 	char* input_file;
+	char* output_csv;
 	
 	/* --- 引数取り込み --- */
-	if (argc != 3) {
+	if (argc != 4) {
 		show_usage();
 		exit(0);
 	} else {
 		tflite_file = argv[1];
 		input_file = argv[2];
+		output_csv = argv[3];
 	}
 	
 	/* --- tfliteファイル読み込み --- */
@@ -124,9 +127,26 @@ int main(int argc, char* argv[])
 	interpreter->Invoke();
 
 	float* output = interpreter->typed_output_tensor<float>(0);
-	printf("[OUTPUT]\n");
-	for (int o = 0; o < 10; o++) {
-		printf("  * [%d] %e\n", o, output[o]);
+	TfLiteIntArray* output_dims = interpreter->tensor(interpreter->outputs()[0])->dims;
+	int output_dim = 1;
+	for (int dim = 1; dim < output_dims->size; dim++) {
+		printf("output_dims->data[%d]: %d\n", dim, output_dims->data[dim]);
+		output_dim *= output_dims->data[dim];
+	}
+	
+	/* --- 結果をcsvファイルへ出力 --- */
+	FILE* fp_output_csv = fopen(output_csv, "w");
+	if (fp_output_csv != NULL) {
+		int new_line = output_dim / output_dims->data[1];
+		for (int o = 0; o < output_dim; o++) {
+			if ((o+1) % new_line != 0) {
+				fprintf(fp_output_csv, "%e,", output[o]);
+			} else {
+				fprintf(fp_output_csv, "%e\n", output[o]);
+			}
+		}
+	} else {
+		fprintf(stderr, "[ERROR] Could not open file: %s\n", output_csv);
 	}
 	
 	return 0;
