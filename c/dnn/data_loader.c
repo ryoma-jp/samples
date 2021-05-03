@@ -1,9 +1,9 @@
 /**
- * @file read_sample_c.c
+ * @file data_loader.c
  * @brief byteデータで固められたfloatデータを読み込むサンプル
  */
 
-#include <data_loader.h>
+#include "data_loader.h"
 #include <common.h>
 
 /**
