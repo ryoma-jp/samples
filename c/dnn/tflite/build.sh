@@ -1,5 +1,7 @@
 #! /bin/bash
 
+DEBUG="ON"		# ON or OFF
+
 ROOT_DIR=${PWD}
 TENSORFLOW_DIR='./tensorflow'
 FLATBUFFERS_DIR='./flatbuffers'
@@ -19,6 +21,7 @@ if [ ! -e ${FLATBUFFERS_DIR} ]; then
 fi
 
 cd ${ROOT_DIR}
+if [ ${DEBUG} != "ON" ]; then
 g++ main.cpp \
 	-I${TENSORFLOW_DIR} \
 	-I${FLATBUFFERS_DIR}/include \
@@ -26,4 +29,12 @@ g++ main.cpp \
 	-ltensorflow-lite \
 	-lpthread -ldl -lm \
 	-o tflite_inference
-
+else
+g++ main.cpp \
+	-I${TENSORFLOW_DIR} \
+	-I${FLATBUFFERS_DIR}/include \
+	-L${TFLITE_LIB_DIR} \
+	-ltensorflow-lite \
+	-lpthread -ldl -lm \
+	-g -o tflite_inference
+fi
