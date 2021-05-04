@@ -14,7 +14,7 @@ from data_loader import cifar10
 # 関数
 #---------------------------------
 def ArgParser():
-	parser = argparse.ArgumentParser(description='argparseモジュールのサンプルプログラム',
+	parser = argparse.ArgumentParser(description='データセット読み込み処理のサンプル',
 				formatter_class=argparse.RawTextHelpFormatter)
 
 	# --- 引数を追加 ---
