@@ -1,6 +1,7 @@
 #! /bin/bash
 
-DATA_TYPE="CIFAR-10"		# "CIFAR-10" or ...(T.B.D)
+#DATA_TYPE="CIFAR-10"		# "CIFAR-10" or "Titanic" ...(T.B.D)
+DATA_TYPE="Titanic"		# "CIFAR-10" or "Titanic" ...(T.B.D)
 DATASET_DIR="./dataset"
 
 mkdir -p ${DATASET_DIR}
@@ -13,6 +14,8 @@ if [ ${DATA_TYPE} = "CIFAR-10" ]; then
 		tar -zxf cifar-10-python.tar.gz
 		cd ..
 	fi
+elif [ ${DATA_TYPE} = "Titanic" ]; then
+	dataset_dir="${DATASET_DIR}/titanic"
 else
 	echo "Unknown DATA_TYPE: ${DATA_TYPE}"
 	exit
