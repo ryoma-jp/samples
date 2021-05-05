@@ -7,7 +7,7 @@
 ## 実行手順
 
 	$ cd docker  
-	$ docker build -t calc_distance/tensorflow:21.03-tf2-py3 .  
+	$ docker build -t data_loader/tensorflow:21.03-tf2-py3 .  
 	$ ./docker_run.sh  
 	# cd /work  
 	# ./run.sh  
