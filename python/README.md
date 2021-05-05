@@ -10,6 +10,7 @@
 |filter |信号処理フィルタのサンプル |
 |float2byte |floatをbyteデータに変換するサンプル |
 |glob_sample |globモジュールを用いたファイル探索のサンプル |
+|k-medoids_sample |k-medoids法によるクラスタリングのサンプル |
 |matplotlib_sample |matplotlibを用いたグラフ描画のサンプル |
 |module_import_sample |独自で作成したモジュールをimportするサンプル |
 |multi_thread |マルチスレッドのサンプル |
