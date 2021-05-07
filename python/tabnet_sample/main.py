@@ -3,11 +3,13 @@
 #---------------------------------
 # モジュールのインポート
 #---------------------------------
+import os
 import argparse
+import numpy as np
+import matplotlib.pyplot as plt
 from data_loader import titanic
 from tabnet.tabnet import TabNet
 
-import numpy as np
 #---------------------------------
 # 定数定義
 #---------------------------------
@@ -22,6 +24,8 @@ def ArgParser():
 	# --- 引数を追加 ---
 	parser.add_argument('--dataset_dir', dest='dataset_dir', type=str, default=None, required=True, \
 			help='データセットディレクトリ')
+	parser.add_argument('--output_dir', dest='output_dir', type=str, default=None, required=True, \
+			help='結果を出力するディレクトリ')
 
 	args = parser.parse_args()
 
@@ -31,6 +35,9 @@ def main():
 	# --- 引数処理 ---
 	args = ArgParser()
 	print(args.dataset_dir)
+	print(args.output_dir)
+	
+	os.makedirs(args.output_dir, exist_ok=True)
 	
 	train_data, train_labels, test_data = titanic.load_titanic(args.dataset_dir)
 	print(train_data)
@@ -38,12 +45,22 @@ def main():
 	
 	x_train = train_data.drop(labels=["PassengerId", "Survived", "Name"], axis=1, inplace=False)
 	y_train = train_labels
+	x_train_columns = x_train.columns
 	
 	x_train = np.array(x_train.values, dtype=np.float64)
 	y_train = np.array(y_train.values, dtype=np.float64)
 	
 	tn_clf = TabNet()
-	tn_clf.fit(x_train, y_train)
+	scores, feature_importances = tn_clf.fit(x_train, y_train)
+	
+	print(feature_importances)
+	
+	plt.figure()
+	plt.barh(x_train_columns, feature_importances.mean(axis=0))
+	plt.title('feature_importance')
+	plt.tight_layout()
+	plt.savefig(os.path.join(args.output_dir, 'feature_importance.png'))
+	plt.close()
 
 	return
 

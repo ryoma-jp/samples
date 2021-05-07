@@ -31,7 +31,7 @@ class TabNet():
 		kf = KFold(n_splits=kf_splits, shuffle=False)
 		scores = []
 		
-		for train_index, val_index in kf.split(x_train, y_train):
+		for i, (train_index, val_index) in enumerate(kf.split(x_train, y_train)):
 			x_tr = x_train[train_index]
 			x_val = x_train[val_index]
 			y_tr = y_train[train_index]
@@ -45,10 +45,15 @@ class TabNet():
 			)
 			prediction = tabnet_clf.predict(x_val)
 			scores.append(accuracy_score(y_val, prediction))
+			
+			if (i == 0):
+				feature_importances = tabnet_clf.feature_importances_.copy()
+			else:
+				feature_importances = np.vstack((feature_importances, tabnet_clf.feature_importances_))
 		
 		print(scores)
 		print(np.mean(scores))
 		
-		return
+		return scores, feature_importances
 
 
