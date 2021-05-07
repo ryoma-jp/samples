@@ -6,7 +6,7 @@
 WORK_ROOT="${PWD}/.."
 echo ${WORK_ROOT}
 
-CONTAINER="tabnet/tensorflow:21.03-tf2-py3"
+CONTAINER="tabnet/pytorch:21.03-tf2-py3"
 
 docker run --gpus all --rm -it --shm-size=1g --ulimit memlock=-1 --ulimit stack=67108864 -v "${WORK_ROOT}:/work" ${CONTAINER}
 
