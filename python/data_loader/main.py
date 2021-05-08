@@ -4,7 +4,7 @@
 # モジュールのインポート
 #---------------------------------
 import argparse
-from data_loader import cifar10, titanic
+from data_loader import cifar10, titanic, sarcos
 
 #---------------------------------
 # 定数定義
@@ -19,7 +19,7 @@ def ArgParser():
 
 	# --- 引数を追加 ---
 	parser.add_argument('--data_type', dest='data_type', type=str, default='CIFAR-10', required=False, \
-			help='データ種別(CIFAR-10, Titanic or ...(T.B.D)')
+			help='データ種別(CIFAR-10, Titanic, SARCOS or ...(T.B.D)')
 	parser.add_argument('--dataset_dir', dest='dataset_dir', type=str, default=None, required=True, \
 			help='データセットディレクトリ')
 
@@ -44,6 +44,12 @@ def main():
 		print(train_data.shape)
 		print(train_labels.shape)
 		print(test_data.shape)
+	if (args.data_type == "SARCOS"):
+		train_data, train_labels, test_data, test_labels = sarcos.load_sarcos(args.dataset_dir)
+		print(train_data.shape)
+		print(train_labels.shape)
+		print(test_data.shape)
+		print(test_labels.shape)
 	else:
 		print('[ERROR] Unknown data_type: {}'.format(args.data_type))
 		quit()

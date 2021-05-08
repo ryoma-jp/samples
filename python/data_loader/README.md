@@ -13,3 +13,7 @@
 	# ./run.sh  
 
 
+# 参考
+
+* [How to load Matlab .mat files in Python](https://towardsdatascience.com/how-to-load-matlab-mat-files-in-python-1f200e1287b5)
+* [The SARCOS data](http://www.gaussianprocess.org/gpml/data/)
