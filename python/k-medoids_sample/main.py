@@ -5,6 +5,7 @@
 #---------------------------------
 import os
 import argparse
+import cv2
 import numpy as np
 from data_loader import cifar10
 from kmedoids import kmedoids
@@ -77,6 +78,43 @@ def main():
 		plt.tight_layout()
 		plt.savefig(os.path.join(args.output_dir, 'k-medoids.png'))
 	
+	if (args.data_type == "CIFAR-10"):
+		# --- セントロイドの画像を保存 ---
+		for i in range(len(centroids)):
+			(h, w, c) = data[0].shape
+			n = int(np.ceil(np.sqrt(len(centroids))))
+			
+			img = np.zeros([h*n, w*n, c], dtype=np.uint8)
+			cnt = 0
+			for nh in range(n):
+				for nw in range(n):
+					img[h*nh:h*(nh+1), w*nw:w*(nw+1)] = data[centroids[cnt]]
+					cnt += 1
+					if (cnt >= len(centroids)):
+						break
+				if (cnt >= len(centroids)):
+					break
+			cv2.imwrite(os.path.join(args.output_dir, 'img_centroids.png'), img)
+			
+		# --- クラスタ毎の画像を保存 ---
+		for i in range(len(centroids)):
+			(h, w, c) = data[0].shape
+			
+			n = 4
+			img = np.zeros([h*n, w*n, c], dtype=np.uint8)
+			cluster_img = data[labels==i]
+			
+			cnt = 0
+			for nh in range(n):
+				for nw in range(n):
+					img[h*nh:h*(nh+1), w*nw:w*(nw+1)] = cluster_img[cnt]
+					cnt += 1
+					if (cnt >= len(cluster_img)):
+						break
+				if (cnt >= len(cluster_img)):
+					break
+			cv2.imwrite(os.path.join(args.output_dir, 'img_cluster{}.png'.format(i)), img)
+			
 	return
 
 #---------------------------------
