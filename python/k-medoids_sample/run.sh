@@ -1,7 +1,7 @@
 #! /bin/bash
 
-#DATA_TYPE="CIFAR-10"		# "CIFAR-10", "BLOBS" or ...(T.B.D)
-DATA_TYPE="BLOBS"		# "CIFAR-10", "BLOBS" or ...(T.B.D)
+DATA_TYPE="CIFAR-10"		# "CIFAR-10", "BLOBS" or ...(T.B.D)
+#DATA_TYPE="BLOBS"		# "CIFAR-10", "BLOBS" or ...(T.B.D)
 DATASET_DIR="./dataset"
 OUTPUT_DIR="./output"
 

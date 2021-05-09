@@ -45,9 +45,10 @@ def main():
 	
 	if (args.data_type == "CIFAR-10"):
 		train_data, train_labels, test_data, test_labels = cifar10.load_cifar10(args.dataset_dir)
-		data = train_data
+		#data = train_data
+		data = train_data[0:10000]
 		n_cluster = 10
-	if (args.data_type == "BLOBS"):
+	elif (args.data_type == "BLOBS"):
 		n_cluster = 3
 		data, labels = make_blobs(
 										n_samples=150,
@@ -64,7 +65,7 @@ def main():
 	km = kmedoids.kMedoids(n_cluster=n_cluster, result_dir=args.output_dir)
 #	km.fit(train_data)		# メモリ不足エラー(16GB以上必要)
 #	km.fit(test_data[0:100])			# for Debug
-	labels, medoids = km.fit(data)
+	labels, centroids = km.fit(data)
 	
 	if (data.shape[1] == 2):
 		plt.figure()
@@ -72,7 +73,7 @@ def main():
 			plt.scatter(
 				data[labels==label, 0],
 				data[labels==label, 1])
-		plt.scatter(data[medoids, 0], data[medoids, 1], c='red')
+		plt.scatter(data[centroids, 0], data[centroids, 1], c='red')
 		plt.tight_layout()
 		plt.savefig(os.path.join(args.output_dir, 'k-medoids.png'))
 	

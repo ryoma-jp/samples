@@ -28,50 +28,38 @@ class kMedoids():
 		return
 	
 	def fit(self, data):
+		"""
+			https://canvas.harvard.edu/files/260014/download?download_frd=1&verifier=law8QK56wDa47yRCbBnVH0akY4Q8aqDMWgsclJJV
+			 * Algorithm 4 K-Medoids
+		"""
 		if (len(data.shape) > 2):
 			# --- 二次元[N, d]にreshape ---
 			data = np.reshape(data, [len(data), -1])
 		
 		print(data.shape)
 		
-		# --- 初期セントロイドを選択（乱数） ---
-		medoids = np.random.choice(range(len(data)), self.n_cluster, replace=False)
-		print('[INFO] medoids={}'.format(medoids))
-		pdist_data = pdist(data, metric='euclidean')
-		print(pdist_data.shape)
-		D = squareform(pdist_data)
-#		pd.DataFrame(D).to_csv(os.path.join(self.result_dir, 'D.csv'))
-		print(D.shape)
-		tmp_D = D[:, medoids]
-#		print(tmp_D)
+		# --- 各データサンプルのクラスタを乱数で初期設定 ---
+		r = np.random.choice(range(self.n_cluster), len(data))
 		
-		labels = np.argmin(tmp_D, axis=1)
-		print(labels)
+		# --- 入力データのサンプル間距離行列を生成 ---
+		D = squareform(pdist(data, metric='euclidean'))
 		
+		# --- クラスタリング実行 ---
+		mu = np.zeros(self.n_cluster, dtype=int)	# セントロイド
 		for _iter in range(self.max_iter):
-			for i in range(self.n_cluster):
-				# --- クラスタのインデックスを取得 ---
-				index = np.where(labels==i)[0]
-#				print(index)
-				
-				# --- クラスタのデータを取得 ---
-				tmp_D = D[index]
-				tmp_D = tmp_D[:, index]
-#				print(tmp_D.shape)
-				
-				# --- クラスタ内の距離合計を算出 ---
-				tmp_D_sum = np.sum(tmp_D, axis=1)
-#				print(tmp_D_sum.shape)
-				
-				# --- 合計距離が最小のデータをセントロイドに変更する ---
-				medoids[i] = index[np.argmin(tmp_D_sum)]
+			for k in range(self.n_cluster):
+				index = np.where(r==k)[0]
+				J = D[index][:, index].sum(axis=1)
+				mu[k] = index[np.argmin(J)]
+				print('[INFO] iter={}, k={}, n_samples: {}'.format(_iter, k, len(index)))
 			
-			print('[INFO] {} (iter={})'.format(medoids, _iter))
-			tmp_D = D[:, medoids]
-			labels = np.argmin(tmp_D, axis=1)
-#			print(labels.shape)
-		
-		return labels, medoids
+			r_prev = r.copy()
+			r = np.argmin(D[:, mu], axis=1)
+
+			if (np.all(r_prev == r)):
+				break
+			
+		return r, mu
 	
 	def predict(self):
 		return
