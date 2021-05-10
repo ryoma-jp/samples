@@ -38,7 +38,7 @@ class TabNet():
 				fit_params = dict(
 									batch_size=1024, virtual_batch_size=128,
 									eval_metric='accuracy')
-			if (tabnet_type == 'TabNet-S'):
+			elif (tabnet_type == 'TabNet-S'):
 				tabnet_params = dict(
 									n_d=8, n_a=8,
 									lambda_sparse=0.0001,

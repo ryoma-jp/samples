@@ -1,12 +1,12 @@
 #! /bin/bash
 
-DATASET_TYPE="SARCOS"
+DATASET_TYPE="Titanic"
 OUTPUT_DIR="./output"
-TABNET_TYPE="TabNet-S"
 
 if [ ${DATASET_TYPE} = "Titanic" ]; then
 	DATASET_DIR="./dataset/titanic"
 elif [ ${DATASET_TYPE} = "SARCOS" ]; then
+	TABNET_TYPE="TabNet-S"
 	DATASET_DIR="./dataset/sarcos"
 	if [ ! -e ${DATASET_DIR} ]; then
 		mkdir -p ${DATASET_DIR}
