@@ -66,7 +66,7 @@ def main():
 	km = kmedoids.kMedoids(n_cluster=n_cluster, result_dir=args.output_dir)
 #	km.fit(train_data)		# メモリ不足エラー(16GB以上必要)
 #	km.fit(test_data[0:100])			# for Debug
-	labels, centroids = km.fit(data)
+	labels, medoids = km.fit(data)
 	
 	if (data.shape[1] == 2):
 		plt.figure()
@@ -74,30 +74,30 @@ def main():
 			plt.scatter(
 				data[labels==label, 0],
 				data[labels==label, 1])
-		plt.scatter(data[centroids, 0], data[centroids, 1], c='red')
+		plt.scatter(data[medoids, 0], data[medoids, 1], c='red')
 		plt.tight_layout()
 		plt.savefig(os.path.join(args.output_dir, 'k-medoids.png'))
 	
 	if (args.data_type == "CIFAR-10"):
-		# --- セントロイドの画像を保存 ---
-		for i in range(len(centroids)):
+		# --- Medoidの画像を保存 ---
+		for i in range(len(medoids)):
 			(h, w, c) = data[0].shape
-			n = int(np.ceil(np.sqrt(len(centroids))))
+			n = int(np.ceil(np.sqrt(len(medoids))))
 			
 			img = np.zeros([h*n, w*n, c], dtype=np.uint8)
 			cnt = 0
 			for nh in range(n):
 				for nw in range(n):
-					img[h*nh:h*(nh+1), w*nw:w*(nw+1)] = data[centroids[cnt]]
+					img[h*nh:h*(nh+1), w*nw:w*(nw+1)] = data[medoids[cnt]]
 					cnt += 1
-					if (cnt >= len(centroids)):
+					if (cnt >= len(medoids)):
 						break
-				if (cnt >= len(centroids)):
+				if (cnt >= len(medoids)):
 					break
-			cv2.imwrite(os.path.join(args.output_dir, 'img_centroids.png'), img)
+			cv2.imwrite(os.path.join(args.output_dir, 'img_medoids.png'), img)
 			
 		# --- クラスタ毎の画像を保存 ---
-		for i in range(len(centroids)):
+		for i in range(len(medoids)):
 			(h, w, c) = data[0].shape
 			
 			n = 4

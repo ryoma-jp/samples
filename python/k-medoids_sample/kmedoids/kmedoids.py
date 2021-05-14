@@ -45,7 +45,7 @@ class kMedoids():
 		D = squareform(pdist(data, metric='euclidean'))
 		
 		# --- クラスタリング実行 ---
-		mu = np.zeros(self.n_cluster, dtype=int)	# セントロイド
+		mu = np.zeros(self.n_cluster, dtype=int)	# medoids
 		for _iter in range(self.max_iter):
 			for k in range(self.n_cluster):
 				index = np.where(r==k)[0]
