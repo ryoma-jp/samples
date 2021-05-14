@@ -1,6 +1,6 @@
 #! /bin/bash
 
-DATASET_TYPE="Titanic"
+DATASET_TYPE="SARCOS"
 OUTPUT_DIR="./output"
 
 if [ ${DATASET_TYPE} = "Titanic" ]; then

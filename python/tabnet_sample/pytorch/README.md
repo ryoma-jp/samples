@@ -16,7 +16,7 @@
 #### スクリプトを実行する
 
 	$ cd docker  
-	$ docker build -t tabnet/pytorch:21.03-tf2-py3 .  
+	$ docker build -t tabnet/pytorch:21.04-py3  .  
 	$ ./docker_run.sh  
 	# cd /work  
 	# vim run.sh
@@ -28,7 +28,7 @@
 #### スクリプトを実行する
 
 	$ cd docker  
-	$ docker build -t tabnet/pytorch:21.03-tf2-py3 .  
+	$ docker build -t tabnet/pytorch:21.04-py3 .  
 	$ ./docker_run.sh  
 	# cd /work  
 	# vim run.sh
