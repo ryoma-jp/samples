@@ -42,7 +42,7 @@ def main():
 		print(test_labels.shape)
 	
 	mg = MeasuringGranularity()
-	mg.rankm(train_images, train_labels, onehot=True)
+	mg.rsm(train_images, train_labels, onehot=True)
 	
 	return
 
