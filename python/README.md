@@ -11,6 +11,7 @@
 |float2byte |floatをbyteデータに変換するサンプル |
 |glob_sample |globモジュールを用いたファイル探索のサンプル |
 |k-medoids_sample |k-medoids法によるクラスタリングのサンプル |
+|lambda_sample |無名関数lambdaの利用サンプル |
 |matplotlib_sample |matplotlibを用いたグラフ描画のサンプル |
 |measuring_dataset_granularity |データセットの粒度計算のサンプル |
 |module_import_sample |独自で作成したモジュールをimportするサンプル |
