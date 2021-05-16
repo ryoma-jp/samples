@@ -12,6 +12,7 @@
 |glob_sample |globモジュールを用いたファイル探索のサンプル |
 |k-medoids_sample |k-medoids法によるクラスタリングのサンプル |
 |matplotlib_sample |matplotlibを用いたグラフ描画のサンプル |
+|measuring_dataset_granularity |データセットの粒度計算のサンプル |
 |module_import_sample |独自で作成したモジュールをimportするサンプル |
 |multi_thread |マルチスレッドのサンプル |
 |pca_sample | PCA(主成分分析)による次元圧縮のサンプル |
