@@ -7,6 +7,7 @@ import os
 import numpy as np
 import torch
 
+from pytorch_tabnet.pretraining import TabNetPretrainer
 from pytorch_tabnet.tab_model import TabNetClassifier, TabNetRegressor
 from sklearn.metrics import accuracy_score, mean_squared_error
 from sklearn.model_selection import KFold
@@ -73,8 +74,10 @@ class TabNet():
 		
 		for i, (train_index, val_index) in enumerate(kf.split(x_train, y_train)):
 			if (problem == 'classification'):
+				unsupervised_model = TabNetPretrainer(**tabnet_params)
 				tabnet_model = TabNetClassifier(**tabnet_params)
 			elif (problem == 'regression'):
+				unsupervised_model = TabNetPretrainer(**tabnet_params)
 				tabnet_model = TabNetRegressor(**tabnet_params)
 			else:
 				pring('[ERROR] Unknown problem: {}'.format(problem))
@@ -85,6 +88,14 @@ class TabNet():
 			y_tr = y_train[train_index]
 			y_val = y_train[val_index]
 			
+			unsupervised_model.fit(
+				x_tr,
+				eval_set=[x_val],
+				patience=300,
+				max_epochs=5000,
+				pretraining_ratio=0.8
+			)
+			
 			tabnet_model.fit(
 				x_tr, y_tr,
 				eval_set=[(x_val, y_val)],
@@ -92,8 +103,10 @@ class TabNet():
 				batch_size=fit_params['batch_size'],
 				virtual_batch_size=fit_params['virtual_batch_size'],
 				patience=300,
-				max_epochs=5000
+				max_epochs=5000,
+				from_unsupervised=unsupervised_model
 			)
+			
 			self.tabnet_models.append(tabnet_model)
 			prediction = tabnet_model.predict(x_val)
 			if (problem == 'classification'):
