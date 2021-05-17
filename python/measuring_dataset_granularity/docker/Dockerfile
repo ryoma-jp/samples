@@ -1,6 +1,6 @@
 
 # --- build command ---
-#   docker build -t measuring_dataset_granularity/tensorflow:21.03-tf2-py3 .
+#   docker build --network=host -t measuring_dataset_granularity/tensorflow:21.03-tf2-py3 .
 
 # --- for machine learning ---
 FROM nvcr.io/nvidia/tensorflow:21.03-tf2-py3

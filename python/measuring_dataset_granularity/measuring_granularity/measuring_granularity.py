@@ -72,41 +72,22 @@ class MeasuringGranularity():
 				img = data[idx]
 				cv2.imwrite(os.path.join(rsm_output_dir, 'img_medoid_{}.png'.format(i)), img)
 		
-		# --- ground-truthクラスとの距離計算 ---
-		n_class = max(label)+1
-		for i in range(n_class):
-			# --- クラスiのデータを取得 ---
-			data_tmp = data_calc[np.arange(len(label))[label==i]]
-			print('i: {}, len(data_tmp): {}'.format(i, len(data_tmp)))
-			
-			data_tmp_dist = np.sqrt(np.sum((data_tmp - data_calc[medoids[i]])**2, axis=1))
-			print(data_tmp_dist)
+		# --- 各クラスのmedoidとの距離計算 ---
+		data_medoids = data_calc[medoids]
+		print(data_medoids)
+		for i, data_medoid in enumerate(data_medoids):
+			data_tmp_dist = np.sqrt(np.sum((data_calc - data_medoid)**2, axis=1))
 			print(data_tmp_dist.shape)
 			if (i == 0):
 				data_dist = data_tmp_dist
 			else:
 				data_dist = np.vstack((data_dist, data_tmp_dist))
-		print(data_dist.shape)
-		
-		# --- 他クラスのmedoidとの距離計算 ---
-		data_medoids = data_calc[medoids]
-		print(data_medoids)
-		for i, data_medoid in enumerate(data_medoids):
-			data_tmp_dist_other_medoid = np.sqrt(np.sum((data_calc - data_medoid)**2, axis=1))
-			print(data_tmp_dist_other_medoid.shape)
-			if (i == 0):
-				data_dist_other_medoid = data_tmp_dist_other_medoid
-			else:
-				data_dist_other_medoid = np.vstack((data_dist_other_medoid, data_tmp_dist_other_medoid))
-		print(data_dist_other_medoid.shape)
-#		print(data_dist_other_medoid[:, 0])
-#		print(data_dist_other_medoid[6, 0])
-		print(data_dist_other_medoid[:, medoids])
+		pd.DataFrame(medoids).to_csv(os.path.join(rsm_output_dir, 'medoids.csv'))
+		pd.DataFrame(data_dist.T).to_csv(os.path.join(rsm_output_dir, 'data_distances.csv'))
 		
 		# --- ラベルとmedoidとの距離の小さいインデックスを保存 ---
-		data_dist_other_medoid_argmin = np.argmin(data_dist_other_medoid, axis=0)
-		data_dist_other_medoid_min = np.min(data_dist_other_medoid, axis=0)
-		pd.DataFrame(np.vstack((label, data_dist_other_medoid_argmin, data_dist_other_medoid_min)).T).to_csv(os.path.join(rsm_output_dir, 'label_vs_medoid_idx.csv'), header=False, index=False)
+		data_dist_argmin = np.argmin(data_dist, axis=0)
+		pd.DataFrame(np.vstack((label, data_dist_argmin)).T).to_csv(os.path.join(rsm_output_dir, 'label_vs_medoid_idx.csv'), header=False, index=False)
 		
 		return 
 	
