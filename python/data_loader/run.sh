@@ -1,6 +1,6 @@
 #! /bin/bash
 
-DATA_TYPE="SARCOS"		# "CIFAR-10", "Titanic", "SARCOS", or ...(T.B.D)
+DATA_TYPE="CIFAR-10"		# "CIFAR-10", "Titanic", "SARCOS", or ...(T.B.D)
 DATASET_DIR="./dataset"
 
 mkdir -p ${DATASET_DIR}

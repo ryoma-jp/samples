@@ -4,7 +4,7 @@
 # モジュールのインポート
 #---------------------------------
 import argparse
-from data_loader import cifar10, titanic, sarcos
+from data_loader import common, cifar10, titanic, sarcos
 
 #---------------------------------
 # 定数定義
@@ -39,12 +39,17 @@ def main():
 		print(train_labels.shape)
 		print(test_images.shape)
 		print(test_labels.shape)
-	if (args.data_type == "Titanic"):
+		
+		label_index = common.get_label_index(train_labels)
+		print(label_index.shape)
+		for _label_index in label_index:
+			print(train_labels[_label_index].argmax(axis=1).min(), train_labels[_label_index].argmax(axis=1).max())
+	elif (args.data_type == "Titanic"):
 		train_data, train_labels, test_data = titanic.load_titanic(args.dataset_dir)
 		print(train_data.shape)
 		print(train_labels.shape)
 		print(test_data.shape)
-	if (args.data_type == "SARCOS"):
+	elif (args.data_type == "SARCOS"):
 		train_data, train_labels, test_data, test_labels = sarcos.load_sarcos(args.dataset_dir)
 		print(train_data.shape)
 		print(train_labels.shape)
