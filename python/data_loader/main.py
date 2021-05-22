@@ -4,7 +4,7 @@
 # モジュールのインポート
 #---------------------------------
 import argparse
-from data_loader import common, cifar10, titanic, sarcos, coco_loader
+from data_loader import common, cifar10, titanic, sarcos, coco_loader, movie_poster
 
 #---------------------------------
 # 定数定義
@@ -19,7 +19,7 @@ def ArgParser():
 
 	# --- 引数を追加 ---
 	parser.add_argument('--data_type', dest='data_type', type=str, default='CIFAR-10', required=False, \
-			help='データ種別(CIFAR-10, Titanic, SARCOS, COCO2014 or ...(T.B.D)')
+			help='データ種別(CIFAR-10, Titanic, SARCOS, COCO2014, MoviePoster or ...(T.B.D)')
 	parser.add_argument('--dataset_dir', dest='dataset_dir', type=str, default=None, required=True, \
 			help='データセットディレクトリ')
 
@@ -65,6 +65,13 @@ def main():
 			print(validation_data.shape)
 			print(validation_labels)
 			print(test_data.shape)
+	elif (args.data_type == "MoviePoster"):
+		train_images, train_labels, test_images, test_labels = movie_poster.load_movie_poster(args.dataset_dir)
+		print(train_images.shape)
+		print(train_labels.shape)
+		print(test_images.shape)
+		print(test_labels.shape)
+		
 	else:
 		print('[ERROR] Unknown data_type: {}'.format(args.data_type))
 		quit()

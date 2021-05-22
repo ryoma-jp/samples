@@ -1,6 +1,6 @@
 #! /bin/bash
 
-DATA_TYPE="COCO2014"		# "CIFAR-10", "Titanic", "SARCOS", "COCO2014" or ...(T.B.D)
+DATA_TYPE="MoviePoster"		# "CIFAR-10", "Titanic", "SARCOS", "COCO2014", "MoviePoster" or ...(T.B.D)
 DATASET_DIR="./dataset"
 LIB_DIR="/work/lib"
 
@@ -33,7 +33,7 @@ elif [ ${DATA_TYPE} = "COCO2014" ]; then
 		wget http://images.cocodataset.org/zips/train2014.zip &
 		wget http://images.cocodataset.org/zips/val2014.zip &
 		wget http://images.cocodataset.org/zips/test2014.zip &
-		wget http://images.cocodataset.org/annotations/annotations_trainval2014.zip &
+		wget http://images.cocodataset.org/annotations/annotations_trainval2014.zip
 		wait
 		unzip train2014.zip &
 		unzip val2014.zip &
@@ -52,12 +52,28 @@ elif [ ${DATA_TYPE} = "COCO2014" ]; then
 		make
 		cd ../../../
 	fi
-	export PYTHONPATH=${PYTHONPATH}:${LIB_DIR}/cocoapi/PythonAPI
 	
+elif [ ${DATA_TYPE} = "MoviePoster" ]; then
+	#------------------------------------------------
+	# Genreを分類するものとして読み込む
+	#------------------------------------------------
+	dataset_dir="${DATASET_DIR}/movie_poster"
+	if [ ! -e ${dataset_dir} ]; then
+		mkdir -p ${dataset_dir}
+		cd ${dataset_dir}
+		wget https://www.cs.ccu.edu.tw/~wtchu/projects/MoviePoster/Movie_Poster_Dataset.zip &
+		wget https://www.cs.ccu.edu.tw/~wtchu/projects/MoviePoster/Movie_Poster_Metadata.zip
+		wait
+		unzip Movie_Poster_Dataset.zip &
+		unzip Movie_Poster_Metadata.zip
+		wait
+		cd ../..
+	fi
 else
 	echo "Unknown DATA_TYPE: ${DATA_TYPE}"
 	exit
 fi
 
 echo `pwd`
+export PYTHONPATH=${PYTHONPATH}:${LIB_DIR}/cocoapi/PythonAPI
 python3 main.py --data_type ${DATA_TYPE} --dataset_dir ${dataset_dir}

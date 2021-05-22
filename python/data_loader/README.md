@@ -17,3 +17,5 @@
 
 * [How to load Matlab .mat files in Python](https://towardsdatascience.com/how-to-load-matlab-mat-files-in-python-1f200e1287b5)
 * [The SARCOS data](http://www.gaussianprocess.org/gpml/data/)
+* [COCO](https://cocodataset.org/#home)
+* [Movie Genre Classification based on Poster Images with Deep Neural Networks](https://www.cs.ccu.edu.tw/~wtchu/projects/MoviePoster/index.html)
