@@ -4,7 +4,7 @@
 # モジュールのインポート
 #---------------------------------
 import argparse
-from data_loader import common, cifar10, titanic, sarcos
+from data_loader import common, cifar10, titanic, sarcos, coco_loader
 
 #---------------------------------
 # 定数定義
@@ -19,7 +19,7 @@ def ArgParser():
 
 	# --- 引数を追加 ---
 	parser.add_argument('--data_type', dest='data_type', type=str, default='CIFAR-10', required=False, \
-			help='データ種別(CIFAR-10, Titanic, SARCOS or ...(T.B.D)')
+			help='データ種別(CIFAR-10, Titanic, SARCOS, COCO2014 or ...(T.B.D)')
 	parser.add_argument('--dataset_dir', dest='dataset_dir', type=str, default=None, required=True, \
 			help='データセットディレクトリ')
 
@@ -55,6 +55,16 @@ def main():
 		print(train_labels.shape)
 		print(test_data.shape)
 		print(test_labels.shape)
+	elif (args.data_type == "COCO2014"):
+		ann_types = ['captions', 'instances', 'person_keypoints']
+		for ann_type in ann_types:
+			print('[INFO] ann_type: {}'.format(ann_type))
+			train_data, train_labels, validation_data, validation_labels, test_data = coco_loader.load_coco2014(args.dataset_dir, ann_type=ann_type)
+			print(train_data.shape)
+			print(train_labels)
+			print(validation_data.shape)
+			print(validation_labels)
+			print(test_data.shape)
 	else:
 		print('[ERROR] Unknown data_type: {}'.format(args.data_type))
 		quit()

@@ -9,7 +9,7 @@ RUN apt update
 RUN apt upgrade -y
 RUN apt install -y libgl1-mesa-dev
 
-RUN pip install pandas opencv-python
+RUN pip install matplotlib pandas opencv-python cython
 
 ENTRYPOINT /usr/local/bin/nvidia_entrypoint.sh
 
