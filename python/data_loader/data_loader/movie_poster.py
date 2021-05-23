@@ -3,11 +3,13 @@
 #---------------------------------
 # モジュールのインポート
 #---------------------------------
+import io
 import os
 import re
 import glob
 import json
 import numpy as np
+import pandas as pd
 from chardet import detect
 import cv2
 
@@ -30,17 +32,18 @@ def load_movie_poster(dataset_dir, output_dir='./output'):
 		keys = ['{', '}', '"imdbID"', '"Poster"', '"Genre"']
 		
 		anns = []
+		df_labels = pd.DataFrame()
 		for i, ground_truth in enumerate(list_ground_truth):
 			# --- metaファイル読み込み ---
 			#   * 文字コードが混在している為，テキストを開く際に文字コード指定する
-			print('[INFO] load {} ({}/{})'.format(ground_truth, i, len(list_ground_truth)))
+			print('[INFO] load {} ({}/{})'.format(ground_truth, i+1, len(list_ground_truth)))
 			with open(ground_truth, 'rb') as f:
 				enc = detect(f.read())
 			with open(ground_truth, 'r', encoding=enc['encoding']) as f:
 				lines = f.readlines()
 			
 			# --- metaファイルから画像ファイル情報と分類クラス情報を読み込む ---
-			for i, line in enumerate(lines):
+			for line in lines:
 				for key in keys:
 					if (key in line):
 						if (key == '{'):
@@ -52,13 +55,24 @@ def load_movie_poster(dataset_dir, output_dir='./output'):
 							str_anns += line
 							ann = json.loads(str_anns)
 							img_file = os.path.join(img_dir, str(ann['Year']), '{}.jpg'.format(ann['imdbID']))
-							if (os.path.exists(img_file)):
+							
+							if (os.path.exists(img_file) and (not('N/A' in ann['Genre']))):
 								anns.append(ann)
+								
+								label_index = pd.read_csv(io.StringIO(ann['Genre']), header=None, skipinitialspace=True).values[0]
+								dict_label = dict()
+								for label in label_index:
+									dict_label[label] = [1]
+								df_labels = df_labels.append(pd.DataFrame(dict_label, index=[ann['imdbID']]))
 						else:
 							str_anns += line_prev
 							line_prev = line
 						break
-			
+		
+		df_labels = df_labels.fillna(0)
+		df_labels = df_labels.astype(int)
+#		print(df_labels)
+		
 		return anns
 	
 	os.makedirs(output_dir, exist_ok=True)
