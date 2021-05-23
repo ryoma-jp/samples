@@ -66,7 +66,7 @@ def main():
 			print(validation_labels)
 			print(test_data.shape)
 	elif (args.data_type == "MoviePoster"):
-		train_images, train_labels, test_images, test_labels = movie_poster.load_movie_poster(args.dataset_dir)
+		train_images, train_labels, test_images, test_labels = movie_poster.load_movie_poster(args.dataset_dir, output_dir='./output/movie_poster')
 		print(train_images.shape)
 		print(train_labels.shape)
 		print(test_images.shape)
