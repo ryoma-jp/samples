@@ -22,7 +22,7 @@ numbers = re.compile(r'(\d+)')
 #---------------------------------
 # 関数
 #---------------------------------
-def load_movie_poster(dataset_dir, output_dir='./output'):
+def load_movie_poster(dataset_dir, output_dir='./output', resize=[256, 256]):
 	def _numericalSort(value):
 		parts = numbers.split(value)
 		parts[1::2] = map(int, parts[1::2])
@@ -54,8 +54,8 @@ def load_movie_poster(dataset_dir, output_dir='./output'):
 							str_anns += line_prev.replace(',\n', '\n')
 							str_anns += line
 							ann = json.loads(str_anns)
-							img_file = os.path.join(img_dir, str(ann['Year']), '{}.jpg'.format(ann['imdbID']))
 							
+							img_file = os.path.join(img_dir, str(ann['Year']), '{}.jpg'.format(ann['imdbID']))
 							if (os.path.exists(img_file) and (not('N/A' in ann['Genre']))):
 								anns.append(ann)
 								
@@ -73,7 +73,7 @@ def load_movie_poster(dataset_dir, output_dir='./output'):
 		df_labels = df_labels.astype(int)
 #		print(df_labels)
 		
-		return anns
+		return anns, df_labels
 	
 	os.makedirs(output_dir, exist_ok=True)
 	img_dir = os.path.join(dataset_dir, "Movie_Poster_Dataset")
@@ -84,27 +84,34 @@ def load_movie_poster(dataset_dir, output_dir='./output'):
 	print(list_ground_truth)
 	
 	# --- データ読み込み ---
-	anns = _extract_classification_info(list_ground_truth, img_dir)
+	anns, df_labels = _extract_classification_info(list_ground_truth, img_dir)
 #	print(anns)
 	print('[INFO] Meta data loaded')
-	print('  * Num of annotations: {}'.format(len(anns)))
-	print('  * Num of classification keys: {}'.format(anns[0].keys()))
+	print('  * Num of annotations:\n{}'.format(len(anns)))
+	print('  * Num of classification keys:\n{}'.format(anns[0].keys()))
+	print('  * Categories(Genre):\n{}'.format(df_labels.columns))
 	
+	img = []
 	img_size = []
 	log_interval = len(anns) // 30
 	for i, ann in enumerate(anns):
 		if (i % log_interval == 0):
 			print('[INFO] Processing ... ({}/{})'.format(i, len(anns)))
 		img_file = os.path.join(img_dir, str(ann['Year']), '{}.jpg'.format(ann['imdbID']))
-		img = cv2.imread(img_file)
-		if (img is not None):
-			ann['imgHeight'], ann['imgWidth'] = img.shape[0:2]
-			img_size.append(img.shape[0:2])
+		_img = cv2.imread(img_file)
+		if (_img is not None):
+			if (resize is not None):
+				_img = cv2.resize(_img, resize)
+			img.append(list(_img))
+			ann['imgHeight'], ann['imgWidth'] = _img.shape[0:2]
+			img_size.append(_img.shape[0:2])
 		else:
 			print('[ERROR] Failed to open file: {}'.format(img_file))
 			quit()
+	img = np.array(img)
 	img_size = np.array(img_size)
 	print('[INFO] DONE ({}/{})'.format(len(anns), len(anns)))
+	print('  * img.shape    : {}'.format(img.shape))
 	print('  * img_min(h, w): {}'.format(img_size.min(axis=0)))
 	print('  * img_max(h, w): {}'.format(img_size.max(axis=0)))
 	
