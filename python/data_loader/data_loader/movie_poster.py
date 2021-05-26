@@ -22,7 +22,7 @@ numbers = re.compile(r'(\d+)')
 #---------------------------------
 # 関数
 #---------------------------------
-def load_movie_poster(dataset_dir, output_dir='./output', resize=[256, 256]):
+def load_movie_poster(dataset_dir, output_dir='./output', resize=[256, 256], test_data_ratio=0.2, random_seed=-1):
 	def _numericalSort(value):
 		parts = numbers.split(value)
 		parts[1::2] = map(int, parts[1::2])
@@ -118,9 +118,22 @@ def load_movie_poster(dataset_dir, output_dir='./output', resize=[256, 256]):
 	with open(os.path.join(output_dir, 'annotations.json'), mode='w', encoding='utf-8') as f:
 		json.dump(anns, f, ensure_ascii=False, indent=2)
 	
-	quit()
+	if (random_seed >= 0):
+		np.random.seed(seed=random_seed)
+	data_index = np.arange(len(img))
+	np.random.shuffle(data_index)
+	test_data_index = int(len(img)*(1-test_data_ratio))
+	train_index = data_index[0:test_data_index]
+	test_index = data_index[test_data_index::]
 	
-	return np.array(train_images), np.array(train_labels), np.array(test_images), np.array(test_labels)
+	train_images = img[train_index]
+	train_labels = df_labels.values[train_index]
+	test_images = img[test_index]
+	test_labels = df_labels.values[test_index]
+	
+	print('[DEBUG] test_labels[0:5]:\n{}'.format(test_labels[0:5]))
+	
+	return train_images, train_labels, test_images, test_labels
 
 
 
