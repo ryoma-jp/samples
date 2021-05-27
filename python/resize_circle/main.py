@@ -4,7 +4,6 @@
 # モジュールのインポート
 #---------------------------------
 import io
-import pandas as pd
 import argparse
 from resize_circle import resize_circle
 
@@ -29,6 +28,7 @@ def main():
 	rc = resize_circle.ResizeCircle()
 	rc.resize_opencv()
 	rc.resize_pil()
+	rc.resize_tensorflow()
 
 	return
 

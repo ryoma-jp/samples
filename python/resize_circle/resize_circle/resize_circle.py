@@ -7,6 +7,7 @@ import os
 import numpy as np
 import cv2
 from PIL import Image
+import tensorflow as tf
 
 #---------------------------------
 # 定数定義
@@ -79,4 +80,47 @@ class ResizeCircle():
 		
 		return
 
+	def resize_tensorflow(self):
+		physical_devices = tf.config.list_physical_devices('GPU')
+		if (len(physical_devices) > 0):
+			for device in physical_devices:
+				tf.config.experimental.set_memory_growth(device, True)
+		else:
+			print('[ERROR] GPU hardware devices unavailable')
+			quit()
+		tf_img_base = tf.convert_to_tensor(self.img_circle, tf.uint8)
+		
+		img = tf.image.resize(tf_img_base, self.dsize, method='area')
+		img = img.numpy().astype(np.uint8)
+		cv2.imwrite(os.path.join(self.output_dir, 'resize_tensorflow_area.png'), img)
+		
+		img = tf.image.resize(tf_img_base, self.dsize, method='bicubic')
+		img = img.numpy().astype(np.uint8)
+		cv2.imwrite(os.path.join(self.output_dir, 'resize_tensorflow_bicubic.png'), img)
+		
+		img = tf.image.resize(tf_img_base, self.dsize, method='bilinear')
+		img = img.numpy().astype(np.uint8)
+		cv2.imwrite(os.path.join(self.output_dir, 'resize_tensorflow_bilinear.png'), img)
+		
+		img = tf.image.resize(tf_img_base, self.dsize, method='gaussian')
+		img = img.numpy().astype(np.uint8)
+		cv2.imwrite(os.path.join(self.output_dir, 'resize_tensorflow_gaussian.png'), img)
+		
+		img = tf.image.resize(tf_img_base, self.dsize, method='lanczos3')
+		img = img.numpy().astype(np.uint8)
+		cv2.imwrite(os.path.join(self.output_dir, 'resize_tensorflow_lanczos3.png'), img)
+		
+		img = tf.image.resize(tf_img_base, self.dsize, method='lanczos5')
+		img = img.numpy().astype(np.uint8)
+		cv2.imwrite(os.path.join(self.output_dir, 'resize_tensorflow_lanczos5.png'), img)
+		
+		img = tf.image.resize(tf_img_base, self.dsize, method='mitchellcubic')
+		img = img.numpy().astype(np.uint8)
+		cv2.imwrite(os.path.join(self.output_dir, 'resize_tensorflow_mitchellcubic.png'), img)
+		
+		img = tf.image.resize(tf_img_base, self.dsize, method='nearest')
+		img = img.numpy().astype(np.uint8)
+		cv2.imwrite(os.path.join(self.output_dir, 'resize_tensorflow_nearest.png'), img)
+		
+		return
 
