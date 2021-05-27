@@ -8,6 +8,7 @@ import numpy as np
 import cv2
 from PIL import Image
 import tensorflow as tf
+from torchvision import transforms
 
 #---------------------------------
 # 定数定義
@@ -124,3 +125,33 @@ class ResizeCircle():
 		
 		return
 
+	def resize_pytorch(self):
+		img_base = self.img_circle.copy()
+		img_base = cv2.cvtColor(img_base, cv2.COLOR_BGR2RGB)
+		img_base = Image.fromarray(img_base)
+		
+		transform = transforms.Resize(self.dsize, interpolation=transforms.InterpolationMode.NEAREST)
+		img = transform(img_base)
+		img.save(os.path.join(self.output_dir, 'resize_pytorch_nearest.png'))
+		
+		transform = transforms.Resize(self.dsize, interpolation=transforms.InterpolationMode.BILINEAR)
+		img = transform(img_base)
+		img.save(os.path.join(self.output_dir, 'resize_pytorch_bilinear.png'))
+		
+		transform = transforms.Resize(self.dsize, interpolation=transforms.InterpolationMode.BICUBIC)
+		img = transform(img_base)
+		img.save(os.path.join(self.output_dir, 'resize_pytorch_bicubic.png'))
+		
+		transform = transforms.Resize(self.dsize, interpolation=transforms.InterpolationMode.BOX)
+		img = transform(img_base)
+		img.save(os.path.join(self.output_dir, 'resize_pytorch_box.png'))
+		
+		transform = transforms.Resize(self.dsize, interpolation=transforms.InterpolationMode.HAMMING)
+		img = transform(img_base)
+		img.save(os.path.join(self.output_dir, 'resize_pytorch_hamming.png'))
+		
+		transform = transforms.Resize(self.dsize, interpolation=transforms.InterpolationMode.LANCZOS)
+		img = transform(img_base)
+		img.save(os.path.join(self.output_dir, 'resize_pytorch_lanczos.png'))
+		
+		return

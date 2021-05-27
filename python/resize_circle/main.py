@@ -29,7 +29,8 @@ def main():
 	rc.resize_opencv()
 	rc.resize_pil()
 	rc.resize_tensorflow()
-
+	rc.resize_pytorch()
+	
 	return
 
 #---------------------------------
