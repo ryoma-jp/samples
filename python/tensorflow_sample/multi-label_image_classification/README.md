@@ -6,7 +6,7 @@
 
 ## 実行手順
 
-	$ python3 tensorflow_sample.py
+	$ ./run.sh
 
 ## 参照
 
