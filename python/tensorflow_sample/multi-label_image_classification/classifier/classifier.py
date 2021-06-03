@@ -4,12 +4,12 @@
 # モジュールのインポート
 #---------------------------------
 import numpy as np
-import keras
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
-from keras.utils import to_categorical
-from keras.preprocessing import image
+import tensorflow.keras as keras
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Flatten
+from tensorflow.keras.layers import Conv2D, MaxPooling2D
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.preprocessing import image
 from sklearn.model_selection import train_test_split
 
 #---------------------------------

@@ -57,7 +57,7 @@ def main():
 		np.savez_compressed(os.path.join(output_dir, 'dataset_movie_poster.npz'), 
 			train_images, train_labels, test_images, test_labels)
 		
-	if (args.data_type == "MoviePoster_npz"):
+	elif (args.data_type == "MoviePoster_npz"):
 		npz_comp = np.load(args.dataset_file)
 		train_images = npz_comp['arr_0']
 		train_labels = npz_comp['arr_1']

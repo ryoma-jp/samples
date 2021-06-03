@@ -94,6 +94,7 @@ def load_movie_poster(dataset_dir, output_dir='./output', resize=[400, 400], tes
 	img = []
 	img_size = []
 	log_interval = len(anns) // 30
+	resize = tuple(resize)
 	for i, ann in enumerate(anns):
 		if (i % log_interval == 0):
 			print('[INFO] Processing ... ({}/{})'.format(i, len(anns)))

@@ -1,6 +1,6 @@
 #! /bin/bash
 
-DATA_TYPE="MoviePoster_npz"		# "MoviePoster", "MoviePoster_npz" or ...(T.B.D)
+DATA_TYPE="MoviePoster"		# "MoviePoster", "MoviePoster_npz" or ...(T.B.D)
 DATASET_DIR="./dataset"
 
 mkdir -p ${DATASET_DIR}
