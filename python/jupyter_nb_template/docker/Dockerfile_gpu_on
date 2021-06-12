@@ -1,0 +1,13 @@
+
+# --- build command ---
+#   docker build --network=host -f Dockerfile_gpu_on -t jupyter_nb/tensorflow_gpu .
+
+# --- for machine learning ---
+FROM tensorflow/tensorflow:latest-gpu-jupyter
+
+RUN apt update
+RUN apt upgrade -y
+RUN apt install -y libgl1-mesa-dev
+
+RUN pip install opencv-python
+

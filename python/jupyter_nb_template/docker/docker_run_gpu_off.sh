@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# --- ref ---
+#   https://docs.nvidia.com/cuda/wsl-user-guide/index.html
+
+WORK_ROOT="${PWD}/.."
+echo ${WORK_ROOT}
+
+CONTAINER="jupyter_nb/scipy-notebook:latest"
+
+docker run -v "${WORK_ROOT}/work_gpu_off:/home/jovyan/work" -p 10000:8888 ${CONTAINER}
+
+

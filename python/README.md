@@ -21,6 +21,7 @@
 |resize_circle |Pythonモジュールごとの円のリサイズ(ダウンサンプリングのされ方が異なる) |
 |subprocess_run |外部プログラムを実行するサンプル |
 |tabnet_sample |TabNetの実装サンプル |
+|jupyter_nb_template |Docker上のJupyter Notebook環境 |
 |tensorflow_sample |TensorFlowの実装サンプル |
 |tsne_sample | t-SNEによる次元圧縮のサンプル |
 
