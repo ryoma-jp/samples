@@ -5,6 +5,7 @@
 |argparse_sample |argparseモジュールで引数を入力するサンプル |
 |calc_distance |データ間の距離計算処理のサンプル |
 |camera_input |カメラ入力サンプル |
+|csg_sample |CSGによる指標化サンプル |
 |data_loader |データセット読み込み処理のサンプル |
 |dist_sample |配布用パッケージ作成サンプル |
 |filter |信号処理フィルタのサンプル |
