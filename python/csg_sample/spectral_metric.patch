@@ -1,0 +1,115 @@
+diff --git a/main.py b/main.py
+index 5381fdd..9863ef9 100644
+--- a/main.py
++++ b/main.py
+@@ -1,5 +1,6 @@
+ import argparse
+ 
++import os
+ from tqdm import tqdm
+ 
+ from spectral_metric.config import EMBEDDINGS, make_config
+@@ -21,6 +22,9 @@ def parse_arg():
+ 
+ def main():
+     args = parse_arg()
++    result_dir = 'result_dir'
++    os.makedirs(result_dir, exist_ok=True)
++
+     configs = [make_config(k,
+                            embd=args.embd,
+                            tsne=args.tsne,
+@@ -28,10 +32,10 @@ def main():
+                            shuffled_class=args.shuffled_class) for k in args.datasets]
+ 
+     if args.make_graph:
+-        visualize(configs[0], k_nearest=args.k_nearest, M_sample=args.M)
++        visualize(configs[0], k_nearest=args.k_nearest, M_sample=args.M, result_dir=result_dir)
+ 
+     valss = [test_job(config=k, k_nearest=args.k_nearest, M_sample=args.M) for k in tqdm(configs)]
+-    plot_with_err(*valss)
++    plot_with_err(*valss, result_dir=result_dir)
+ 
+ 
+ if __name__ == '__main__':
+diff --git a/spectral_metric/visualize.py b/spectral_metric/visualize.py
+index 685d3f0..416a860 100644
+--- a/spectral_metric/visualize.py
++++ b/spectral_metric/visualize.py
+@@ -1,5 +1,6 @@
+ from itertools import cycle
+ 
++import os
+ import numpy as np
+ import seaborn as sns
+ from joblib import Parallel, delayed
+@@ -26,7 +27,7 @@ stl10_cls = ['airplane', 'bird', 'car', 'cat', 'deer', 'dog', 'horse', 'monkey',
+ clss = {'cifar10': cifar10_cls, 'notMNIST': notMNIST_cls, 'stl10': stl10_cls, 'miotcd': mio_tcd_clss}
+ 
+ 
+-def visualize(config, k_nearest=10, isomap=None, M_sample=100):
++def visualize(config, k_nearest=10, isomap=None, M_sample=100, result_dir=None):
+     """
+     Compute and plot the graph for a config
+     Args:
+@@ -45,11 +46,11 @@ def visualize(config, k_nearest=10, isomap=None, M_sample=100):
+     estimator = CumulativeGradientEstimator(M_sample, k_nearest, isomap)
+     estimator.fit(data, target)
+ 
+-    make_graph(estimator.difference, ds_name)
++    make_graph(estimator.difference, ds_name, result_dir)
+     font.set_weight('normal')
+ 
+ 
+-def make_graph(difference, ds_name):
++def make_graph(difference, ds_name, result_dir=None):
+     """
+     Plot the graph of `ds_name`
+     Args:
+@@ -91,7 +92,12 @@ def make_graph(difference, ds_name):
+     ax.add_collection(lc)
+     plt.title(ds_name)
+     plt.tight_layout(1.1)
+-    plt.show()
++
++    if (result_dir is None):
++        plt.show()
++    else:
++        plt.savefig(os.path.join(result_dir, 'graph_{}.png'.format(ds_name)))
++
+ 
+ 
+ def process_many(config, k_nearest=3, isomap=None, M_sample=100, loop=1):
+@@ -156,7 +162,7 @@ def make_label(config, knn, iso, ksamp):
+     return lbl
+ 
+ 
+-def plot_with_err(*vals):
++def plot_with_err(*vals, result_dir=None):
+     """
+     Plot the eigens values and the CSG
+     Args:
+@@ -180,7 +186,11 @@ def plot_with_err(*vals):
+     plt.xlabel('Node')
+     plt.legend(loc='best')
+     plt.tight_layout()
+-    plt.show()
++
++    if (result_dir is None):
++        plt.show()
++    else:
++        plt.savefig(os.path.join(result_dir, 'plot_errorbar.png'))
+ 
+     plt.figure(dpi=300)
+ 
+@@ -191,4 +201,9 @@ def plot_with_err(*vals):
+     plt.barh(ind, np.array(ratios)[:, 0], xerr=np.array(ratios)[:, 1], log=False)
+     plt.yticks(ind, lbls)
+     plt.tight_layout()
+-    plt.show()
++
++    if (result_dir is None):
++        plt.show()
++    else:
++        plt.savefig(os.path.join(result_dir, 'plot_bar.png'))
++
