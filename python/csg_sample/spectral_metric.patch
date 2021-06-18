@@ -1,5 +1,5 @@
 diff --git a/main.py b/main.py
-index 5381fdd..9863ef9 100644
+index 5381fdd..b2e30b1 100644
 --- a/main.py
 +++ b/main.py
 @@ -1,5 +1,6 @@
@@ -19,12 +19,13 @@ index 5381fdd..9863ef9 100644
      configs = [make_config(k,
                             embd=args.embd,
                             tsne=args.tsne,
-@@ -28,10 +32,10 @@ def main():
+@@ -28,10 +32,11 @@ def main():
                             shuffled_class=args.shuffled_class) for k in args.datasets]
  
      if args.make_graph:
 -        visualize(configs[0], k_nearest=args.k_nearest, M_sample=args.M)
-+        visualize(configs[0], k_nearest=args.k_nearest, M_sample=args.M, result_dir=result_dir)
++        for config in configs:
++            visualize(config, k_nearest=args.k_nearest, M_sample=args.M, result_dir=result_dir)
  
      valss = [test_job(config=k, k_nearest=args.k_nearest, M_sample=args.M) for k in tqdm(configs)]
 -    plot_with_err(*valss)
@@ -33,7 +34,7 @@ index 5381fdd..9863ef9 100644
  
  if __name__ == '__main__':
 diff --git a/spectral_metric/visualize.py b/spectral_metric/visualize.py
-index 685d3f0..416a860 100644
+index 685d3f0..e6b362b 100644
 --- a/spectral_metric/visualize.py
 +++ b/spectral_metric/visualize.py
 @@ -1,5 +1,6 @@
@@ -66,7 +67,7 @@ index 685d3f0..416a860 100644
      """
      Plot the graph of `ds_name`
      Args:
-@@ -91,7 +92,12 @@ def make_graph(difference, ds_name):
+@@ -91,7 +92,14 @@ def make_graph(difference, ds_name):
      ax.add_collection(lc)
      plt.title(ds_name)
      plt.tight_layout(1.1)
@@ -76,11 +77,13 @@ index 685d3f0..416a860 100644
 +        plt.show()
 +    else:
 +        plt.savefig(os.path.join(result_dir, 'graph_{}.png'.format(ds_name)))
++    
++    plt.close()
 +
  
  
  def process_many(config, k_nearest=3, isomap=None, M_sample=100, loop=1):
-@@ -156,7 +162,7 @@ def make_label(config, knn, iso, ksamp):
+@@ -156,7 +164,7 @@ def make_label(config, knn, iso, ksamp):
      return lbl
  
  
@@ -89,7 +92,7 @@ index 685d3f0..416a860 100644
      """
      Plot the eigens values and the CSG
      Args:
-@@ -180,7 +186,11 @@ def plot_with_err(*vals):
+@@ -180,7 +188,11 @@ def plot_with_err(*vals):
      plt.xlabel('Node')
      plt.legend(loc='best')
      plt.tight_layout()
@@ -102,7 +105,7 @@ index 685d3f0..416a860 100644
  
      plt.figure(dpi=300)
  
-@@ -191,4 +201,9 @@ def plot_with_err(*vals):
+@@ -191,4 +203,10 @@ def plot_with_err(*vals):
      plt.barh(ind, np.array(ratios)[:, 0], xerr=np.array(ratios)[:, 1], log=False)
      plt.yticks(ind, lbls)
      plt.tight_layout()
@@ -113,3 +116,4 @@ index 685d3f0..416a860 100644
 +    else:
 +        plt.savefig(os.path.join(result_dir, 'plot_bar.png'))
 +
++    plt.close()
