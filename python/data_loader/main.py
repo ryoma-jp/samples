@@ -90,7 +90,7 @@ def main():
 		print(test_images.shape)
 		print(test_labels.shape)
 		
-	if (args.data_type == "MNIST"):
+	elif (args.data_type == "MNIST"):
 		train_images, train_labels, test_images, test_labels = mnist.load_mnist(args.dataset_dir)
 		print(train_images.shape)
 		print(train_labels.shape)
