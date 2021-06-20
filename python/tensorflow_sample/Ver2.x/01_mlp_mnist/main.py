@@ -13,6 +13,8 @@ else:
 	print('[ERROR] Unknown DATA_TYPE({})'.format(_data_type))
 	quit()
 
+from trainer.trainer import TrainerMLP
+
 #---------------------------------
 # 定数定義
 #---------------------------------
@@ -48,6 +50,15 @@ def main():
 		print(dataset.test_images.shape)
 		print(dataset.test_labels.shape)
 		
+		x_train = dataset.train_images / 255
+		y_train = dataset.train_labels
+		x_test = dataset.test_images / 255
+		y_test = dataset.test_labels
+		trainer = TrainerMLP(dataset.train_images.shape[1:])
+		trainer.fit(x_train, y_train, x_test=x_test, y_test=y_test)
+		
+		predictions = trainer.predict(x_test)
+		print('\nPredictions(shape): {}'.format(predictions.shape))
 	else:
 		print('[ERROR] Unknown data_type: {}'.format(args.data_type))
 		quit()

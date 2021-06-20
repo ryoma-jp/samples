@@ -30,3 +30,4 @@ fi
 
 echo `pwd`
 python3 main.py --data_type ${DATA_TYPE} --dataset_dir ${dataset_dir}
+#python3 -m pdb main.py --data_type ${DATA_TYPE} --dataset_dir ${dataset_dir}

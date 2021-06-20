@@ -27,7 +27,7 @@ class DataLoader():
 #---------------------------------
 class DataLoaderMNIST(DataLoader):
 	# --- コンストラクタ ---
-	def __init__(self, dataset_dir, flatten=True, one_hot=True):
+	def __init__(self, dataset_dir, flatten=False, one_hot=False):
 		# --- initialize super class ---
 		super().__init__()
 		
