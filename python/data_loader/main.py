@@ -3,8 +3,26 @@
 #---------------------------------
 # モジュールのインポート
 #---------------------------------
+import os
 import argparse
-from data_loader import common, cifar10, titanic, sarcos, coco_loader, movie_poster
+from data_loader import common
+
+_data_type = os.environ['DATA_TYPE']
+if (_data_type == 'CIFAR-10'):
+	from data_loader import cifar10
+elif (_data_type == 'Titanic'):
+	from data_loader import titanic
+elif (_data_type == 'SARCOS'):
+	from data_loader import sarcos
+elif (_data_type == 'COCO2014'):
+	from data_loader import coco_loader
+elif (_data_type == 'MoviePoster'):
+	from data_loader import movie_poster
+elif (_data_type == 'MNIST'):
+	from data_loader import mnist
+else:
+	print('[ERROR] Unknown DATA_TYPE({})'.format(_data_type))
+	quit()
 
 #---------------------------------
 # 定数定義
@@ -19,7 +37,7 @@ def ArgParser():
 
 	# --- 引数を追加 ---
 	parser.add_argument('--data_type', dest='data_type', type=str, default='CIFAR-10', required=False, \
-			help='データ種別(CIFAR-10, Titanic, SARCOS, COCO2014, MoviePoster or ...(T.B.D)')
+			help='データ種別(CIFAR-10, Titanic, SARCOS, COCO2014, MoviePoster, MNIST or ...(T.B.D)')
 	parser.add_argument('--dataset_dir', dest='dataset_dir', type=str, default=None, required=True, \
 			help='データセットディレクトリ')
 
@@ -67,6 +85,13 @@ def main():
 			print(test_data.shape)
 	elif (args.data_type == "MoviePoster"):
 		train_images, train_labels, test_images, test_labels = movie_poster.load_movie_poster(args.dataset_dir, output_dir='./output/movie_poster', random_seed=0)
+		print(train_images.shape)
+		print(train_labels.shape)
+		print(test_images.shape)
+		print(test_labels.shape)
+		
+	if (args.data_type == "MNIST"):
+		train_images, train_labels, test_images, test_labels = mnist.load_mnist(args.dataset_dir)
 		print(train_images.shape)
 		print(train_labels.shape)
 		print(test_images.shape)
