@@ -26,8 +26,8 @@ from trainer.trainer import TrainerMLP, TrainerCNN
 #---------------------------------
 def ArgParser():
 	parser = argparse.ArgumentParser(description='TensorFlowの学習実装サンプル\n'
-													'  * No.00: MNISTデータセットを用いた全結合NN学習サンプル\n'
-													'  * No.01: CIFAR-10データセットを用いたCNN学習サンプル',
+													'  * No.01: MNISTデータセットを用いた全結合NN学習サンプル\n'
+													'  * No.02: CIFAR-10データセットを用いたCNN学習サンプル',
 				formatter_class=argparse.RawTextHelpFormatter)
 
 	# --- 引数を追加 ---
