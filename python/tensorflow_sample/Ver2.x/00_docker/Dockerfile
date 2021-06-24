@@ -8,8 +8,9 @@ FROM nvcr.io/nvidia/tensorflow:21.03-tf2-py3
 RUN apt update
 RUN apt upgrade -y
 RUN apt install -y libgl1-mesa-dev
+RUN apt install -y graphviz
 
-RUN pip install matplotlib pandas opencv-python cython
+RUN pip install matplotlib pandas opencv-python cython pydot
 
 ENTRYPOINT /usr/local/bin/nvidia_entrypoint.sh
 
