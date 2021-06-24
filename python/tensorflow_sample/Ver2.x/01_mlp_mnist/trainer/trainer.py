@@ -14,7 +14,12 @@ from tensorflow import keras
 #---------------------------------
 class Trainer():
 	# --- コンストラクタ ---
-	def __init__(self, model_file=None):
+	def __init__(self, output_dir=None, model_file=None):
+		# --- 出力ディレクトリ作成 ---
+		self.output_dir = output_dir
+		if (output_dir is not None):
+			os.makedirs(output_dir, exist_ok=True)
+		
 		# --- モデル構築 ---
 		def _load_model(model_file):
 			if (model_file is not None):
@@ -56,14 +61,16 @@ class Trainer():
 #---------------------------------
 class TrainerMLP(Trainer):
 	# --- コンストラクタ ---
-	def __init__(self, input_shape):
-	# --- モデル構築 ---
+	def __init__(self, input_shape, output_dir=None):
+		# --- モデル構築 ---
 		def _load_model(input_shape):
 			model = keras.Sequential([
 				keras.layers.Flatten(input_shape=input_shape),
 				keras.layers.Dense(128, activation='relu'),
 				keras.layers.Dense(10, activation='softmax')
 			])
+			
+			model.summary()
 			
 			model.compile(
 				optimizer='adam',
@@ -73,10 +80,12 @@ class TrainerMLP(Trainer):
 			return model
 		
 		# --- 基底クラスの初期化 ---
-		super().__init__()
+		super().__init__(output_dir)
 		
 		# --- モデル構築 ---
 		self.model = _load_model(input_shape)
+		if (self.output_dir is not None):
+			keras.utils.plot_model(self.model, os.path.join(self.output_dir, 'plot_model.png'), show_shapes=True)
 		
 		return
 	
