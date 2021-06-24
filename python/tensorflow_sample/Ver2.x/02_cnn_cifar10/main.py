@@ -57,7 +57,7 @@ def main():
 		y_train = dataset.train_labels
 		x_test = dataset.test_images / 255
 		y_test = dataset.test_labels
-		trainer = TrainerMLP(dataset.train_images.shape[1:])
+		trainer = TrainerMLP(dataset.train_images.shape[1:], output_dir='./output')
 		trainer.fit(x_train, y_train, x_test=x_test, y_test=y_test)
 		
 		predictions = trainer.predict(x_test)
@@ -73,7 +73,7 @@ def main():
 		y_train = dataset.train_labels
 		x_test = dataset.test_images / 255
 		y_test = dataset.test_labels
-		trainer = TrainerCNN(dataset.train_images.shape[1:])
+		trainer = TrainerCNN(dataset.train_images.shape[1:], output_dir='./output')
 		trainer.fit(x_train, y_train, x_test=x_test, y_test=y_test)
 		
 		predictions = trainer.predict(x_test)
