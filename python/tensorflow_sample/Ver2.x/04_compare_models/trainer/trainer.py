@@ -33,7 +33,11 @@ class Trainer():
 	# --- 学習 ---
 	def fit(self, x_train, y_train, x_test=None, y_test=None, epochs=5):
 		# --- 学習 ---
-		self.model.fit(x_train, y_train, epochs=epochs)
+		os.makedirs(os.path.join(self.output_dir, 'checkpoints'), exist_ok=True)
+		checkpoint_path = os.path.join(self.output_dir, 'checkpoints', 'model.ckpt')
+		cp_callback = keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=1)
+		
+		self.model.fit(x_train, y_train, epochs=epochs, callbacks=[cp_callback])
 		
 		# --- 学習結果を評価 ---
 		if ((x_test is not None) and (y_test is not None)):
@@ -47,6 +51,25 @@ class Trainer():
 	def predict(self, x_test):
 		predictions = self.model.predict(x_test)
 		return predictions
+		
+	# --- モデル保存 ---
+	def save_model(self):
+		# --- 保存先ディレクトリ作成 ---
+		model_dir = os.path.join(self.output_dir, 'models')
+		os.makedirs(os.path.join(model_dir, 'checkpoint'), exist_ok=True)
+		os.makedirs(os.path.join(model_dir, 'saved_model'), exist_ok=True)
+		os.makedirs(os.path.join(model_dir, 'hdf5'), exist_ok=True)
+		
+		# --- checkpoint ---
+		self.model.save_weights(os.path.join(model_dir, 'checkpoint', 'model.ckpt'))
+		
+		# --- saved_model ---
+		self.model.save(os.path.join(model_dir, 'saved_model'))
+		
+		# --- hdf5 ---
+		self.model.save(os.path.join(model_dir, 'hdf5', 'model.h5'))
+		
+		return
 		
 	# --- ラベルインデックス取得 ---
 	def GetLabelIndex(self, label, onehot=True):

@@ -79,18 +79,21 @@ def main():
 	if (args.model_type == 'MLP'):
 		trainer = TrainerMLP(dataset.train_images.shape[1:], output_dir=args.result_dir)
 		trainer.fit(x_train, y_train, x_test=x_test, y_test=y_test)
+		trainer.save_model()
 		
 		predictions = trainer.predict(x_test)
 		print('\nPredictions(shape): {}'.format(predictions.shape))
 	elif (args.model_type == 'SimpleCNN'):
 		trainer = TrainerCNN(dataset.train_images.shape[1:], output_dir=args.result_dir)
 		trainer.fit(x_train, y_train, x_test=x_test, y_test=y_test)
+		trainer.save_model()
 		
 		predictions = trainer.predict(x_test)
 		print('\nPredictions(shape): {}'.format(predictions.shape))
 	elif (args.model_type == 'SimpleResNet'):
 		trainer = TrainerResNet(dataset.train_images.shape[1:], output_dims, output_dir=args.result_dir)
 		trainer.fit(x_train, y_train, x_test=x_test, y_test=y_test)
+		trainer.save_model()
 		
 		predictions = trainer.predict(x_test)
 		print('\nPredictions(shape): {}'.format(predictions.shape))
