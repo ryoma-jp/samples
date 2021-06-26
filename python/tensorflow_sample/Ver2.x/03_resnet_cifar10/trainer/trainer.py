@@ -123,6 +123,11 @@ class TrainerResNet(Trainer):
 			model = keras.models.Model(input, x)
 			model.summary()
 			
+			model.compile(
+				optimizer='adam',
+				loss = 'sparse_categorical_crossentropy',
+				metrics=['accuracy'])
+			
 			return model
 			
 		def _load_model_resnet50(input_shape, classes, dbg_mode=1):
@@ -150,8 +155,8 @@ class TrainerResNet(Trainer):
 		# --- モデル構築 ---
 		if (model_type == 'custom'):
 			def stack_fn(x):
-				x = stack1(x, 64, 3, stride1=1, name='conv2')
-				return stack1(x, 128, 4, name='conv3')
+				x = stack1(x, 32, 3, stride1=1, name='conv2')
+				return stack1(x, 64, 4, name='conv3')
 			
 			self.model = _load_model(input_shape, classes, stack_fn)
 		elif (model_type == 'resnet50'):

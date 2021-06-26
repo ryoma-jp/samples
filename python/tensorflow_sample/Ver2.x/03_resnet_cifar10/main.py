@@ -92,6 +92,10 @@ def main():
 		print('\nPredictions(shape): {}'.format(predictions.shape))
 	elif (args.model_type == 'ResNet'):
 		trainer = TrainerResNet(dataset.train_images.shape[1:], output_dims, output_dir='./output')
+		trainer.fit(x_train, y_train, x_test=x_test, y_test=y_test)
+		
+		predictions = trainer.predict(x_test)
+		print('\nPredictions(shape): {}'.format(predictions.shape))
 	else:
 		print('[ERROR] Unknown model_type: {}'.format(args.model_type))
 		quit()
