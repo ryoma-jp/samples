@@ -61,7 +61,7 @@ class Trainer():
 #---------------------------------
 class TrainerResNet(Trainer):
 	# --- コンストラクタ ---
-	def __init__(self, input_shape, output_dir=None):
+	def __init__(self, input_shape, classes, output_dir=None, model_type='custom'):
 		# --- Residual Block ---
 		#  * アプリケーションからkeras.applications.resnet.ResNetにアクセスできない為，
 		#    必要なモジュールをTensorFlow公式からコピー
@@ -101,9 +101,36 @@ class TrainerResNet(Trainer):
 			return x
 		
 		# --- モデル構築 ---
-		#   0: original ResNet50, 1: custom ResNet50
+		#  * stack_fn()の関数ポインタを引数に設定してカスタマイズ
+		def _load_model(input_shape, classes, stack_fn):
+			input = keras.layers.Input(shape=input_shape)
+			bn_axis = 3
+			
+			x = keras.layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='conv1_pad')(input)
+			x = keras.layers.Conv2D(64, 7, strides=2, use_bias=True, name='conv1_conv')(x)
+
+			x = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name='conv1_bn')(x)
+			x = keras.layers.Activation('relu', name='conv1_relu')(x)
+
+			x = keras.layers.ZeroPadding2D(padding=((1, 1), (1, 1)), name='pool1_pad')(x)
+			x = keras.layers.MaxPooling2D(3, strides=2, name='pool1_pool')(x)
+
+			x = stack_fn(x)
+
+			x = keras.layers.GlobalAveragePooling2D(name='avg_pool')(x)
+			x = keras.layers.Dense(classes, activation='softmax', name='predictions')(x)
+			
+			model = keras.models.Model(input, x)
+			model.summary()
+			
+			return model
+			
 		def _load_model_resnet50(input_shape, classes, dbg_mode=1):
+			# --- TensorFlowのResNet50のモデル ---
+			#  https://www.tensorflow.org/api_docs/python/tf/keras/applications/resnet50/ResNet50
+			#    dbg_mode=0: original ResNet50, dbg_mode=11: custom ResNet50
 			if (dbg_mode == 0):
+				print('[INFO] Load ResNet50 model from keras.applications')
 				model = keras.applications.resnet50.ResNet50()
 			elif (dbg_mode == 1):
 				def stack_fn(x):
@@ -112,34 +139,27 @@ class TrainerResNet(Trainer):
 					x = stack1(x, 256, 6, name='conv4')
 					return stack1(x, 512, 3, name='conv5')
 				
-				input = keras.layers.Input(shape=[224, 224, 3])
-				bn_axis = 3
+				print('[INFO] Load ResNet50 model (custom implementation)')
+				model = _load_model(input_shape, classes, stack_fn)
 				
-				x = keras.layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='conv1_pad')(input)
-				x = keras.layers.Conv2D(64, 7, strides=2, use_bias=True, name='conv1_conv')(x)
-
-				x = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name='conv1_bn')(x)
-				x = keras.layers.Activation('relu', name='conv1_relu')(x)
-
-				x = keras.layers.ZeroPadding2D(padding=((1, 1), (1, 1)), name='pool1_pad')(x)
-				x = keras.layers.MaxPooling2D(3, strides=2, name='pool1_pool')(x)
-
-				x = stack_fn(x)
-
-				x = keras.layers.GlobalAveragePooling2D(name='avg_pool')(x)
-				x = keras.layers.Dense(classes, activation='softmax', name='predictions')(x)
-				
-				model = keras.models.Model(input, x)
-				
-			model.summary()
-			
 			return model
 		
 		# --- 基底クラスの初期化 ---
 		super().__init__(output_dir)
 		
 		# --- モデル構築 ---
-		self.model = _load_model_resnet50(input_shape, 1000)
+		if (model_type == 'custom'):
+			def stack_fn(x):
+				x = stack1(x, 64, 3, stride1=1, name='conv2')
+				return stack1(x, 128, 4, name='conv3')
+			
+			self.model = _load_model(input_shape, classes, stack_fn)
+		elif (model_type == 'resnet50'):
+			self.model = _load_model_resnet50(input_shape, classes, dbg_mode=1)
+		else:
+			print('[ERROR] Unknown model_type: {}'.format(model_type))
+			return
+			
 		if (self.output_dir is not None):
 			keras.utils.plot_model(self.model, os.path.join(self.output_dir, 'plot_model.png'), show_shapes=True)
 		
@@ -222,6 +242,7 @@ class TrainerMLP(Trainer):
 # メイン処理; Trainerモジュールテスト
 #---------------------------------
 def main():
+	import argparse
 	def _argparse():
 		parser = argparse.ArgumentParser(description='Trainerモジュールテスト\n'
 					'  * test_mode=\'ResNet\': ResNetのモデル構造確認(ResNet50の構造をTensorFlow公開モデルと比較)',
@@ -240,7 +261,7 @@ def main():
 	
 	# --- モジュールテスト ---
 	if (args.test_mode == 'ResNet'):
-		trainer = TrainerResNet([224, 224, 3], output_dir=None)
+		trainer = TrainerResNet([224, 224, 3], 1000, output_dir=None, model_type='resnet50')
 	else:
 		print('[ERROR] Unknown test_mode: {}'.format(args.test_mode))
 	

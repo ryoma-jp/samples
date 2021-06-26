@@ -15,8 +15,8 @@ class DataLoader():
 		return
 	
 	# --- ラベルインデックス取得 ---
-	def get_label_index(self, label, onehot=True):
-		if (onehot):
+	def get_label_index(self, label, one_hot=True):
+		if (one_hot):
 			label = np.argmax(label, axis=1)
 		n_category = max(label)+1
 		
@@ -58,11 +58,15 @@ class DataLoaderCIFAR10(DataLoader):
 		
 		# --- labels ---
 		if (one_hot):
+			identity = np.eye(10, dtype=np.int)
 			self.train_labels = np.array([identity[i] for i in train_labels])
 			self.test_labels = np.array([identity[i] for i in test_labels])
 		else:
 			self.train_labels = np.array(train_labels)
 			self.test_labels = np.array(test_labels)
+		
+		# --- 出力次元数を保持 ---
+		self.output_dims = 10
 		
 		return
 		
@@ -121,6 +125,9 @@ class DataLoaderMNIST(DataLoader):
 		self.test_labels = byte_data[8:]
 		if (one_hot):
 			self.test_labels = np.array([identity[i] for i in self.test_labels])
+		
+		# --- 出力次元数を保持 ---
+		self.output_dims = 10
 		
 		return
 	

@@ -61,6 +61,7 @@ def main():
 		y_train = dataset.train_labels
 		x_test = dataset.test_images / 255
 		y_test = dataset.test_labels
+		output_dims = dataset.output_dims
 	elif (args.data_type == "CIFAR-10"):
 		dataset = DataLoaderCIFAR10(args.dataset_dir)
 		print(dataset.train_images.shape)
@@ -72,6 +73,7 @@ def main():
 		y_train = dataset.train_labels
 		x_test = dataset.test_images / 255
 		y_test = dataset.test_labels
+		output_dims = dataset.output_dims
 	else:
 		print('[ERROR] Unknown data_type: {}'.format(args.data_type))
 		quit()
@@ -89,7 +91,7 @@ def main():
 		predictions = trainer.predict(x_test)
 		print('\nPredictions(shape): {}'.format(predictions.shape))
 	elif (args.model_type == 'ResNet'):
-		trainer = TrainerResNet(dataset.train_images.shape[1:], output_dir='./output')
+		trainer = TrainerResNet(dataset.train_images.shape[1:], output_dims, output_dir='./output')
 	else:
 		print('[ERROR] Unknown model_type: {}'.format(args.model_type))
 		quit()
