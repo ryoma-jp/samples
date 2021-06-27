@@ -66,6 +66,16 @@ do
 done
 
 # --- Compare models ---
-# [T.B.D]
+metrics_list="./result_MLP_CIFAR-10/metrics/metrics.csv,"\
+"./result_MLP_MNIST/metrics/metrics.csv,"\
+"./result_SimpleCNN_CIFAR-10/metrics/metrics.csv,"\
+"./result_SimpleCNN_MNIST/metrics/metrics.csv,"\
+"./result_SimpleResNet_CIFAR-10/metrics/metrics.csv,"\
+"./result_SimpleResNet_MNIST/metrics/metrics.csv"
+metrics_names="MLP_CIFAR-10,MLP_MNIST,SimpleCNN_CIFAR-10,SimpleCNN_MNIST,SimpleResNet_CIFAR-10,SimpleResNet_MNIST"
+output_dir="./result/metrics_graph"
+
+python3 tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --output_dir ${output_dir}
+#python3 -m pdb tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --output_dir ${output_dir}
 
 
