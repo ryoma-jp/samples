@@ -5,6 +5,8 @@
 #---------------------------------
 import os
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
 import tensorflow as tf
 from tensorflow import keras
@@ -37,13 +39,33 @@ class Trainer():
 		checkpoint_path = os.path.join(self.output_dir, 'checkpoints', 'model.ckpt')
 		cp_callback = keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=1)
 		
-		self.model.fit(x_train, y_train, epochs=epochs, callbacks=[cp_callback])
+		history = self.model.fit(x_train, y_train, epochs=epochs, callbacks=[cp_callback])
 		
 		# --- 学習結果を評価 ---
 		if ((x_test is not None) and (y_test is not None)):
 			test_loss, test_acc = self.model.evaluate(x_test, y_test, verbose=2)
 			print('Test Accuracy: {}'.format(test_acc))
 			print('Test Loss: {}'.format(test_loss))
+		
+		# --- メトリクスを保存 ---
+		metrics = history.history
+		os.makedirs(os.path.join(self.output_dir, 'metrics'), exist_ok=True)
+		df_metrics = pd.DataFrame(metrics)
+		df_metrics.to_csv(os.path.join(self.output_dir, 'metrics', 'metrics.csv'), index_label='epoch')
+		
+		epoch = df_metrics.index.values
+		for column in df_metrics.columns:
+			plt.figure()
+			plt.plot(epoch, df_metrics[column])
+			plt.xlabel(column)
+			plt.ylabel('epoch')
+			plt.grid(True)
+			plt.tight_layout()
+			
+			graph_name = os.path.join(self.output_dir, 'metrics', '{}.png'.format(column))
+			plt.savefig(graph_name)
+			
+			plt.close()
 		
 		return
 	
