@@ -33,13 +33,14 @@ class Trainer():
 		return
 	
 	# --- 学習 ---
-	def fit(self, x_train, y_train, x_test=None, y_test=None, epochs=5):
+	def fit(self, x_train, y_train, x_test=None, y_test=None, epochs=1000000):
 		# --- 学習 ---
 		os.makedirs(os.path.join(self.output_dir, 'checkpoints'), exist_ok=True)
 		checkpoint_path = os.path.join(self.output_dir, 'checkpoints', 'model.ckpt')
 		cp_callback = keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=1)
+		es_callback = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=5, verbose=1, mode='auto')
 		
-		history = self.model.fit(x_train, y_train, epochs=epochs, callbacks=[cp_callback])
+		history = self.model.fit(x_train, y_train, validation_split=0.2, epochs=epochs, callbacks=[cp_callback, es_callback])
 		
 		# --- 学習結果を評価 ---
 		if ((x_test is not None) and (y_test is not None)):
