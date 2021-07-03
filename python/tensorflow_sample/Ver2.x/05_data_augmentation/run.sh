@@ -35,8 +35,10 @@ fi
 
 # --- Training ---
 echo `pwd`
+OUTPUT_DIR="./output"
 DATA_TYPE_LIST=("MNIST" "CIFAR-10")
 MODEL_TYPE_LIST=("MLP" "SimpleCNN" "SimpleResNet")
+DATA_AUG_LIST=("True" "False")
 
 for DATA_TYPE in ${DATA_TYPE_LIST[@]}
 do
@@ -51,31 +53,103 @@ do
 	
 	for MODEL_TYPE in ${MODEL_TYPE_LIST[@]}
 	do
-		echo "[Training Conditions] MODEL_TYPE=${MODEL_TYPE}, DATA_TYPE=${DATA_TYPE}"
-		result_dir="result_${MODEL_TYPE}_${DATA_TYPE}"
-		mkdir -p ${result_dir}
-		python3 main.py --data_type ${DATA_TYPE} \
-			--dataset_dir ${dataset_dir} \
-			--model_type ${MODEL_TYPE} \
-			--result_dir ${result_dir}
-		#python3 -m pdb main.py --data_type ${DATA_TYPE} \
-		#	--dataset_dir ${dataset_dir} \
-		#	--model_type ${MODEL_TYPE} \
-		#	--result_dir ${result_dir}
+		for DATA_AUG in ${DATA_AUG_LIST[@]}
+		do
+			echo "[Training Conditions]"
+			echo "  * MODEL_TYPE=${MODEL_TYPE}"
+			echo "  * DATA_TYPE=${DATA_TYPE}"
+			echo "  * DATA_AUG=${DATA_AUG}"
+			
+			model_dir="${OUTPUT_DIR}/model/${MODEL_TYPE}_${DATA_TYPE}_DA-${DATA_AUG}"
+			mkdir -p ${model_dir}
+			
+			if [ ${DATA_AUG} = "True" ]; then
+				python3 main.py --data_type ${DATA_TYPE} \
+					--dataset_dir ${dataset_dir} \
+					--model_type ${MODEL_TYPE} \
+					--data_augmentation \
+					--result_dir ${model_dir}
+			else
+				python3 main.py --data_type ${DATA_TYPE} \
+					--dataset_dir ${dataset_dir} \
+					--model_type ${MODEL_TYPE} \
+					--result_dir ${model_dir}
+			fi
+		done
 	done
 done
 
-# --- Compare models ---
-metrics_list="./result_MLP_CIFAR-10/metrics/metrics.csv,"\
-"./result_MLP_MNIST/metrics/metrics.csv,"\
-"./result_SimpleCNN_CIFAR-10/metrics/metrics.csv,"\
-"./result_SimpleCNN_MNIST/metrics/metrics.csv,"\
-"./result_SimpleResNet_CIFAR-10/metrics/metrics.csv,"\
-"./result_SimpleResNet_MNIST/metrics/metrics.csv"
-metrics_names="MLP_CIFAR-10,MLP_MNIST,SimpleCNN_CIFAR-10,SimpleCNN_MNIST,SimpleResNet_CIFAR-10,SimpleResNet_MNIST"
-output_dir="./result/metrics_graph"
+# --- Compare models(ALL) ---
+metrics_list=\
+"${OUTPUT_DIR}/model/MLP_CIFAR-10_DA-True/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/MLP_CIFAR-10_DA-False/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/MLP_MNIST_DA-True/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/MLP_MNIST_DA-False/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleCNN_CIFAR-10_DA-True/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleCNN_CIFAR-10_DA-False/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleCNN_MNIST_DA-True/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleCNN_MNIST_DA-False/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleResNet_CIFAR-10_DA-True/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleResNet_CIFAR-10_DA-False/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleResNet_MNIST_DA-True/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleResNet_MNIST_DA-False/metrics/metrics.csv"
+metrics_names=\
+"MLP_CIFAR-10_DA-True,"\
+"MLP_CIFAR-10_DA-False,"\
+"MLP_MNIST_DA-True,"\
+"MLP_MNIST_DA-False,"\
+"SimpleCNN_CIFAR-10_DA-True,"\
+"SimpleCNN_CIFAR-10_DA-False,"\
+"SimpleCNN_MNIST_DA-True,"\
+"SimpleCNN_MNIST_DA-False,"\
+"SimpleResNet_CIFAR-10_DA-True,"\
+"SimpleResNet_CIFAR-10_DA-False,"\
+"SimpleResNet_MNIST_DA-True,"\
+"SimpleResNet_MNIST_DA-False"
+output_dir="${OUTPUT_DIR}/metrics_graph"
 
 python3 tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --output_dir ${output_dir}
 #python3 -m pdb tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --output_dir ${output_dir}
+
+# --- Compare models(MNIST) ---
+metrics_list=\
+"${OUTPUT_DIR}/model/MLP_MNIST_DA-True/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/MLP_MNIST_DA-False/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleCNN_MNIST_DA-True/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleCNN_MNIST_DA-False/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleResNet_MNIST_DA-True/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleResNet_MNIST_DA-False/metrics/metrics.csv"
+metrics_names=\
+"MLP_MNIST_DA-True,"\
+"MLP_MNIST_DA-False,"\
+"SimpleCNN_MNIST_DA-True,"\
+"SimpleCNN_MNIST_DA-False,"\
+"SimpleResNet_MNIST_DA-True,"\
+"SimpleResNet_MNIST_DA-False"
+output_dir="${OUTPUT_DIR}/metrics_graph-mnist"
+
+python3 tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --output_dir ${output_dir}
+#python3 -m pdb tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --output_dir ${output_dir}
+
+# --- Compare models(CIFAR-10) ---
+metrics_list=\
+"${OUTPUT_DIR}/model/MLP_CIFAR-10_DA-True/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/MLP_CIFAR-10_DA-False/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleCNN_CIFAR-10_DA-True/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleCNN_CIFAR-10_DA-False/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleResNet_CIFAR-10_DA-True/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/SimpleResNet_CIFAR-10_DA-False/metrics/metrics.csv"
+metrics_names=\
+"MLP_CIFAR-10_DA-True,"\
+"MLP_CIFAR-10_DA-False,"\
+"SimpleCNN_CIFAR-10_DA-True,"\
+"SimpleCNN_CIFAR-10_DA-False,"\
+"SimpleResNet_CIFAR-10_DA-True,"\
+"SimpleResNet_CIFAR-10_DA-False"
+output_dir="${OUTPUT_DIR}/metrics_graph-cifar10"
+
+python3 tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --output_dir ${output_dir}
+#python3 -m pdb tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --output_dir ${output_dir}
+
 
 

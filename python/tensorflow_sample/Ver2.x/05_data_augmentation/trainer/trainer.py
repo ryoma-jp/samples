@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 import tensorflow as tf
 from tensorflow import keras
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 #---------------------------------
 # クラス; 学習モジュール基底クラス
@@ -42,10 +43,25 @@ class Trainer():
 		cp_callback = keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=1)
 		es_callback = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=5, verbose=1, mode='auto')
 		
-		if ((x_val is not None) and (y_val is not None)):
-			history = self.model.fit(x_train, y_train, validation_data=(x_val, y_val), epochs=epochs, callbacks=[cp_callback, es_callback])
+		if (da_enable):
+			# --- no tuning ---
+			datagen = ImageDataGenerator(
+				rotation_range=10,
+				width_shift_range=0.2,
+				height_shift_range=0.2,
+				horizontal_flip=True)
 		else:
-			history = self.model.fit(x_train, y_train, validation_split=0.2, epochs=epochs, callbacks=[cp_callback, es_callback])
+			datagen = ImageDataGenerator()
+		datagen.fit(x_train)
+		
+		if ((x_val is not None) and (y_val is not None)):
+			history = self.model.fit(datagen.flow(x_train, y_train, batch_size=batch_size),
+						steps_per_epoch=len(x_train)/batch_size, validation_data=(x_val, y_val),
+						epochs=epochs, callbacks=[cp_callback, es_callback])
+		else:
+			history = self.model.fit(datagen.flow(x_train, y_train, batch_size=batch_size),
+						steps_per_epoch=len(x_train)/batch_size, validation_split=0.2,
+						epochs=epochs, callbacks=[cp_callback, es_callback])
 		
 		# --- 学習結果を評価 ---
 		if ((x_test is not None) and (y_test is not None)):
