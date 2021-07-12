@@ -39,8 +39,8 @@ echo `pwd`
 OUTPUT_DIR="./output"
 DATA_TYPE_LIST=("CIFAR-10")
 MODEL_TYPE_LIST=("SimpleResNet")
-DATA_AUG_LIST=("False")
-OPTIMIZER_LIST=("momentum" "adam" "sgd_lrs")
+DATA_AUG_LIST=("False" "True")
+OPTIMIZER_LIST=("momentum" "adam")
 
 if [ ! -e ${OUTPUT_DIR} ]; then
 	for DATA_TYPE in ${DATA_TYPE_LIST[@]}
@@ -145,17 +145,20 @@ SimpleResNet_CIFAR10_DAFalse_OPTsgdlrs="SimpleResNet_CIFAR-10_DA-False_OPT-sgd_l
 SimpleResNet_MNIST_DATrue_OPTsgdlrs="SimpleResNet_MNIST_DA-True_OPT-sgd_lrs"
 SimpleResNet_MNIST_DAFalse_OPTsgdlrs="SimpleResNet_MNIST_DA-False_OPT-sgd_lrs"
 
+SimpleResNet_CIFAR10_DATrue_OPTmomentum="SimpleResNet_CIFAR-10_DA-True_OPT-momentum"
 SimpleResNet_CIFAR10_DAFalse_OPTmomentum="SimpleResNet_CIFAR-10_DA-False_OPT-momentum"
 
 # --- Compare models(ALL) ---
 metrics_list=\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DAFalse_OPTmomentum}/metrics/metrics.csv,"\
 "${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DAFalse}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DAFalse_OPTsgdlrs}/metrics/metrics.csv"
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DAFalse_OPTmomentum}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DATrue}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DATrue_OPTmomentum}/metrics/metrics.csv"
 metrics_names=\
-"${SimpleResNet_CIFAR10_DAFalse_OPTmomentum},"\
 "${SimpleResNet_CIFAR10_DAFalse},"\
-"${SimpleResNet_CIFAR10_DAFalse_OPTsgdlrs}"
+"${SimpleResNet_CIFAR10_DAFalse_OPTmomentum},"\
+"${SimpleResNet_CIFAR10_DATrue},"\
+"${SimpleResNet_CIFAR10_DATrue_OPTmomentum}"
 output_dir="${OUTPUT_DIR}/metrics_graph"
 
 python3 tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --fig_size ${fig_size} --output_dir ${output_dir}
