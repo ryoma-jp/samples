@@ -37,6 +37,8 @@ def ArgParser():
 	parser.add_argument('--optimizer', dest='optimizer', type=str, default='adam', required=False, \
 			help='Optimizer(adam(default), sgd, adam_lrs, sgd, lrs)\n'
 					'  * lrs: Learning Rate Scheduler')
+	parser.add_argument('--batch_size', dest='batch_size', type=int, default=32, required=False, \
+			help='ミニバッチサイズ')
 	parser.add_argument('--result_dir', dest='result_dir', type=str, default='./result', required=False, \
 			help='学習結果の出力先ディレクトリ')
 
@@ -61,6 +63,7 @@ def main():
 	print('  * args.model_type = {}'.format(args.model_type))
 	print('  * args.data_augmentation = {}'.format(args.data_augmentation))
 	print('  * args.optimizer = {}'.format(args.optimizer))
+	print('  * args.batch_size = {}'.format(args.batch_size))
 	print('  * args.result_dir = {}'.format(args.result_dir))
 	
 	if (args.data_type == "MNIST"):
@@ -120,7 +123,7 @@ def main():
 	if (args.model_type == 'MLP'):
 		trainer = TrainerMLP(dataset.train_images.shape[1:], output_dir=args.result_dir, optimizer=args.optimizer)
 		trainer.fit(x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
-			da_enable=args.data_augmentation)
+			batch_size=args.batch_size, da_enable=args.data_augmentation)
 		trainer.save_model()
 		
 		predictions = trainer.predict(x_test)
@@ -128,7 +131,7 @@ def main():
 	elif (args.model_type == 'SimpleCNN'):
 		trainer = TrainerCNN(dataset.train_images.shape[1:], output_dir=args.result_dir, optimizer=args.optimizer)
 		trainer.fit(x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
-			da_enable=args.data_augmentation)
+			batch_size=args.batch_size, da_enable=args.data_augmentation)
 		trainer.save_model()
 		
 		predictions = trainer.predict(x_test)
@@ -136,7 +139,7 @@ def main():
 	elif (args.model_type == 'SimpleResNet'):
 		trainer = TrainerResNet(dataset.train_images.shape[1:], output_dims, output_dir=args.result_dir, optimizer=args.optimizer)
 		trainer.fit(x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
-			da_enable=args.data_augmentation)
+			batch_size=args.batch_size, da_enable=args.data_augmentation)
 		trainer.save_model()
 		
 		predictions = trainer.predict(x_test)
