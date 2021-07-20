@@ -80,7 +80,7 @@ class Trainer():
 	
 	# --- 学習 ---
 	def fit(self, x_train, y_train, x_val=None, y_val=None, x_test=None, y_test=None,
-			da_enable=False,
+			da_params=None,
 			batch_size=32, epochs=200):
 		# --- 学習 ---
 		os.makedirs(os.path.join(self.output_dir, 'checkpoints'), exist_ok=True)
@@ -90,13 +90,13 @@ class Trainer():
 		#callbacks = [cp_callback, es_callback]
 		callbacks = [cp_callback]
 		
-		if (da_enable):
+		if (da_params is not None):
 			# --- no tuning ---
 			datagen = ImageDataGenerator(
-				rotation_range=10,
-				width_shift_range=0.2,
-				height_shift_range=0.2,
-				horizontal_flip=True)
+				rotation_range=da_params['rotation_range'],
+				width_shift_range=da_params['width_shift_range'],
+				height_shift_range=da_params['height_shift_range'],
+				horizontal_flip=da_params['horizontal_flip'])
 		else:
 			datagen = ImageDataGenerator()
 		datagen.fit(x_train)

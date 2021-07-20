@@ -3,8 +3,10 @@
 #---------------------------------
 # モジュールのインポート
 #---------------------------------
+import io
 import os
 import argparse
+import pandas as pd
 
 from data_loader.data_loader import DataLoaderMNIST
 from data_loader.data_loader import DataLoaderCIFAR10
@@ -32,8 +34,13 @@ def ArgParser():
 			help='データセットディレクトリ')
 	parser.add_argument('--model_type', dest='model_type', type=str, default='ResNet', required=False, \
 			help='モデル種別(MLP, SimpleCNN, SimpleResNet)')
-	parser.add_argument('--data_augmentation', dest='data_augmentation', action='store_true', default=False, required=False, \
-			help='Data Augmentation有無を指定(True: あり，False:(default)：なし)')
+	parser.add_argument('--data_augmentation', dest='data_augmentation', type=str, default=None, required=False, \
+			help='Data Augmentationパラメータをカンマ区切りで指定\n'
+					'  rotation_range,width_shift_range,height_shift_range,horizontal_flip\n'
+					'    rotation_range: 回転範囲をdeg単位で指定\n'
+					'    width_shift_range: 水平方向のシフト範囲を画像横幅に対する割合で指定\n'
+					'    height_shift_range: 垂直方向のシフト範囲を画像縦幅に対する割合で指定\n'
+					'    horizontal_flip: 水平方向の反転有無(True or False)')
 	parser.add_argument('--optimizer', dest='optimizer', type=str, default='adam', required=False, \
 			help='Optimizer(adam(default), sgd, adam_lrs, sgd, lrs)\n'
 					'  * lrs: Learning Rate Scheduler')
@@ -65,6 +72,17 @@ def main():
 	print('  * args.optimizer = {}'.format(args.optimizer))
 	print('  * args.batch_size = {}'.format(args.batch_size))
 	print('  * args.result_dir = {}'.format(args.result_dir))
+	
+	# --- Data Augmentationパラメータを辞書型に変換 ---
+	if (args.data_augmentation is not None):
+		dict_keys = ['rotation_range', 'width_shift_range', 'height_shift_range', 'horizontal_flip']
+		df_da_params = pd.read_csv(io.StringIO(args.data_augmentation), header=None, skipinitialspace=True).values[0]
+		
+		data_augmentation = {}
+		for (key, da_param) in zip(dict_keys, df_da_params):
+			data_augmentation[key] = da_param
+	else:
+		data_augmentaion = None
 	
 	if (args.data_type == "MNIST"):
 		dataset = DataLoaderMNIST(args.dataset_dir, validation_split=0.2)
@@ -123,7 +141,7 @@ def main():
 	if (args.model_type == 'MLP'):
 		trainer = TrainerMLP(dataset.train_images.shape[1:], output_dir=args.result_dir, optimizer=args.optimizer)
 		trainer.fit(x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
-			batch_size=args.batch_size, da_enable=args.data_augmentation)
+			batch_size=args.batch_size, da_params=data_augmentation)
 		trainer.save_model()
 		
 		predictions = trainer.predict(x_test)
@@ -131,7 +149,7 @@ def main():
 	elif (args.model_type == 'SimpleCNN'):
 		trainer = TrainerCNN(dataset.train_images.shape[1:], output_dir=args.result_dir, optimizer=args.optimizer)
 		trainer.fit(x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
-			batch_size=args.batch_size, da_enable=args.data_augmentation)
+			batch_size=args.batch_size, da_params=data_augmentation)
 		trainer.save_model()
 		
 		predictions = trainer.predict(x_test)
@@ -139,7 +157,7 @@ def main():
 	elif (args.model_type == 'SimpleResNet'):
 		trainer = TrainerResNet(dataset.train_images.shape[1:], output_dims, output_dir=args.result_dir, optimizer=args.optimizer)
 		trainer.fit(x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
-			batch_size=args.batch_size, da_enable=args.data_augmentation)
+			batch_size=args.batch_size, da_params=data_augmentation)
 		trainer.save_model()
 		
 		predictions = trainer.predict(x_test)
