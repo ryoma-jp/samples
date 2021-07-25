@@ -45,11 +45,11 @@ DATA_AUG_NAME_LIST=("DA3")
 	# DA1: 5,0.2,0.2,True
 	# DA2: 3,0.2,0.2,True
 	# DA3: 3,0.1,0.1,True
-OPTIMIZER_LIST=("momentum")
-BATCH_SIZE_LIST=("32")
+OPTIMIZER_LIST=("momentum" "adam")
+BATCH_SIZE_LIST=("32" "64" "128")
 INITIALIZER_LIST=("he_normal")
 DATA_NORM_LIST=("z-score")
-DROPOUT_RATE_LIST=("0.0" "0.25" "0.5")
+DROPOUT_RATE_LIST=("0.25")
 
 if [ ! -e ${OUTPUT_DIR} ]; then
 	for DATA_TYPE in ${DATA_TYPE_LIST[@]}
@@ -122,13 +122,19 @@ source ./model.list
 
 # --- Compare models(ALL) ---
 metrics_list=\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTmomentum_he_normal_DNzscore}/metrics/metrics.csv,"\
 "${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTmomentum_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTmomentum_he_normal_DNzscore_DROPOUT050}/metrics/metrics.csv"
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTmomentum_batch64_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTmomentum_batch128_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTadam_batch32_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTadam_batch64_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTadam_batch128_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv"
 metrics_names=\
-"${SimpleResNet_CIFAR10_DA3_OPTmomentum_he_normal_DNzscore},"\
 "${SimpleResNet_CIFAR10_DA3_OPTmomentum_he_normal_DNzscore_DROPOUT025},"\
-"${SimpleResNet_CIFAR10_DA3_OPTmomentum_he_normal_DNzscore_DROPOUT050}"
+"${SimpleResNet_CIFAR10_DA3_OPTmomentum_batch64_he_normal_DNzscore_DROPOUT025},"\
+"${SimpleResNet_CIFAR10_DA3_OPTmomentum_batch128_he_normal_DNzscore_DROPOUT025},"\
+"${SimpleResNet_CIFAR10_DA3_OPTadam_batch32_he_normal_DNzscore_DROPOUT025},"\
+"${SimpleResNet_CIFAR10_DA3_OPTadam_batch64_he_normal_DNzscore_DROPOUT025},"\
+"${SimpleResNet_CIFAR10_DA3_OPTadam_batch128_he_normal_DNzscore_DROPOUT025}"
 output_dir="${OUTPUT_DIR}/metrics_graph"
 
 python3 tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --fig_size ${fig_size} --output_dir ${output_dir}
