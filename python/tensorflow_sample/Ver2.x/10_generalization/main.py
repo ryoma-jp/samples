@@ -91,7 +91,7 @@ def main():
 	
 	# --- Data Augmentationパラメータを辞書型に変換 ---
 	if (args.data_augmentation is not None):
-		dict_keys = ['rotation_range', 'width_shift_range', 'height_shift_range', 'horizontal_flip']
+		dict_keys = ['rotation_range', 'width_shift_range', 'height_shift_range', 'zoom_range', 'channel_shift_range', 'horizontal_flip']
 		df_da_params = pd.read_csv(io.StringIO(args.data_augmentation), header=None, skipinitialspace=True).values[0]
 		
 		data_augmentation = {}

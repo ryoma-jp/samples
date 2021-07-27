@@ -96,6 +96,8 @@ class Trainer():
 				rotation_range=da_params['rotation_range'],
 				width_shift_range=da_params['width_shift_range'],
 				height_shift_range=da_params['height_shift_range'],
+				zoom_range=da_params['zoom_range'],
+				channel_shift_range=da_params['channel_shift_range'],
 				horizontal_flip=da_params['horizontal_flip'])
 		else:
 			datagen = ImageDataGenerator()

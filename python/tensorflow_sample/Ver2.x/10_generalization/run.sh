@@ -39,14 +39,19 @@ echo `pwd`
 OUTPUT_DIR="./output"
 DATA_TYPE_LIST=("CIFAR-10")
 MODEL_TYPE_LIST=("SimpleResNet")
-DATA_AUG_LIST=("3,0.1,0.1,True")
-DATA_AUG_NAME_LIST=("DA3")
-	# DA0: 10,0.2,0.2,True
-	# DA1: 5,0.2,0.2,True
-	# DA2: 3,0.2,0.2,True
-	# DA3: 3,0.1,0.1,True
-OPTIMIZER_LIST=("momentum" "adam")
-BATCH_SIZE_LIST=("32" "64" "128")
+DATA_AUG_LIST=("3,0.1,0.1,0.0,0.0,True" "3,0.1,0.1,0.1,0.1,True" "5,0.2,0.2,0.2,0.2,True" "5,0.2,0.2,0.2,0.0,True" "5,0.2,0.2,0.0,0.2,True")
+DATA_AUG_NAME_LIST=("DA3" "DA4" "DA5" "DA6" "DA7")
+	# DAn: rotation_range,width_shift_range,height_shift_range,zoom_range,channel_shift_range,horizontal_flip
+	# DA0: 10,0.2,0.2,0.0,0.0,True
+	# DA1: 5,0.2,0.2,0.0,0.0,True
+	# DA2: 3,0.2,0.2,0.0,0.0,True
+	# DA3: 3,0.1,0.1,0.0,0.0,True
+	# DA4: 3,0.1,0.1,0.1,0.1,True
+	# DA5: 5,0.2,0.2,0.2,0.2,True
+	# DA6: 5,0.2,0.2,0.2,0.0,True
+	# DA7: 5,0.2,0.2,0.0,0.2,True
+OPTIMIZER_LIST=("momentum")
+BATCH_SIZE_LIST=("32")
 INITIALIZER_LIST=("he_normal")
 DATA_NORM_LIST=("z-score")
 DROPOUT_RATE_LIST=("0.25")
@@ -123,18 +128,16 @@ source ./model.list
 # --- Compare models(ALL) ---
 metrics_list=\
 "${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTmomentum_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTmomentum_batch64_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTmomentum_batch128_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTadam_batch32_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTadam_batch64_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTadam_batch128_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv"
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA4_OPTmomentum_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTmomentum_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA6_OPTmomentum_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA7_OPTmomentum_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv"
 metrics_names=\
 "${SimpleResNet_CIFAR10_DA3_OPTmomentum_he_normal_DNzscore_DROPOUT025},"\
-"${SimpleResNet_CIFAR10_DA3_OPTmomentum_batch64_he_normal_DNzscore_DROPOUT025},"\
-"${SimpleResNet_CIFAR10_DA3_OPTmomentum_batch128_he_normal_DNzscore_DROPOUT025},"\
-"${SimpleResNet_CIFAR10_DA3_OPTadam_batch32_he_normal_DNzscore_DROPOUT025},"\
-"${SimpleResNet_CIFAR10_DA3_OPTadam_batch64_he_normal_DNzscore_DROPOUT025},"\
-"${SimpleResNet_CIFAR10_DA3_OPTadam_batch128_he_normal_DNzscore_DROPOUT025}"
+"${SimpleResNet_CIFAR10_DA4_OPTmomentum_he_normal_DNzscore_DROPOUT025},"\
+"${SimpleResNet_CIFAR10_DA5_OPTmomentum_he_normal_DNzscore_DROPOUT025},"\
+"${SimpleResNet_CIFAR10_DA6_OPTmomentum_he_normal_DNzscore_DROPOUT025},"\
+"${SimpleResNet_CIFAR10_DA7_OPTmomentum_he_normal_DNzscore_DROPOUT025}"
 output_dir="${OUTPUT_DIR}/metrics_graph"
 
 python3 tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --fig_size ${fig_size} --output_dir ${output_dir}
