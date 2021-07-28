@@ -59,6 +59,8 @@ def ArgParser():
 					'  z-score: 標準化(平均と標準偏差を用いて算出)\n')
 	parser.add_argument('--dropout_rate', dest='dropout_rate', type=float, default=0.0, required=False, \
 			help='Dropoutで欠落させるデータの割合')
+	parser.add_argument('--loss_func', dest='loss_func', type=str, default='sparse_categorical_crossentropy', required=False, \
+			help='コスト関数(tf.keras.lossesのメンバを指定)')
 	parser.add_argument('--result_dir', dest='result_dir', type=str, default='./result', required=False, \
 			help='学習結果の出力先ディレクトリ')
 
@@ -87,6 +89,7 @@ def main():
 	print('  * args.initializer = {}'.format(args.initializer))
 	print('  * args.data_norm = {}'.format(args.data_norm))
 	print('  * args.dropout_rate = {}'.format(args.dropout_rate))
+	print('  * args.loss_func = {}'.format(args.loss_func))
 	print('  * args.result_dir = {}'.format(args.result_dir))
 	
 	# --- Data Augmentationパラメータを辞書型に変換 ---
@@ -100,10 +103,14 @@ def main():
 	else:
 		data_augmentaion = None
 	
+	if (args.loss_func == "sparse_categorical_crossentropy"):
+		one_hot = False
+	else:
+		one_hot = True
 	if (args.data_type == "MNIST"):
-		dataset = DataLoaderMNIST(args.dataset_dir, validation_split=0.2)
+		dataset = DataLoaderMNIST(args.dataset_dir, validation_split=0.2, one_hot=one_hot)
 	elif (args.data_type == "CIFAR-10"):
-		dataset = DataLoaderCIFAR10(args.dataset_dir, validation_split=0.2)
+		dataset = DataLoaderCIFAR10(args.dataset_dir, validation_split=0.2, one_hot=one_hot)
 	else:
 		print('[ERROR] Unknown data_type: {}'.format(args.data_type))
 		quit()
@@ -141,7 +148,7 @@ def main():
 		print('\nPredictions(shape): {}'.format(predictions.shape))
 	elif (args.model_type == 'SimpleResNet'):
 		trainer = TrainerResNet(dataset.train_images.shape[1:], output_dims, output_dir=args.result_dir,
-			optimizer=args.optimizer, initializer=args.initializer, dropout_rate=args.dropout_rate)
+			optimizer=args.optimizer, loss=args.loss_func, initializer=args.initializer, dropout_rate=args.dropout_rate)
 		trainer.fit(x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
 			batch_size=args.batch_size, da_params=data_augmentation)
 		trainer.save_model()

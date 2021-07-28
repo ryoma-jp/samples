@@ -17,7 +17,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 #---------------------------------
 class Trainer():
 	# --- コンストラクタ ---
-	def __init__(self, output_dir=None, model_file=None, optimizer='adam'):
+	def __init__(self, output_dir=None, model_file=None, optimizer='adam', loss='sparse_categorical_crossentropy'):
 		# --- 出力ディレクトリ作成 ---
 		self.output_dir = output_dir
 		if (output_dir is not None):
@@ -32,12 +32,12 @@ class Trainer():
 		
 		self.model = _load_model(model_file)
 		if (self.model is not None):
-			self._compile_model(optimizer)
+			self._compile_model(optimizer=optimizer, loss=loss)
 		return
 	
 	# --- モデルの構成 ---
 	#   * lr_decay: 学習率減衰する(=True)，しない(=False; default)を指定
-	def _compile_model(self, optimizer='adam'):
+	def _compile_model(self, optimizer='adam', loss='sparse_categorical_crossentropy'):
 		
 		if (optimizer == 'adam'):
 			opt = tf.keras.optimizers.Adam()
@@ -73,7 +73,7 @@ class Trainer():
 		
 		self.model.compile(
 			optimizer=opt,
-			loss = 'sparse_categorical_crossentropy',
+			loss=loss,
 			metrics=['accuracy'])
 		
 		return
@@ -177,7 +177,7 @@ class Trainer():
 #---------------------------------
 class TrainerResNet(Trainer):
 	# --- コンストラクタ ---
-	def __init__(self, input_shape, classes, output_dir=None, model_type='custom', optimizer='adam', initializer='glorot_uniform', dropout_rate=0.0):
+	def __init__(self, input_shape, classes, output_dir=None, model_type='custom', optimizer='adam', loss='sparse_categorical_crossentropy', initializer='glorot_uniform', dropout_rate=0.0):
 		# --- Residual Block ---
 		#  * アプリケーションからkeras.applications.resnet.ResNetにアクセスできない為，
 		#    必要なモジュールをTensorFlow公式からコピー
@@ -274,10 +274,10 @@ class TrainerResNet(Trainer):
 				return stack1(x, 64, 4, name='conv3')
 			
 			self.model = _load_model(input_shape, classes, stack_fn, initializer=initializer, dropout_rate=dropout_rate)
-			self._compile_model(optimizer=optimizer)
+			self._compile_model(optimizer=optimizer, loss=loss)
 		elif (model_type == 'resnet50'):
 			self.model = _load_model_resnet50(input_shape, classes, initializer=initializer, dbg_mode=1)
-			self._compile_model(optimizer=optimizer)
+			self._compile_model(optimizer=optimizer, loss=loss)
 		else:
 			print('[ERROR] Unknown model_type: {}'.format(model_type))
 			return
