@@ -39,9 +39,10 @@ echo `pwd`
 OUTPUT_DIR="./output"
 DATA_TYPE_LIST=("CIFAR-10")
 MODEL_TYPE_LIST=("SimpleResNet")
-DATA_AUG_LIST=("5,0.2,0.2,0.2,0.2,True")
-DATA_AUG_NAME_LIST=("DA5")
+DATA_AUG_LIST=("0,0,0,0.0,0.0,False" "3,0.1,0.1,0.1,0.1,True" "5,0.2,0.2,0.2,0.2,True")
+DATA_AUG_NAME_LIST=("DA-OFF" "DA3" "DA5")
 	# DAn: rotation_range,width_shift_range,height_shift_range,zoom_range,channel_shift_range,horizontal_flip
+	# DA-OFF: 0,0,0,0.0,0.0,False
 	# DA0: 10,0.2,0.2,0.0,0.0,True
 	# DA1: 5,0.2,0.2,0.0,0.0,True
 	# DA2: 3,0.2,0.2,0.0,0.0,True
@@ -55,7 +56,7 @@ BATCH_SIZE_LIST=("32")
 INITIALIZER_LIST=("he_normal")
 DATA_NORM_LIST=("z-score")
 DROPOUT_RATE_LIST=("0.25")
-LOSS_FUNC_LIST=("sparse_categorical_crossentropy" "categorical_crossentropy" "binary_crossentropy")
+LOSS_FUNC_LIST=("binary_crossentropy")
 
 if [ ! -e ${OUTPUT_DIR} ]; then
 	for DATA_TYPE in ${DATA_TYPE_LIST[@]}
@@ -133,12 +134,12 @@ source ./model.list
 
 # --- Compare models(ALL) ---
 metrics_list=\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTmomentum_he_normal_DNzscore_DROPOUT025}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTmomentum_he_normal_DNzscore_DROPOUT025_categorical_crossentropy}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DAOFF_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy}/metrics/metrics.csv,"\
 "${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy}/metrics/metrics.csv"
 metrics_names=\
-"${SimpleResNet_CIFAR10_DA5_OPTmomentum_he_normal_DNzscore_DROPOUT025},"\
-"${SimpleResNet_CIFAR10_DA5_OPTmomentum_he_normal_DNzscore_DROPOUT025_categorical_crossentropy},"\
+"${SimpleResNet_CIFAR10_DAOFF_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy},"\
+"${SimpleResNet_CIFAR10_DA3_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy},"\
 "${SimpleResNet_CIFAR10_DA5_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy}"
 output_dir="${OUTPUT_DIR}/metrics_graph"
 
