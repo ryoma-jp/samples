@@ -39,8 +39,8 @@ echo `pwd`
 OUTPUT_DIR="./output"
 DATA_TYPE_LIST=("CIFAR-10")
 MODEL_TYPE_LIST=("SimpleResNet")
-DATA_AUG_LIST=("0,0,0,0.0,0.0,False" "3,0.1,0.1,0.1,0.1,True" "5,0.2,0.2,0.2,0.2,True")
-DATA_AUG_NAME_LIST=("DA-OFF" "DA3" "DA5")
+DATA_AUG_LIST=("5,0.2,0.2,0.2,0.2,True")
+DATA_AUG_NAME_LIST=("DA5")
 	# DAn: rotation_range,width_shift_range,height_shift_range,zoom_range,channel_shift_range,horizontal_flip
 	# DA-OFF: 0,0,0,0.0,0.0,False
 	# DA0: 10,0.2,0.2,0.0,0.0,True
@@ -51,12 +51,13 @@ DATA_AUG_NAME_LIST=("DA-OFF" "DA3" "DA5")
 	# DA5: 5,0.2,0.2,0.2,0.2,True
 	# DA6: 5,0.2,0.2,0.2,0.0,True
 	# DA7: 5,0.2,0.2,0.0,0.2,True
-OPTIMIZER_LIST=("momentum")
-BATCH_SIZE_LIST=("32")
+OPTIMIZER_LIST=("adam" "momentum")
+BATCH_SIZE_LIST=("32" "50" "100" "200")
 INITIALIZER_LIST=("he_normal")
 DATA_NORM_LIST=("z-score")
 DROPOUT_RATE_LIST=("0.25")
 LOSS_FUNC_LIST=("binary_crossentropy")
+EPOCHS_LIST=("400")
 
 if [ ! -e ${OUTPUT_DIR} ]; then
 	for DATA_TYPE in ${DATA_TYPE_LIST[@]}
@@ -90,31 +91,36 @@ if [ ! -e ${OUTPUT_DIR} ]; then
 								do
 									for LOSS_FUNC in ${LOSS_FUNC_LIST[@]}
 									do
-										echo "[Training Conditions]"
-										echo "  * MODEL_TYPE=${MODEL_TYPE}"
-										echo "  * DATA_TYPE=${DATA_TYPE}"
-										echo "  * DATA_AUG=${DATA_AUG}"
-										echo "  * DATA_AUG_NAME=${DATA_AUG_NAME}"
-										echo "  * OPTIMIZER=${OPTIMIZER}"
-										echo "  * BATCH_SIZE=${BATCH_SIZE}"
-										echo "  * INITIALIZER=${INITIALIZER}"
-										echo "  * DATA_NORM=${DATA_NORM}"
-										echo "  * DROPOUT_RATE=${DROPOUT_RATE}"
-										echo "  * LOSS_FUNC=${LOSS_FUNC}"
-										
-										model_dir="${OUTPUT_DIR}/model/${MODEL_TYPE}_${DATA_TYPE}_${DATA_AUG_NAME}_OPT-${OPTIMIZER}_batch${BATCH_SIZE}_${INITIALIZER}_datanorm-${DATA_NORM}_dropout-${DROPOUT_RATE}_${LOSS_FUNC}"
-										mkdir -p ${model_dir}
-										
-										python3 main.py --data_type ${DATA_TYPE} \
-											--dataset_dir ${dataset_dir} \
-											--model_type ${MODEL_TYPE} \
-											--data_augmentation ${DATA_AUG} \
-											--optimizer ${OPTIMIZER} \
-											--batch_size ${BATCH_SIZE} \
-											--initializer ${INITIALIZER} \
-											--dropout_rate ${DROPOUT_RATE} \
-											--loss_func ${LOSS_FUNC} \
-											--result_dir ${model_dir}
+										for EPOCHS in ${EPOCHS_LIST[@]}
+										do
+											echo "[Training Conditions]"
+											echo "  * MODEL_TYPE=${MODEL_TYPE}"
+											echo "  * DATA_TYPE=${DATA_TYPE}"
+											echo "  * DATA_AUG=${DATA_AUG}"
+											echo "  * DATA_AUG_NAME=${DATA_AUG_NAME}"
+											echo "  * OPTIMIZER=${OPTIMIZER}"
+											echo "  * BATCH_SIZE=${BATCH_SIZE}"
+											echo "  * INITIALIZER=${INITIALIZER}"
+											echo "  * DATA_NORM=${DATA_NORM}"
+											echo "  * DROPOUT_RATE=${DROPOUT_RATE}"
+											echo "  * LOSS_FUNC=${LOSS_FUNC}"
+											echo "  * EPOCHS=${EPOCHS}"
+											
+											model_dir="${OUTPUT_DIR}/model/${MODEL_TYPE}_${DATA_TYPE}_${DATA_AUG_NAME}_OPT-${OPTIMIZER}_batch${BATCH_SIZE}_${INITIALIZER}_datanorm-${DATA_NORM}_dropout-${DROPOUT_RATE}_${LOSS_FUNC}_epochs${EPOCHS}"
+											mkdir -p ${model_dir}
+											
+											python3 main.py --data_type ${DATA_TYPE} \
+												--dataset_dir ${dataset_dir} \
+												--model_type ${MODEL_TYPE} \
+												--data_augmentation ${DATA_AUG} \
+												--optimizer ${OPTIMIZER} \
+												--batch_size ${BATCH_SIZE} \
+												--initializer ${INITIALIZER} \
+												--dropout_rate ${DROPOUT_RATE} \
+												--loss_func ${LOSS_FUNC} \
+												--epochs ${EPOCHS} \
+												--result_dir ${model_dir}
+										done
 									done
 								done
 							done
@@ -134,13 +140,23 @@ source ./model.list
 
 # --- Compare models(ALL) ---
 metrics_list=\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DAOFF_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA3_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy}/metrics/metrics.csv"
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTmomentum_batch100_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTadam_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTadam_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTadam_batch100_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTadam_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv"
 metrics_names=\
-"${SimpleResNet_CIFAR10_DAOFF_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy},"\
-"${SimpleResNet_CIFAR10_DA3_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy},"\
-"${SimpleResNet_CIFAR10_DA5_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy}"
+"${SimpleResNet_CIFAR10_DA5_OPTmomentum_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${SimpleResNet_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${SimpleResNet_CIFAR10_DA5_OPTmomentum_batch100_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${SimpleResNet_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${SimpleResNet_CIFAR10_DA5_OPTadam_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${SimpleResNet_CIFAR10_DA5_OPTadam_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${SimpleResNet_CIFAR10_DA5_OPTadam_batch100_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${SimpleResNet_CIFAR10_DA5_OPTadam_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}"
 output_dir="${OUTPUT_DIR}/metrics_graph"
 
 python3 tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --fig_size ${fig_size} --output_dir ${output_dir}

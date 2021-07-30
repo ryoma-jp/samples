@@ -61,6 +61,8 @@ def ArgParser():
 			help='Dropoutで欠落させるデータの割合')
 	parser.add_argument('--loss_func', dest='loss_func', type=str, default='sparse_categorical_crossentropy', required=False, \
 			help='コスト関数(tf.keras.lossesのメンバを指定)')
+	parser.add_argument('--epochs', dest='epochs', type=int, default=200, required=False, \
+			help='学習EPOCH数')
 	parser.add_argument('--result_dir', dest='result_dir', type=str, default='./result', required=False, \
 			help='学習結果の出力先ディレクトリ')
 
@@ -90,6 +92,7 @@ def main():
 	print('  * args.data_norm = {}'.format(args.data_norm))
 	print('  * args.dropout_rate = {}'.format(args.dropout_rate))
 	print('  * args.loss_func = {}'.format(args.loss_func))
+	print('  * args.epochs = {}'.format(args.epochs))
 	print('  * args.result_dir = {}'.format(args.result_dir))
 	
 	# --- Data Augmentationパラメータを辞書型に変換 ---
@@ -150,7 +153,7 @@ def main():
 		trainer = TrainerResNet(dataset.train_images.shape[1:], output_dims, output_dir=args.result_dir,
 			optimizer=args.optimizer, loss=args.loss_func, initializer=args.initializer, dropout_rate=args.dropout_rate)
 		trainer.fit(x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
-			batch_size=args.batch_size, da_params=data_augmentation)
+			batch_size=args.batch_size, da_params=data_augmentation, epochs=args.epochs)
 		trainer.save_model()
 		
 		predictions = trainer.predict(x_test)
