@@ -292,8 +292,8 @@ class TrainerResNet(Trainer):
 #---------------------------------
 class TrainerCNN(Trainer):
 	# --- コンストラクタ ---
-	def __init__(self, input_shape, output_dir=None, optimizer='adam', initializer='glorot_uniform'):
-		# --- モデル構築 ---
+	def __init__(self, input_shape, output_dir=None, optimizer='adam', loss='sparse_categorical_crossentropy', initializer='glorot_uniform', model_type='baseline'):
+		# --- モデル構築(baseline) ---
 		def _load_model(input_shape, initializer='glorot_uniform'):
 			model = keras.models.Sequential()
 			model.add(keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape, kernel_initializer=initializer))
@@ -310,12 +310,59 @@ class TrainerCNN(Trainer):
 			
 			return model
 		
+		# --- モデル構築(deep_model) ---
+		def _load_model_deep(input_shape, initializer='glorot_uniform'):
+			input = keras.layers.Input(shape=input_shape)
+
+			x = keras.layers.Conv2D(64, (3,3), padding="SAME", activation="relu")(input)
+			x = keras.layers.Conv2D(64, (3,3), padding="SAME", activation="relu")(x)
+			x = keras.layers.BatchNormalization()(x)
+			x = keras.layers.Conv2D(64, (3,3), padding="SAME", activation= "relu")(x)
+			x = keras.layers.MaxPooling2D()(x)
+			x = keras.layers.Dropout(0.25)(x)
+
+			x = keras.layers.Conv2D(128, (3,3), padding="SAME", activation="relu")(x)
+			x = keras.layers.Conv2D(128, (3,3), padding="SAME", activation="relu")(x)
+			x = keras.layers.BatchNormalization()(x)
+			x = keras.layers.Conv2D(128, (3,3), padding="SAME", activation="relu")(x)
+			x = keras.layers.MaxPooling2D()(x)
+			x = keras.layers.Dropout(0.25)(x)
+
+			x = keras.layers.Conv2D(256, (3,3), padding="SAME", activation="relu")(x)
+			x = keras.layers.Conv2D(256, (3,3), padding="SAME", activation="relu")(x)
+			x = keras.layers.BatchNormalization()(x)
+			x = keras.layers.Conv2D(256, (3,3), padding="SAME", activation="relu")(x)
+			x = keras.layers.Conv2D(256, (3,3), padding="SAME", activation="relu")(x)
+			x = keras.layers.Conv2D(256, (3,3), padding="SAME", activation="relu")(x)
+			x = keras.layers.BatchNormalization()(x)
+			x = keras.layers.Conv2D(512, (3,3), padding="SAME", activation="relu")(x)
+			x = keras.layers.Conv2D(512, (3,3), padding="SAME", activation="relu")(x)
+			x = keras.layers.GlobalAveragePooling2D()(x)
+
+			x = keras.layers.Dense(1024, activation="relu")(x)
+			x = keras.layers.Dropout(0.5)(x)
+			x = keras.layers.Dense(1024, activation="relu")(x)
+			x = keras.layers.Dropout(0.5)(x)
+			x = keras.layers.Dense(10, activation="softmax")(x)
+			
+			model = keras.models.Model(input, x)
+			model.summary()
+			
+			return model
+		
 		# --- 基底クラスの初期化 ---
 		super().__init__(output_dir)
 		
 		# --- モデル構築 ---
-		self.model = _load_model(input_shape, initializer=initializer)
-		self._compile_model(optimizer=optimizer)
+		if (model_type == 'baseline'):
+			self.model = _load_model(input_shape, initializer=initializer)
+		elif (model_type == 'deep_model'):
+			self.model = _load_model_deep(input_shape, initializer=initializer)
+		else:
+			print('[ERROR] Unknown model_type: {}'.format(model_type))
+			quit()
+		
+		self._compile_model(optimizer=optimizer, loss=loss)
 		if (self.output_dir is not None):
 			keras.utils.plot_model(self.model, os.path.join(self.output_dir, 'plot_model.png'), show_shapes=True)
 		

@@ -33,7 +33,7 @@ def ArgParser():
 	parser.add_argument('--dataset_dir', dest='dataset_dir', type=str, default=None, required=True, \
 			help='データセットディレクトリ')
 	parser.add_argument('--model_type', dest='model_type', type=str, default='ResNet', required=False, \
-			help='モデル種別(MLP, SimpleCNN, SimpleResNet)')
+			help='モデル種別(MLP, SimpleCNN, DeepCNN, SimpleResNet)')
 	parser.add_argument('--data_augmentation', dest='data_augmentation', type=str, default=None, required=False, \
 			help='Data Augmentationパラメータをカンマ区切りで指定\n'
 					'  rotation_range,width_shift_range,height_shift_range,horizontal_flip\n'
@@ -134,33 +134,24 @@ def main():
 	if (args.model_type == 'MLP'):
 		trainer = TrainerMLP(dataset.train_images.shape[1:], output_dir=args.result_dir,
 			optimizer=args.optimizer, initializer=args.initializer)
-		trainer.fit(x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
-			batch_size=args.batch_size, da_params=data_augmentation)
-		trainer.save_model()
-		
-		predictions = trainer.predict(x_test)
-		print('\nPredictions(shape): {}'.format(predictions.shape))
 	elif (args.model_type == 'SimpleCNN'):
 		trainer = TrainerCNN(dataset.train_images.shape[1:], output_dir=args.result_dir,
-			optimizer=args.optimizer, initializer=args.initializer)
-		trainer.fit(x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
-			batch_size=args.batch_size, da_params=data_augmentation)
-		trainer.save_model()
-		
-		predictions = trainer.predict(x_test)
-		print('\nPredictions(shape): {}'.format(predictions.shape))
+			optimizer=args.optimizer, loss=args.loss_func, initializer=args.initializer)
+	elif (args.model_type == 'DeepCNN'):
+		trainer = TrainerCNN(dataset.train_images.shape[1:], output_dir=args.result_dir,
+			optimizer=args.optimizer, loss=args.loss_func, initializer=args.initializer, model_type='deep_model')
 	elif (args.model_type == 'SimpleResNet'):
 		trainer = TrainerResNet(dataset.train_images.shape[1:], output_dims, output_dir=args.result_dir,
 			optimizer=args.optimizer, loss=args.loss_func, initializer=args.initializer, dropout_rate=args.dropout_rate)
-		trainer.fit(x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
-			batch_size=args.batch_size, da_params=data_augmentation, epochs=args.epochs)
-		trainer.save_model()
-		
-		predictions = trainer.predict(x_test)
-		print('\nPredictions(shape): {}'.format(predictions.shape))
 	else:
 		print('[ERROR] Unknown model_type: {}'.format(args.model_type))
 		quit()
+	trainer.fit(x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
+		batch_size=args.batch_size, da_params=data_augmentation, epochs=args.epochs)
+	trainer.save_model()
+	
+	predictions = trainer.predict(x_test)
+	print('\nPredictions(shape): {}'.format(predictions.shape))
 
 	return
 
