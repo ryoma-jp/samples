@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
 	printf("[DEBUG] width=%d\n", image_data.width);
 	printf("[DEBUG] channel=%d\n", image_data.channel);
 
-	free(image_data.data)
+	free(image_data.data);
 	return 0;
 }
 
