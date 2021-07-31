@@ -1,6 +1,6 @@
 #! /bin/bash
 
-export DATA_TYPE="MNIST"		# "CIFAR-10", "Titanic", "SARCOS", "COCO2014", "MoviePoster", "MNIST" or ...(T.B.D)
+export DATA_TYPE="CIFAR-10"		# "CIFAR-10", "Titanic", "SARCOS", "COCO2014", "MoviePoster", "MNIST" or ...(T.B.D)
 DATASET_DIR="./dataset"
 LIB_DIR="/work/lib"
 

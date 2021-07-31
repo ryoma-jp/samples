@@ -52,7 +52,7 @@ def main():
 	print(args.dataset_dir)
 	
 	if (args.data_type == "CIFAR-10"):
-		train_images, train_labels, test_images, test_labels = cifar10.load_cifar10(args.dataset_dir)
+		train_images, train_labels, test_images, test_labels = cifar10.load_cifar10(args.dataset_dir, img_dir='./cifar10_images')
 		print(train_images.shape)
 		print(train_labels.shape)
 		print(test_images.shape)
