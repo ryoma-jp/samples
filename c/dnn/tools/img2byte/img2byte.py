@@ -50,7 +50,7 @@ def img2byte(input_img, output_file, output_fmt='BGR'):
         exit(-1)
 
     # --- ヘッダパラメータ: ../../data_loader.c ---
-    n_data = len(img) + 16      # データサイズにヘッダ(4パラメータ，16byte分を加算)
+    n_data = len(img) + 16      # データサイズにヘッダ(4パラメータ，16byte分)を加算
     pack_data = struct.pack('<i', n_data)
     bytefile.write(pack_data)
 
