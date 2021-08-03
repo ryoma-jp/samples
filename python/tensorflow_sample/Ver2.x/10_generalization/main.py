@@ -33,7 +33,7 @@ def ArgParser():
 	parser.add_argument('--dataset_dir', dest='dataset_dir', type=str, default=None, required=True, \
 			help='データセットディレクトリ')
 	parser.add_argument('--model_type', dest='model_type', type=str, default='ResNet', required=False, \
-			help='モデル種別(MLP, SimpleCNN, DeepCNN, SimpleResNet)')
+			help='モデル種別(MLP, SimpleCNN, DeepCNN, SimpleResNet, DeepResNet)')
 	parser.add_argument('--data_augmentation', dest='data_augmentation', type=str, default=None, required=False, \
 			help='Data Augmentationパラメータをカンマ区切りで指定\n'
 					'  rotation_range,width_shift_range,height_shift_range,horizontal_flip\n'
@@ -142,6 +142,11 @@ def main():
 			optimizer=args.optimizer, loss=args.loss_func, initializer=args.initializer, model_type='deep_model')
 	elif (args.model_type == 'SimpleResNet'):
 		trainer = TrainerResNet(dataset.train_images.shape[1:], output_dims, output_dir=args.result_dir,
+			model_type='custom', 
+			optimizer=args.optimizer, loss=args.loss_func, initializer=args.initializer, dropout_rate=args.dropout_rate)
+	elif (args.model_type == 'DeepResNet'):
+		trainer = TrainerResNet(dataset.train_images.shape[1:], output_dims, output_dir=args.result_dir,
+			model_type='custom_deep', 
 			optimizer=args.optimizer, loss=args.loss_func, initializer=args.initializer, dropout_rate=args.dropout_rate)
 	else:
 		print('[ERROR] Unknown model_type: {}'.format(args.model_type))

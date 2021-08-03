@@ -234,7 +234,7 @@ class TrainerResNet(Trainer):
 			x = keras.layers.MaxPooling2D(3, strides=2, name='pool1_pool')(x)
 			x = keras.layers.Dropout(dropout_rate)(x)
 
-			x = stack_fn(x)
+			x = stack_fn(x, dropout_rate=dropout_rate)
 
 			x = keras.layers.GlobalAveragePooling2D(name='avg_pool')(x)
 			x = keras.layers.Dropout(dropout_rate)(x)
@@ -245,19 +245,19 @@ class TrainerResNet(Trainer):
 			
 			return model
 			
-		def _load_model_resnet50(input_shape, classes, initializer='glorot_uniform', dbg_mode=1):
+		def _load_model_resnet50(input_shape, classes, initializer='glorot_uniform', dropout_rate=0.0, pretrained=True):
 			# --- TensorFlowのResNet50のモデル ---
 			#  https://www.tensorflow.org/api_docs/python/tf/keras/applications/resnet50/ResNet50
 			#    dbg_mode=0: original ResNet50, dbg_mode=11: custom ResNet50
-			if (dbg_mode == 0):
+			if (pretrained):
 				print('[INFO] Load ResNet50 model from keras.applications')
 				model = keras.applications.resnet50.ResNet50()
-			elif (dbg_mode == 1):
-				def stack_fn(x):
-					x = stack1(x, 64, 3, stride1=1, name='conv2')
-					x = stack1(x, 128, 4, name='conv3')
-					x = stack1(x, 256, 6, name='conv4')
-					return stack1(x, 512, 3, name='conv5')
+			else:
+				def stack_fn(x, dropout_rate=0.0):
+					x = stack1(x, 64, 3, stride1=1, dropout_rate=dropout_rate, name='conv2')
+					x = stack1(x, 128, 4, dropout_rate=dropout_rate, name='conv3')
+					x = stack1(x, 256, 6, dropout_rate=dropout_rate, name='conv4')
+					return stack1(x, 512, 3, dropout_rate=dropout_rate, name='conv5')
 				
 				print('[INFO] Load ResNet50 model (custom implementation)')
 				model = _load_model(input_shape, classes, stack_fn, initializer=initializer, dropout_rate=dropout_rate)
@@ -269,14 +269,22 @@ class TrainerResNet(Trainer):
 		
 		# --- モデル構築 ---
 		if (model_type == 'custom'):
-			def stack_fn(x):
-				x = stack1(x, 32, 3, stride1=1, name='conv2')
-				return stack1(x, 64, 4, name='conv3')
+			def stack_fn(x, dropout_rate=0.0):
+				x = stack1(x, 32, 3, stride1=1, dropout_rate=dropout_rate, name='conv2')
+				return stack1(x, 64, 4, dropout_rate=dropout_rate, name='conv3')
+			
+			self.model = _load_model(input_shape, classes, stack_fn, initializer=initializer, dropout_rate=dropout_rate)
+			self._compile_model(optimizer=optimizer, loss=loss)
+		elif (model_type == 'custom_deep'):
+			def stack_fn(x, dropout_rate=0.0):
+				x = stack1(x, 64, 3, stride1=1, dropout_rate=dropout_rate, name='conv2')
+				x = stack1(x, 128, 4, dropout_rate=dropout_rate, name='conv3')
+				return stack1(x, 256, 6, dropout_rate=dropout_rate, name='conv4')
 			
 			self.model = _load_model(input_shape, classes, stack_fn, initializer=initializer, dropout_rate=dropout_rate)
 			self._compile_model(optimizer=optimizer, loss=loss)
 		elif (model_type == 'resnet50'):
-			self.model = _load_model_resnet50(input_shape, classes, initializer=initializer, dbg_mode=1)
+			self.model = _load_model_resnet50(input_shape, classes, initializer=initializer, dropout_rate=dropout_rate, pretrained=False)
 			self._compile_model(optimizer=optimizer, loss=loss)
 		else:
 			print('[ERROR] Unknown model_type: {}'.format(model_type))

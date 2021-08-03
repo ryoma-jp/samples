@@ -38,7 +38,8 @@ fi
 echo `pwd`
 OUTPUT_DIR="./output"
 DATA_TYPE_LIST=("CIFAR-10")
-MODEL_TYPE_LIST=("SimpleCNN" "DeepCNN")
+MODEL_TYPE_LIST=("SimpleResNet" "DeepResNet")
+#MODEL_TYPE_LIST=("SimpleResNet")
 DATA_AUG_LIST=("5,0.2,0.2,0.2,0.2,True")
 DATA_AUG_NAME_LIST=("DA5")
 	# DAn: rotation_range,width_shift_range,height_shift_range,zoom_range,channel_shift_range,horizontal_flip
@@ -140,23 +141,23 @@ source ./model.list
 
 # --- Compare models(ALL) ---
 metrics_list=\
-"${OUTPUT_DIR}/model/${SimpleCNN_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${SimpleCNN_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${SimpleCNN_CIFAR10_DA5_OPTadam_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${SimpleCNN_CIFAR10_DA5_OPTadam_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${DeepCNN_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${DeepCNN_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${DeepCNN_CIFAR10_DA5_OPTadam_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${DeepCNN_CIFAR10_DA5_OPTadam_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv"
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTadam_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${SimpleResNet_CIFAR10_DA5_OPTadam_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${DeepResNet_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${DeepResNet_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${DeepResNet_CIFAR10_DA5_OPTadam_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${DeepResNet_CIFAR10_DA5_OPTadam_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv"
 metrics_names=\
-"${SimpleCNN_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
-"${SimpleCNN_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
-"${SimpleCNN_CIFAR10_DA5_OPTadam_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
-"${SimpleCNN_CIFAR10_DA5_OPTadam_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
-"${DeepCNN_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
-"${DeepCNN_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
-"${DeepCNN_CIFAR10_DA5_OPTadam_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
-"${DeepCNN_CIFAR10_DA5_OPTadam_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}"
+"${SimpleResNet_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${SimpleResNet_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${SimpleResNet_CIFAR10_DA5_OPTadam_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${SimpleResNet_CIFAR10_DA5_OPTadam_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${DeepResNet_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${DeepResNet_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${DeepResNet_CIFAR10_DA5_OPTadam_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${DeepResNet_CIFAR10_DA5_OPTadam_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}"
 output_dir="${OUTPUT_DIR}/metrics_graph"
 
 python3 tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --fig_size ${fig_size} --output_dir ${output_dir}
@@ -164,11 +165,11 @@ python3 tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metr
 
 # --- Compare models(Deep, momentum) ---
 metrics_list=\
-"${OUTPUT_DIR}/model/${DeepCNN_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
-"${OUTPUT_DIR}/model/${DeepCNN_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv"
+"${OUTPUT_DIR}/model/${DeepResNet_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv,"\
+"${OUTPUT_DIR}/model/${DeepResNet_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}/metrics/metrics.csv"
 metrics_names=\
-"${DeepCNN_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
-"${DeepCNN_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}"
+"${DeepResNet_CIFAR10_DA5_OPTmomentum_batch50_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400},"\
+"${DeepResNet_CIFAR10_DA5_OPTmomentum_batch200_he_normal_DNzscore_DROPOUT025_binary_crossentropy_epochs400}"
 output_dir="${OUTPUT_DIR}/metrics_graph-deep_momentum"
 
 python3 tools/create_metrics_graph/create_metrics_graph.py --metrics_list ${metrics_list} --metrics_names ${metrics_names} --fig_size ${fig_size} --output_dir ${output_dir}
