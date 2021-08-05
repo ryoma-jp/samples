@@ -245,6 +245,36 @@ class TrainerResNet(Trainer):
 			
 			return model
 			
+		# --- モデル構築 ---
+		#  * stack_fn()の関数ポインタを引数に設定してカスタマイズ
+		def _load_model_deep(input_shape, classes, stack_fn, initializer='glorot_uniform', dropout_rate=0.0):
+			input = keras.layers.Input(shape=input_shape)
+			bn_axis = 3
+			
+			x = keras.layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='conv1_pad')(input)
+			x = keras.layers.Conv2D(64, 7, strides=2, use_bias=True, kernel_initializer=initializer, name='conv1_conv')(x)
+
+			x = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name='conv1_bn')(x)
+			x = keras.layers.Activation('relu', name='conv1_relu')(x)
+
+			x = keras.layers.ZeroPadding2D(padding=((1, 1), (1, 1)), name='pool1_pad')(x)
+			x = keras.layers.MaxPooling2D(3, strides=2, name='pool1_pool')(x)
+			x = keras.layers.Dropout(dropout_rate)(x)
+
+			x = stack_fn(x, dropout_rate=dropout_rate)
+
+			x = keras.layers.GlobalAveragePooling2D(name='avg_pool')(x)
+			x = keras.layers.Dropout(dropout_rate)(x)
+			x = keras.layers.Dense(512, activation="relu")(x)
+			
+			x = keras.layers.Dropout(dropout_rate)(x)
+			x = keras.layers.Dense(classes, activation='softmax', name='predictions')(x)
+			
+			model = keras.models.Model(input, x)
+			model.summary()
+			
+			return model
+			
 		def _load_model_resnet50(input_shape, classes, initializer='glorot_uniform', dropout_rate=0.0, pretrained=True):
 			# --- TensorFlowのResNet50のモデル ---
 			#  https://www.tensorflow.org/api_docs/python/tf/keras/applications/resnet50/ResNet50
@@ -281,7 +311,7 @@ class TrainerResNet(Trainer):
 				x = stack1(x, 128, 4, dropout_rate=dropout_rate, name='conv3')
 				return stack1(x, 256, 6, dropout_rate=dropout_rate, name='conv4')
 			
-			self.model = _load_model(input_shape, classes, stack_fn, initializer=initializer, dropout_rate=dropout_rate)
+			self.model = _load_model_deep(input_shape, classes, stack_fn, initializer=initializer, dropout_rate=dropout_rate)
 			self._compile_model(optimizer=optimizer, loss=loss)
 		elif (model_type == 'resnet50'):
 			self.model = _load_model_resnet50(input_shape, classes, initializer=initializer, dropout_rate=dropout_rate, pretrained=False)

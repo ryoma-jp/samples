@@ -39,7 +39,6 @@ echo `pwd`
 OUTPUT_DIR="./output"
 DATA_TYPE_LIST=("CIFAR-10")
 MODEL_TYPE_LIST=("SimpleResNet" "DeepResNet")
-#MODEL_TYPE_LIST=("SimpleResNet")
 DATA_AUG_LIST=("5,0.2,0.2,0.2,0.2,True")
 DATA_AUG_NAME_LIST=("DA5")
 	# DAn: rotation_range,width_shift_range,height_shift_range,zoom_range,channel_shift_range,horizontal_flip
