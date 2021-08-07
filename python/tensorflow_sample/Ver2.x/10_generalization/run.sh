@@ -38,7 +38,8 @@ fi
 echo `pwd`
 OUTPUT_DIR="./output"
 DATA_TYPE_LIST=("CIFAR-10")
-MODEL_TYPE_LIST=("SimpleResNet" "DeepResNet")
+#MODEL_TYPE_LIST=("SimpleResNet" "DeepResNet")
+MODEL_TYPE_LIST=("DeepResNet")
 DATA_AUG_LIST=("5,0.2,0.2,0.2,0.2,True")
 DATA_AUG_NAME_LIST=("DA5")
 	# DAn: rotation_range,width_shift_range,height_shift_range,zoom_range,channel_shift_range,horizontal_flip
@@ -51,11 +52,11 @@ DATA_AUG_NAME_LIST=("DA5")
 	# DA5: 5,0.2,0.2,0.2,0.2,True
 	# DA6: 5,0.2,0.2,0.2,0.0,True
 	# DA7: 5,0.2,0.2,0.0,0.2,True
-OPTIMIZER_LIST=("adam" "momentum")
-BATCH_SIZE_LIST=("50" "200")
+OPTIMIZER_LIST=("momentum")
+BATCH_SIZE_LIST=("200")
 INITIALIZER_LIST=("he_normal")
 DATA_NORM_LIST=("z-score")
-DROPOUT_RATE_LIST=("0.25")
+DROPOUT_RATE_LIST=("0.0")
 LOSS_FUNC_LIST=("binary_crossentropy")
 EPOCHS_LIST=("400")
 

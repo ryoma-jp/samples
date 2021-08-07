@@ -67,6 +67,7 @@ class Trainer():
 			# --- parameters ---
 			#  https://qiita.com/8128/items/2d441e46643f73c0ca19
 			opt = tf.keras.optimizers.SGD(learning_rate=0.1, decay=1e-4, momentum=0.9, nesterov=True)
+#			opt = tf.keras.optimizers.SGD(learning_rate=0.2, momentum=0.8, nesterov=True)
 		else:
 			print('[ERROR] Unknown optimizer: {}'.format(optimizer))
 			quit()
@@ -252,7 +253,7 @@ class TrainerResNet(Trainer):
 			bn_axis = 3
 			
 			x = keras.layers.ZeroPadding2D(padding=((3, 3), (3, 3)), name='conv1_pad')(input)
-			x = keras.layers.Conv2D(64, 7, strides=2, use_bias=True, kernel_initializer=initializer, name='conv1_conv')(x)
+			x = keras.layers.Conv2D(64, 3, strides=2, use_bias=True, kernel_initializer=initializer, name='conv1_conv')(x)
 
 			x = keras.layers.BatchNormalization(axis=bn_axis, epsilon=1.001e-5, name='conv1_bn')(x)
 			x = keras.layers.Activation('relu', name='conv1_relu')(x)
@@ -264,9 +265,6 @@ class TrainerResNet(Trainer):
 			x = stack_fn(x, dropout_rate=dropout_rate)
 
 			x = keras.layers.GlobalAveragePooling2D(name='avg_pool')(x)
-			x = keras.layers.Dropout(dropout_rate)(x)
-			x = keras.layers.Dense(512, activation="relu")(x)
-			
 			x = keras.layers.Dropout(dropout_rate)(x)
 			x = keras.layers.Dense(classes, activation='softmax', name='predictions')(x)
 			
@@ -307,9 +305,9 @@ class TrainerResNet(Trainer):
 			self._compile_model(optimizer=optimizer, loss=loss)
 		elif (model_type == 'custom_deep'):
 			def stack_fn(x, dropout_rate=0.0):
-				x = stack1(x, 64, 3, stride1=1, dropout_rate=dropout_rate, name='conv2')
-				x = stack1(x, 128, 4, dropout_rate=dropout_rate, name='conv3')
-				return stack1(x, 256, 6, dropout_rate=dropout_rate, name='conv4')
+				x = stack1(x, 16, 18, stride1=1, dropout_rate=dropout_rate, name='conv2')
+				x = stack1(x, 32, 18, dropout_rate=dropout_rate, name='conv3')
+				return stack1(x, 64, 18, dropout_rate=dropout_rate, name='conv4')
 			
 			self.model = _load_model_deep(input_shape, classes, stack_fn, initializer=initializer, dropout_rate=dropout_rate)
 			self._compile_model(optimizer=optimizer, loss=loss)
