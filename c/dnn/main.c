@@ -31,8 +31,10 @@ int show_usage()
 int main(int argc, char* argv[])
 {
 	/* --- 変数宣言 --- */
+	FILE* fp_byte_file;
 	char* byte_file;
 	tImgData image_data;
+	unsigned int data_size;
 	
 	/* --- 引数取り込み --- */
 	if (argc != 2) {
@@ -40,16 +42,22 @@ int main(int argc, char* argv[])
 		exit(0);
 	} else {
 		byte_file = argv[1];
-		printf("[DEBUG] %s\n", byte_file);
+		printf("[INFO] byte_file: %s\n", byte_file);
 	}
 	
 	/* --- データ読み込み --- */
-	load_bin_file(byte_file, &image_data);
-	printf("[DEBUG] height=%d\n", image_data.height);
-	printf("[DEBUG] width=%d\n", image_data.width);
-	printf("[DEBUG] channel=%d\n", image_data.channel);
+	fp_byte_file = fopen(byte_file, "rb");
+	data_size = get_data_size(fp_byte_file);
+	image_data.data.img_uint8 = (unsigned char*)malloc(data_size);
 
-	free(image_data.data);
+	load_bin_file(fp_byte_file, &image_data);
+	printf("[INFO] d_type=%d\n", image_data.d_type);
+	printf("[INFO] height=%d\n", image_data.height);
+	printf("[INFO] width=%d\n", image_data.width);
+	printf("[INFO] channel=%d\n", image_data.channel);
+	fclose(fp_byte_file);
+
+	free(image_data.data.img_uint8);
 	return 0;
 }
 

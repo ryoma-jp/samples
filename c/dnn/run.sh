@@ -1,9 +1,9 @@
 #! /bin/bash
 
-input_data='./tensorflow/output/tflite/input_data.bin'
+input_data='./tools/img2byte/output/train/abandoned_ship_s_000004.bin'
 output_dir='./output'
 
 mkdir -p ${output_dir}
-./dnn_inference ${input_data} 2>&1 | tee ${OUTPUT_DIR}/log.txt
+./dnn_inference ${input_data} 2>&1 | tee ${output_dir}/log.txt
 
 

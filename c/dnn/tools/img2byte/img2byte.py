@@ -50,8 +50,8 @@ def img2byte(input_img, output_file, output_fmt='BGR'):
         exit(-1)
 
     # --- ヘッダパラメータ: ../../data_loader.c ---
-    n_data = len(img) + 16      # データサイズにヘッダ(4パラメータ，16byte分)を加算
-    pack_data = struct.pack('<i', n_data)
+    data_size = len(img) + 12      # データサイズにヘッダ(3パラメータ，12byte分)を加算
+    pack_data = struct.pack('<i', data_size)
     bytefile.write(pack_data)
 
     d_type = 0
@@ -61,9 +61,6 @@ def img2byte(input_img, output_file, output_fmt='BGR'):
     for data_header in img_shape:   # height, width, channel
         pack_data = struct.pack('<i', data_header)
         bytefile.write(pack_data)
-    d_type = 0
-    pack_data = struct.pack('<i', d_type)
-    bytefile.write(pack_data)
 
     for pixel_data in img:
         pack_data = struct.pack('<B', pixel_data)

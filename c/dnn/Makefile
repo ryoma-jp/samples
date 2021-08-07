@@ -1,6 +1,8 @@
 
 # マクロ定義
 CC           = gcc
+#DEBUG        = -g
+DEBUG        = 
 CFLAGS       = -Wall
 LDFLAGS      =
 INCLUDES     = -I./
@@ -26,6 +28,6 @@ clean :
 
 $(OBJ_DIR)/%.o : %.c
 	$(MKDIR) -p $(OBJ_DIR)
-	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ $<
+	$(CC) $(DEBUG) -c $(CFLAGS) $(INCLUDES) -o $@ $<
 
 -include $(DEPS)
