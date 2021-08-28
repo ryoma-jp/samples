@@ -38,10 +38,15 @@ fi
 echo `pwd`
 OUTPUT_DIR="./output"
 DATA_TYPE_LIST=("CIFAR-10")
-#MODEL_TYPE_LIST=("SimpleResNet" "DeepResNet")
-MODEL_TYPE_LIST=("DeepResNet")
-DATA_AUG_LIST=("5,0.2,0.2,0.2,0.2,True")
-DATA_AUG_NAME_LIST=("DA5")
+MODEL_TYPE_LIST=("SimpleCNN" "DeepCNN" "SimpleResNet" "DeepResNet")
+DATA_AUG_LIST=( \
+  "0,0,0,0.0,0.0,False" \
+  "3,0.1,0.1,0.1,0.1,True" \
+  "5,0.2,0.2,0.2,0.2,True" \
+  "5,0.2,0.2,0.2,0.0,True" \
+  "5,0.2,0.2,0.0,0.2,True" \
+  )
+DATA_AUG_NAME_LIST=("DA-OFF" "DA4" "DA5" "DA6" "DA7")
 	# DAn: rotation_range,width_shift_range,height_shift_range,zoom_range,channel_shift_range,horizontal_flip
 	# DA-OFF: 0,0,0,0.0,0.0,False
 	# DA0: 10,0.2,0.2,0.0,0.0,True
@@ -52,12 +57,12 @@ DATA_AUG_NAME_LIST=("DA5")
 	# DA5: 5,0.2,0.2,0.2,0.2,True
 	# DA6: 5,0.2,0.2,0.2,0.0,True
 	# DA7: 5,0.2,0.2,0.0,0.2,True
-OPTIMIZER_LIST=("momentum")
-BATCH_SIZE_LIST=("200")
+OPTIMIZER_LIST=("adam" "momentum")
+BATCH_SIZE_LIST=("100" "200")
 INITIALIZER_LIST=("he_normal")
-DATA_NORM_LIST=("z-score")
-DROPOUT_RATE_LIST=("0.0")
-LOSS_FUNC_LIST=("binary_crossentropy")
+DATA_NORM_LIST=("z-score" "max")
+DROPOUT_RATE_LIST=("0.0" "0.25")
+LOSS_FUNC_LIST=("binary_crossentropy" "sparse_categorical_crossentropy" "categorical_crossentropy")
 EPOCHS_LIST=("400")
 
 if [ ! -e ${OUTPUT_DIR} ]; then
@@ -120,7 +125,7 @@ if [ ! -e ${OUTPUT_DIR} ]; then
 												--dropout_rate ${DROPOUT_RATE} \
 												--loss_func ${LOSS_FUNC} \
 												--epochs ${EPOCHS} \
-												--result_dir ${model_dir}
+												--result_dir ${model_dir} 2>&1 | tee ${model_dir}/training_log.txt
 										done
 									done
 								done
@@ -132,6 +137,9 @@ if [ ! -e ${OUTPUT_DIR} ]; then
 		done
 	done
 fi
+
+
+exit
 
 # --- 出力するグラフのサイズ[inch] ---
 fig_size="15,5"
