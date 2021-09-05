@@ -26,7 +26,20 @@ def load_uci_har(dataset_dir):
 	x_test = pd.read_csv(x_test_file, sep='\s+', header=None)
 	y_test = pd.read_csv(y_test_file, sep='\s+', header=None)
 	
-	return x_train, y_train, x_test, y_test
+	# --- 特徴量名を取得 ---
+	feature_name_file = os.path.join(dataset_dir, 'features.txt')
+	df_feature_name = pd.read_csv(feature_name_file, sep='\s+', header=None)
+	feature_name = df_feature_name.values[:, 1]
+	
+	
+	# --- ラベル名を取得 ---
+	activity_name_file = os.path.join(dataset_dir, 'activity_labels.txt')
+	df_activity_name = pd.read_csv(activity_name_file, sep='\s+', header=None)
+	activity_name = {}
+	for _activity_name in df_activity_name.values:
+		activity_name[_activity_name[0]] = _activity_name[1]
+	
+	return x_train.values, y_train.values, x_test.values, y_test.values, feature_name, activity_name
 
 
 
