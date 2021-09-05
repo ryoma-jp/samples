@@ -5,4 +5,5 @@
 # --- for machine learning ---
 FROM jupyter/scipy-notebook:latest
 
+RUN pip install tsfresh
 
