@@ -142,8 +142,8 @@ class Trainer():
 		for column in df_metrics.columns:
 			plt.figure()
 			plt.plot(epoch, df_metrics[column])
-			plt.xlabel(column)
-			plt.ylabel('epoch')
+			plt.xlabel('epoch')
+			plt.ylabel(column)
 			plt.grid(True)
 			plt.tight_layout()
 			
