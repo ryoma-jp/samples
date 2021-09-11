@@ -10,8 +10,8 @@ import argparse
 import pandas as pd
 import numpy as np
 
-#import matplotlib      #GUIのない環境で動かす場合にコメントアウトを外す
-#matplotlib.use('Agg')  #GUIのない環境で動かす場合にコメントアウトを外す
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 #---------------------------------
