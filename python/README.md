@@ -9,6 +9,7 @@
 |csg_sample |CSGによる指標化サンプル |
 |data_loader |データセット読み込み処理のサンプル |
 |dist_sample |配布用パッケージ作成サンプル |
+|feature_engineering |特徴量エンジニアリングのサンプル |
 |filter |信号処理フィルタのサンプル |
 |float2byte |floatをbyteデータに変換するサンプル |
 |glob_sample |globモジュールを用いたファイル探索のサンプル |

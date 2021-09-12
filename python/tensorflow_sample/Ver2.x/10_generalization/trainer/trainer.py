@@ -16,6 +16,16 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 # クラス; 学習モジュール基底クラス
 #---------------------------------
 class Trainer():
+	# --- カスタムコールバック ---
+	class CustomCallback(keras.callbacks.Callback):
+		def on_epoch_end(self, epoch, logs=None):
+			keys = list(logs.keys())
+			log_str = ''
+			for key in keys[:-1]:
+				log_str += '({} = {}), '.format(key, logs[key])
+			log_str += '({} = {})'.format(keys[-1], logs[keys[-1]])
+			print("End epoch {}: {}".format(epoch, log_str))
+			
 	# --- コンストラクタ ---
 	def __init__(self, output_dir=None, model_file=None, optimizer='adam', loss='sparse_categorical_crossentropy'):
 		# --- 出力ディレクトリ作成 ---
@@ -82,14 +92,15 @@ class Trainer():
 	# --- 学習 ---
 	def fit(self, x_train, y_train, x_val=None, y_val=None, x_test=None, y_test=None,
 			da_params=None,
-			batch_size=32, epochs=200):
+			batch_size=32, epochs=200,
+			verbose=0):
 		# --- 学習 ---
 		os.makedirs(os.path.join(self.output_dir, 'checkpoints'), exist_ok=True)
 		checkpoint_path = os.path.join(self.output_dir, 'checkpoints', 'model.ckpt')
 		cp_callback = keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=1)
 		es_callback = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=5, verbose=1, mode='auto')
 		#callbacks = [cp_callback, es_callback]
-		callbacks = [cp_callback]
+		callbacks = [cp_callback, self.CustomCallback()]
 		
 		if (da_params is not None):
 			# --- no tuning ---
@@ -107,11 +118,13 @@ class Trainer():
 		if ((x_val is not None) and (y_val is not None)):
 			history = self.model.fit(datagen.flow(x_train, y_train, batch_size=batch_size),
 						steps_per_epoch=len(x_train)/batch_size, validation_data=(x_val, y_val),
-						epochs=epochs, callbacks=callbacks)
+						epochs=epochs, callbacks=callbacks,
+						verbose=verbose)
 		else:
 			history = self.model.fit(datagen.flow(x_train, y_train, batch_size=batch_size),
 						steps_per_epoch=len(x_train)/batch_size, validation_split=0.2,
-						epochs=epochs, callbacks=callbacks)
+						epochs=epochs, callbacks=callbacks,
+						verbose=verbose)
 		
 		# --- 学習結果を評価 ---
 		if ((x_test is not None) and (y_test is not None)):
@@ -129,8 +142,8 @@ class Trainer():
 		for column in df_metrics.columns:
 			plt.figure()
 			plt.plot(epoch, df_metrics[column])
-			plt.xlabel(column)
-			plt.ylabel('epoch')
+			plt.xlabel('epoch')
+			plt.ylabel(column)
 			plt.grid(True)
 			plt.tight_layout()
 			

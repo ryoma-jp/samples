@@ -8,7 +8,7 @@ if [ ! -e ${DATASET_DIR} ]; then
 	cd ${DATASET_DIR}
 	wget https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
 	tar -zxf cifar-10-python.tar.gz
-
+	cd ..
 fi
 
 mkdir -p ${OUTPUT_DIR}
