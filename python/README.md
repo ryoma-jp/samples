@@ -4,6 +4,7 @@
 |---|---|
 |argparse_sample |argparseモジュールで引数を入力するサンプル |
 |calc_distance |データ間の距離計算処理のサンプル |
+|cartpole |Cartpoleを用いたQ学習のサンプル |
 |camera_input |カメラ入力サンプル |
 |correlation-analysis_causal-analysis |相関分析・因果分析のサンプル |
 |csg_sample |CSGによる指標化サンプル |
