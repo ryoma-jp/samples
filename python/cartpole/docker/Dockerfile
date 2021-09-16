@@ -10,7 +10,7 @@ RUN apt update ; \
 	apt install -y libgl1-mesa-dev graphviz python3-tk python-opengl
 
 RUN pip install matplotlib pandas opencv-python cython pydot
-RUN pip install gym pyglet python-opengl
+RUN pip install gym pyglet
 
 ENTRYPOINT /usr/local/bin/nvidia_entrypoint.sh
 
