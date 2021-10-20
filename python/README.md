@@ -3,6 +3,7 @@
 |ディレクトリ |説明 |
 |---|---|
 |argparse_sample |argparseモジュールで引数を入力するサンプル |
+|argument_test |引数(参照渡し)のミュータブルとイミュータブルの扱い確認 |
 |calc_distance |データ間の距離計算処理のサンプル |
 |cartpole |Cartpoleを用いたQ学習のサンプル |
 |camera_input |カメラ入力サンプル |
