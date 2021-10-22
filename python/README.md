@@ -21,6 +21,7 @@
 |[measuring_dataset_granularity](./measuring_dataset_granularity) |データセットの粒度計算のサンプル |
 |[module_import_sample](./module_import_sample) |独自で作成したモジュールをimportするサンプル |
 |[multi_thread](./multi_thread) |マルチスレッドのサンプル |
+|[numpy_sample](./numpy_sample) |numpyモジュールの動作確認 |
 |[pca_sample](./pca_sample) | PCA(主成分分析)による次元圧縮のサンプル |
 |[read_csv_with_stringio](./read_csv_with_stringio) |カンマ区切りの文字列をpandas.read_csvで読み込むサンプル |
 |[resize_circle](./resize_circle) |Pythonモジュールごとの円のリサイズ(ダウンサンプリングのされ方が異なる) |
