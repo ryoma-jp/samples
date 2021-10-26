@@ -9,13 +9,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import signal
 from scipy import fftpack
+from .create_signal import *
 
 #---------------------------------
 # 定数定義
 #---------------------------------
 
 #---------------------------------
-# 関数: filter
+# 関数: signal_filter
 #   フィルタ処理
 # 引数説明：
 #   x: 入力波形
@@ -26,7 +27,7 @@ from scipy import fftpack
 #   gain_stop: 阻止域最小損失[Hz]
 #   btype: フィルタ種別('lowpass', 'highpass', 'bandpass', 'bandstop')
 #---------------------------------
-def filter(x, fs, freq_pass, freq_stop, gain_pass, gain_stop, btype):
+def signal_filter(x, fs, freq_pass, freq_stop, gain_pass, gain_stop, btype):
     fn = fs / 2
     freq_pass_norm = freq_pass / fn
     freq_stop_norm = freq_stop / fn
@@ -45,7 +46,7 @@ def filter(x, fs, freq_pass, freq_stop, gain_pass, gain_stop, btype):
 #   t: 波形の時刻情報
 #   data: 波形データ
 #---------------------------------
-def fft(t, data):
+def signal_fft(t, data):
     duration = (t[1]-t[0]) * len(t)
 #    print(duration)
     fs = 1 / (t[1]-t[0])
@@ -89,23 +90,11 @@ def main():
 
         return args
 
-    def _create_signal(fs=100000, duration=1):
-        n_samples = fs * duration
-
-        t = np.arange(n_samples) / fs
-        y = np.random.normal(loc=0, scale=1, size=n_samples)
-        y = y / max(np.abs(y))
-#        y = np.random.rand(n_samples)
-
-#        print(min(y), max(y))
-
-        return t, y
-
-        # --- 引数処理 ---
+    # --- 引数処理 ---
     args = _arg_parser()
 
     # --- 信号生成 ---
-    t, data = _create_signal(args.fs, 1)
+    t, data = create_signal(args.fs, 1)
     freq, data_fft = fft(t, data)
     plt.figure()
     plt.plot(t, data)
