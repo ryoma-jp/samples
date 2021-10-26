@@ -7,6 +7,14 @@
 
 ## 実行手順
 
+### Jupyter Notebook
+
+	docker_run.shで起動後，
+		http://localhost:10000
+	へブラウザでアクセスし，コンソールに表示されるトークン部分をコピペしてログインする
+
+### コマンドライン
+
 	$ python3 filter.py --help
 	$ python3 filter.py
 
