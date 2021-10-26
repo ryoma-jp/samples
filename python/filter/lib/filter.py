@@ -15,31 +15,17 @@ from scipy import fftpack
 #---------------------------------
 
 #---------------------------------
-# 関数
+# 関数: filter
+#   フィルタ処理
+# 引数説明：
+#   x: 入力波形
+#   fs: サンプリング周波数
+#   freq_pass: 通過域周波数[Hz]
+#   freq_stop: 阻止域周波数[Hz]
+#   gain_pass: 通過域最大損失[Hz]
+#   gain_stop: 阻止域最小損失[Hz]
+#   btype: フィルタ種別('lowpass', 'highpass', 'bandpass', 'bandstop')
 #---------------------------------
-def ArgParser():
-    parser = argparse.ArgumentParser(description='信号のLPF，HPFのサンプル\n'
-                                                 ' * default: LPF, カットオフ周波数 6kHz, Slope -20dB/decade', 
-                formatter_class=argparse.RawTextHelpFormatter)
-
-    # --- 引数を追加 ---
-    parser.add_argument('--filter_type', dest='filter_type', type=str, default='lowpass', required=False, \
-            help='フィルタ種別(lowpass, highpass)')
-    parser.add_argument('--fs', dest='fs', type=float, default=10000, required=False, \
-            help='サンプリングレート[Hz]')
-    parser.add_argument('--freq_pass', dest='freq_pass', type=float, default=3000, required=False, \
-            help='通過域端周波数[Hz]')
-    parser.add_argument('--freq_stop', dest='freq_stop', type=float, default=6000, required=False, \
-            help='阻止域端周波数[Hz]')
-    parser.add_argument('--gain_pass', dest='gain_pass', type=float, default=3, required=False, \
-            help='通過域最大損失[dB]')
-    parser.add_argument('--gain_stop', dest='gain_stop', type=float, default=40, required=False, \
-            help='阻止域最大損失[dB]')
-
-    args = parser.parse_args()
-
-    return args
-
 def filter(x, fs, freq_pass, freq_stop, gain_pass, gain_stop, btype):
     fn = fs / 2
     freq_pass_norm = freq_pass / fn
@@ -52,6 +38,13 @@ def filter(x, fs, freq_pass, freq_stop, gain_pass, gain_stop, btype):
 
     return y
 
+#---------------------------------
+# 関数: fft
+#   FFT
+# 引数説明：
+#   t: 波形の時刻情報
+#   data: 波形データ
+#---------------------------------
 def fft(t, data):
     duration = (t[1]-t[0]) * len(t)
 #    print(duration)
@@ -68,25 +61,51 @@ def fft(t, data):
 
     return freq_list[0:len(t)//2], data_fft[0:len(t)//2]    # 折り返し成分は返さない
 
-def create_signal(fs=100000, duration=1):
-    n_samples = fs * duration
-
-    t = np.arange(n_samples) / fs
-    y = np.random.normal(loc=0, scale=1, size=n_samples)
-    y = y / max(np.abs(y))
-#    y = np.random.rand(n_samples)
-
-#    print(min(y), max(y))
-
-    return t, y
-
-
+#---------------------------------
+# 関数: main
+#   メイン関数
+#---------------------------------
 def main():
-    # --- 引数処理 ---
-    args = ArgParser()
+    def _arg_parser():
+        parser = argparse.ArgumentParser(description='信号のLPF，HPFのサンプル\n'
+                                                     ' * default: LPF, カットオフ周波数 6kHz, Slope -20dB/decade', 
+                    formatter_class=argparse.RawTextHelpFormatter)
+
+        # --- 引数を追加 ---
+        parser.add_argument('--filter_type', dest='filter_type', type=str, default='lowpass', required=False, \
+                help='フィルタ種別(lowpass, highpass)')
+        parser.add_argument('--fs', dest='fs', type=float, default=10000, required=False, \
+                help='サンプリングレート[Hz]')
+        parser.add_argument('--freq_pass', dest='freq_pass', type=float, default=3000, required=False, \
+                help='通過域端周波数[Hz]')
+        parser.add_argument('--freq_stop', dest='freq_stop', type=float, default=6000, required=False, \
+                help='阻止域端周波数[Hz]')
+        parser.add_argument('--gain_pass', dest='gain_pass', type=float, default=3, required=False, \
+                help='通過域最大損失[dB]')
+        parser.add_argument('--gain_stop', dest='gain_stop', type=float, default=40, required=False, \
+                help='阻止域最大損失[dB]')
+
+        args = parser.parse_args()
+
+        return args
+
+    def _create_signal(fs=100000, duration=1):
+        n_samples = fs * duration
+
+        t = np.arange(n_samples) / fs
+        y = np.random.normal(loc=0, scale=1, size=n_samples)
+        y = y / max(np.abs(y))
+#        y = np.random.rand(n_samples)
+
+#        print(min(y), max(y))
+
+        return t, y
+
+        # --- 引数処理 ---
+    args = _arg_parser()
 
     # --- 信号生成 ---
-    t, data = create_signal(args.fs, 1)
+    t, data = _create_signal(args.fs, 1)
     freq, data_fft = fft(t, data)
     plt.figure()
     plt.plot(t, data)
