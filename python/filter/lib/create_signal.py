@@ -6,13 +6,13 @@
 import numpy as np
 
 #---------------------------------
-# 関数: create_signal
+# 関数: create_random_signal
 #   フィルタ動作確認用波形生成
 # 引数説明：
 #   fs: サンプリング周波数
 #   duration: 時間長[sec]
 #---------------------------------
-def create_signal(fs=100000, duration=1):
+def create_random_signal(fs=100000, duration=1):
     n_samples = fs * duration
 
     t = np.arange(n_samples) / fs
