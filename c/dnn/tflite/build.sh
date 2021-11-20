@@ -1,40 +1,33 @@
 #! /bin/bash
 
+# --- Parameters ---
 DEBUG="ON"		# ON or OFF
 
 ROOT_DIR=${PWD}
-TENSORFLOW_DIR='./tensorflow'
-FLATBUFFERS_DIR='./flatbuffers'
-TFLITE_LIB_DIR='./tensorflow/tensorflow/lite/tools/make/gen/linux_x86_64/lib'
+TENSORFLOW_DIR='./tensorflow_src'
+TFLITE_BUILD_DIR='./tflite_build'
+TFLITE_LIB_DIR=${TFLITE_BUILD_DIR}
+APP_BUILD_DIR='./inference_sample_build'
 
+# --- Build TensorFlow Lite ---
 if [ ! -e ${TENSORFLOW_DIR} ]; then
 	cd ${ROOT_DIR}
-	git clone --recursive https://github.com/tensorflow/tensorflow.git
-	cd tensorflow/tensorflow/lite/tools/make
-	./download_dependencies.sh
-	./build_lib.sh
+	git clone --recursive https://github.com/tensorflow/tensorflow.git ${TENSORFLOW_DIR}
+	cd ${TENSORFLOW_DIR}
+	git checkout 205bc8e204fd0fcdd837d93abea9eb1de107fe74
+	cd ..
+	if [ -e ${TFLITE_BUILD_DIR} ]; then
+		rm -rf ${TFLITE_BUILD_DIR}
+	fi
+	mkdir ${TFLITE_BUILD_DIR}
+	cd ${TFLITE_BUILD_DIR}
+	cmake ../${TENSORFLOW_DIR}/tensorflow/lite
+	cmake --build . -j
 fi
 
-if [ ! -e ${FLATBUFFERS_DIR} ]; then
-	cd ${ROOT_DIR}
-	git clone https://github.com/google/flatbuffers.git
-fi
-
+# --- Build Application using TensorFlow Lite ---
 cd ${ROOT_DIR}
-if [ ${DEBUG} != "ON" ]; then
-g++ main.cpp \
-	-I${TENSORFLOW_DIR} \
-	-I${FLATBUFFERS_DIR}/include \
-	-L${TFLITE_LIB_DIR} \
-	-ltensorflow-lite \
-	-lpthread -ldl -lm \
-	-o tflite_inference
-else
-g++ main.cpp \
-	-I${TENSORFLOW_DIR} \
-	-I${FLATBUFFERS_DIR}/include \
-	-L${TFLITE_LIB_DIR} \
-	-ltensorflow-lite \
-	-lpthread -ldl -lm \
-	-g -o tflite_inference
-fi
+mkdir ${APP_BUILD_DIR}
+cd ${APP_BUILD_DIR}
+cmake ../inference_sample
+cmake --build . -j

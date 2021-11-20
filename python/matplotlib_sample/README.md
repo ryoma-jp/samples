@@ -7,12 +7,20 @@
 
 ## 実行手順
 
-	$ python3 matplotlib_sample.py --help
-	$ python3 matplotlib_sample.py --graph_type line --output_dir out
-	$ python3 matplotlib_sample.py --graph_type line --output_dir out --use_gui
-	$ python3 matplotlib_sample.py --graph_type bar --output_dir out --use_gui
-	$ python3 matplotlib_sample.py --graph_type mixed_line_bar --output_dir out --use_gui
-	$ python3 matplotlib_sample.py --graph_type scatter --output_dir out --use_gui
-	$ python3 matplotlib_sample.py --graph_type line,bar,mixed_line_bar,scatter --output_dir out --use_gui
+### Dockerイメージの構築
+
+```
+$ cd docker
+$ docker build -t matplotlib_sample/tensorflow:21.03-tf2-py3 .
+```
+
+### サンプルコードの実行
+
+```
+$ cd docker
+$ ./docker_run.sh
+# cd /work
+# ./run.sh
+```
 
 
