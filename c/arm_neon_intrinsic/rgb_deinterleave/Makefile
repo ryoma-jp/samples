@@ -1,7 +1,7 @@
 
 # マクロ定義
 CC           = gcc
-CFLAGS       = -Wall
+CFLAGS       = -Wall -march=armv8-a -mfpu=neon
 LDFLAGS      =
 INCLUDES     = -I./
 LIBS         =

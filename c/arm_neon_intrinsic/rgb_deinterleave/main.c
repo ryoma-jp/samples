@@ -15,7 +15,9 @@
 int show_usage()
 {
 	printf("<< Usage >>\n");
-	printf("  ./rgb_deinterleave\n");
+	printf("  ./rgb_deinterleave <rgb_binary_file>\n");
+	printf("    rgb_binary_file: RGBデータ\n");
+	printf("    rgb_binary_file_size: RGBデータ\n");
 
 	return 0;
 }
@@ -30,22 +32,41 @@ int show_usage()
 int main(int argc, char* argv[])
 {
 	/* --- 変数宣言 --- */
+	FILE* fpBinFile;
 	clock_t start_clock_c, end_clock_c;
 	clock_t start_clock_neon, end_clock_neon;
-	char* src=NULL;
-	char* dst[3]={NULL, NULL, NULL};
+	char* strBinFileName;
+	unsigned char* src=NULL;
+	unsigned char* dst[3]={NULL, NULL, NULL};
+	int iBinReadSize;
+	int i;
 	
 	/* --- 引数処理 --- */
-	show_usage();
+	if (argc != 3) {
+		show_usage();
+		return -1;
+	} else {
+		strBinFileName = argv[1];
+		iBinReadSize = (int)(atoi(argv[2]) / 3) * 3;	// 3の倍数に切り捨て
+	}
+	
+	fpBinFile = fopen(strBinFileName, "wb");
+	src = (unsigned char*)malloc(iBinReadSize);
+	fread(src, 1, iBinReadSize, fpBinFile);
+	fclose(fpBinFile);
+	
+	for (i = 0; i < 3; i++) {
+		dst[i] = (unsigned char*)malloc(iBinReadSize / 3);
+	}
 	
 	/* --- RGBピクセル値取得：C言語 --- */
 	start_clock_c = clock();
-	rgb_deinterleave_c(src, dst);
+	rgb_deinterleave_c(src, iBinReadSize, dst);
 	end_clock_c = clock();
 	
 	/* --- RGBピクセル値取得：Neon --- */
 	start_clock_neon = clock();
-	rgb_deinterleave_neon(src, dst);
+	rgb_deinterleave_neon(src, iBinReadSize, dst);
 	end_clock_neon = clock();
 	
 	/* --- 処理速度表示 --- */
@@ -55,6 +76,10 @@ int main(int argc, char* argv[])
 	MY_PRINT(MY_PRINT_LVL_INFO, "rgb_deinterleave_neon, %ld, %ld, %ld\n", start_clock_neon, end_clock_neon, end_clock_neon-start_clock_neon);
 	
 
+	free(src);
+	for (i = 0; i < 3; i++) {
+		free(dst[i]);
+	}
 	return 0;
 }
 
