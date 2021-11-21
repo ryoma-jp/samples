@@ -53,7 +53,7 @@ int rgb_deinterleave_neon(unsigned char* src, int src_len, unsigned char* dst[3]
 	unsigned char* g;
 	unsigned char* b;
 	uint8x16x3_t intlv_rgb;
-	int num8x16 = src_len / 3 / 16;
+	int num8x16 = src_len / 3 / 16 + 1;
 	int i;
 	
 	r = dst[0];
