@@ -3,11 +3,6 @@
  * @brief 行列計算
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <math.h>
-#include <arm_neon.h>
 #include "common.h"
 #include "matrix_multiply.h"
 
@@ -31,6 +26,8 @@ int matrix_multiply_c(float32_t *A, float32_t *B, float32_t *C, uint32_t n, uint
 			}
 		}
 	}
+	
+	return 0;
 }
 
 /**
@@ -123,6 +120,8 @@ int matrix_multiply_neon(float32_t  *A, float32_t  *B, float32_t *C, uint32_t n,
 			vst1q_f32(C+C_idx+3*n, C3);
 		}
 	}
+	
+	return 0;
 }
 
 /**
@@ -191,6 +190,8 @@ int matrix_multiply_4x4_neon(float32_t *A, float32_t *B, float32_t *C) {
 	C3 = vfmaq_laneq_f32(C3, A2, B3, 2);
 	C3 = vfmaq_laneq_f32(C3, A3, B3, 3);
 	vst1q_f32(C+12, C3);
+	
+	return 0;
 }
 
 /**
@@ -209,6 +210,8 @@ int print_matrix(float32_t *M, uint32_t cols, uint32_t rows) {
 		printf("\n");
 	}
 	printf("\n");
+	
+	return 0;
 }
 
 /**
@@ -222,6 +225,8 @@ int matrix_init_rand(float32_t *M, uint32_t numvals) {
 	for (int i=0; i<numvals; i++) {
 		M[i] = (float)rand()/(float)(RAND_MAX);
 	}
+	
+	return 0;
 }
 
 /**
@@ -239,6 +244,8 @@ int matrix_init(float32_t *M, uint32_t cols, uint32_t rows, float32_t val) {
 			M[j*rows + i] = val;
 		}
 	}
+	
+	return 0;
 }
 
 /**
