@@ -14,5 +14,6 @@
 * [Optimizing C Code with Neon Intrinsics](https://developer.arm.com/documentation/102467/0100)
 * [Intrinsics](https://developer.arm.com/architectures/instruction-sets/intrinsics/)
 * [Arm C Language Extensions (ACLE)](https://developer.arm.com/architectures/system-architectures/software-standards/acle)
+* [Cross compiling for arm or aarch64 on Debian or Ubuntu](https://jensd.be/1126/linux/cross-compiling-for-arm-or-aarch64-on-debian-or-ubuntu)
 * [Raspberry Pi Imagerで64bit版Raspberry Pi OSイメージを書き込む](https://kurukuruway.com/kaihatsu/raspberry-pi-imager64bitraspberry-pi-os/
 

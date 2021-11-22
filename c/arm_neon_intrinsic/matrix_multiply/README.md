@@ -7,8 +7,14 @@
 
 ## 実行手順
 
+### Aarch64オンボードでの実行
+
 	$ make
 	$ ./run.sh
+
+### クロスコンパイル
+
+	$ make -f Makefile_for_xc_aarch64
 
 ## 参照
 
