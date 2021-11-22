@@ -1,0 +1,29 @@
+
+# マクロ定義
+CC           = arm-linux-gnueabihf-gcc
+CFLAGS       = -Wall -O3 -march=armv8-a -mfpu=neon
+LDFLAGS      = -static
+INCLUDES     = -I./
+LIBS         =
+TARGET       = sample_armv7l
+SRCS         = $(wildcard *.c)
+OBJ_DIR      = ./build
+OBJS         = $(SRCS:%.c=$(OBJ_DIR)/%.o)
+DEPS         = $(SRCS:%.c=$(OBJ_DIR)/%.d)
+RM           = rm
+
+# 生成規則
+.PHONY: all clean
+
+all : $(TARGET)
+
+$(TARGET) : $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+
+clean :
+	$(RM) -f $(TARGET) $(OBJS) $(DEPS)
+
+$(OBJ_DIR)/%.o : %.c
+	$(CC) -c $(CFLAGS) $(INCLUDES) -o $@ $<
+
+-include $(DEPS)
