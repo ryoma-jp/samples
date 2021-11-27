@@ -9,6 +9,7 @@
 |[camera_input](./camera_input) |カメラ入力サンプル |
 |[correlation-analysis_causal-analysis](./correlation-analysis_causal-analysis) |相関分析・因果分析のサンプル |
 |[csg_sample](./csg_sample) |CSGによる指標化サンプル |
+|[data_analysis](./data_analysis) |データ分析モジュールの動作確認 |
 |[data_loader](./data_loader) |データセット読み込み処理のサンプル |
 |[dist_sample](./dist_sample) |配布用パッケージ作成サンプル |
 |[feature_engineering](./feature_engineering) |特徴量エンジニアリングのサンプル |
