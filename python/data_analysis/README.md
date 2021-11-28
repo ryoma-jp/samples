@@ -17,6 +17,7 @@
 |:--|:--|:--|
 |[AutoViz](https://pypi.org/project/autoviz/)|データセットを自動的に可視化するモジュール|Apache License 2.0|
 |[pandas](https://pandas.pydata.org/docs/index.html)|データ分析する為のAPIが備わったモジュール|BSD|
+|[seaborn](https://seaborn.pydata.org/)|データを可視化するモジュール<br>バックエンドではmatplotlibを使用しており，簡単に見栄えをよくすることができるように設計されている|BSD|
 
 ## 参照
 
