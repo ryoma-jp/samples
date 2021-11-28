@@ -16,6 +16,7 @@
 |モジュール|説明|ライセンス|
 |:--|:--|:--|
 |[AutoViz](https://pypi.org/project/autoviz/)|データセットを自動的に可視化するモジュール|Apache License 2.0|
+|[pandas](https://pandas.pydata.org/docs/index.html)|データ分析する為のAPIが備わったモジュール|BSD|
 
 ## 参照
 
