@@ -10,5 +10,7 @@ RUN apt update
 RUN apt upgrade -y
 RUN apt install -y libgl1-mesa-dev
 
-RUN pip install opencv-python scikit-learn pandas optuna torch torchvision torchaudio
-
+RUN pip install opencv-python scikit-learn pandas 
+RUN pip install torch torchvision torchaudio
+RUN pip install optuna
+RUN pip install pycaret shap
