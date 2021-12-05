@@ -2,6 +2,7 @@
 
 |ディレクトリ |説明 |
 |---|---|
+|[automated_machine_learning](./automated_machine_learning) |自動機械学習に関連するPythonモジュールの紹介 |
 |[argparse_sample](./argparse_sample) |argparseモジュールで引数を入力するサンプル |
 |[argument_test](./argument_test) |引数(参照渡し)のミュータブルとイミュータブルの扱い確認 |
 |[calc_distance](./calc_distance) |データ間の距離計算処理のサンプル |
