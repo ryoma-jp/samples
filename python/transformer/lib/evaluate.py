@@ -53,7 +53,4 @@ def translate(model, tokenizer_pt, tokenizer_en, sentence, max_length=40, plot='
 	print('Input: {}'.format(sentence))
 	print('Predicted translation: {}'.format(predicted_sentence))
 
-	if plot:
-		plot_attention_weights(attention_weights, sentence, result, plot)
-
-	return predicted_sentence
+	return predicted_sentence, attention_weights, result
