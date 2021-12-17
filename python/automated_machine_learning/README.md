@@ -12,6 +12,7 @@
 |:--|:--|:--|:--|
 |[Optuna](https://www.preferred.jp/ja/projects/optuna/)|Preferred Networks|[MIT License](https://github.com/optuna/optuna/blob/master/LICENSE)|<ul><li>ハイパーパラメータ自動最適化フレームワーク</li></ul>|
 |[PyCaret](https://pycaret.org/)|PYCARET (Community)|[MIT License](https://github.com/pycaret/pycaret/blob/master/LICENSE)||<ul><li>機械学習ワークフローを少ないコードで実行できるPythonライブラリ</li></ul>|
+|[AutoKeras](https://autokeras.com/)|Texas A&M University|[Apache License 2.0](https://github.com/keras-team/autokeras/blob/master/LICENSE)||<ul><li>ディープラーニングモデルを自動構築できるPythonライブラリ</li></ul>|
 
 ## 実行手順
 

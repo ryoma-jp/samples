@@ -12,5 +12,13 @@ RUN apt install -y libgl1-mesa-dev
 
 RUN pip install opencv-python scikit-learn pandas 
 RUN pip install torch torchvision torchaudio
+
+# --- Optuna ---
 RUN pip install optuna
+
+# --- PyCaret ---
 RUN pip install pycaret shap
+
+# --- AutoKeras ---
+RUN pip install git+https://github.com/keras-team/keras-tuner.git
+RUN pip install autokeras
