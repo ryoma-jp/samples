@@ -15,6 +15,7 @@
 |[dist_sample](./dist_sample) |配布用パッケージ作成サンプル |
 |[feature_engineering](./feature_engineering) |特徴量エンジニアリングのサンプル |
 |[filter](./filter) |信号処理フィルタのサンプル |
+|[fifo](./fifo) |FIFOを介したプロセス間通信のサンプル |
 |[float2byte](./float2byte) |floatをbyteデータに変換するサンプル |
 |[glob_sample](./glob_sample) |globモジュールを用いたファイル探索のサンプル |
 |[k-medoids_sample](./medoids_sample) |k-medoids法によるクラスタリングのサンプル |
