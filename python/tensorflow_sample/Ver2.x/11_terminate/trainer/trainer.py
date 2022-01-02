@@ -4,6 +4,7 @@
 # モジュールのインポート
 #---------------------------------
 import os
+import fcntl
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -18,6 +19,33 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 class Trainer():
 	# --- カスタムコールバック ---
 	class CustomCallback(keras.callbacks.Callback):
+		def __init__(self, fifo):
+			super().__init__()
+			self.fifo = fifo
+			
+		def on_train_batch_end(self, batch, logs=None):
+			fd = os.open(self.fifo, os.O_RDONLY | os.O_NONBLOCK)
+			flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+			flags &= ~os.O_NONBLOCK
+			fcntl.fcntl(fd, fcntl.F_SETFL, flags)
+			
+			try:
+				command = os.read(fd, 128)
+				command = command.decode()[:-1]
+				while (True):
+					buf = os.read(fd, 65536)
+					if not buf:
+						break
+			finally:
+				os.close(fd)
+			
+			if (command):
+				if (command == 'stop'):
+					print("End batch: recv command={}".format(command))
+					self.model.stop_training = True
+				else:
+					print("End batch: recv unknown command={}".format(command))
+			
 		def on_epoch_end(self, epoch, logs=None):
 			keys = list(logs.keys())
 			log_str = ''
@@ -90,7 +118,7 @@ class Trainer():
 		return
 	
 	# --- 学習 ---
-	def fit(self, x_train, y_train, x_val=None, y_val=None, x_test=None, y_test=None,
+	def fit(self, fifo, x_train, y_train, x_val=None, y_val=None, x_test=None, y_test=None,
 			da_params=None,
 			batch_size=32, epochs=200,
 			verbose=0):
@@ -99,10 +127,11 @@ class Trainer():
 		checkpoint_path = os.path.join(self.output_dir, 'checkpoints', 'model.ckpt')
 		cp_callback = keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=1)
 		es_callback = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=5, verbose=1, mode='auto')
+		custom_callback = self.CustomCallback(fifo)
 		tensorboard_logdir = os.path.join(self.output_dir, 'logs')
 		tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=tensorboard_logdir, histogram_freq=1)
 		#callbacks = [cp_callback, es_callback]
-		callbacks = [cp_callback, self.CustomCallback(), tensorboard_callback]
+		callbacks = [cp_callback, custom_callback, tensorboard_callback]
 		
 		if (da_params is not None):
 			# --- no tuning ---

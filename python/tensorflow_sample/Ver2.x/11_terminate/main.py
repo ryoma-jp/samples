@@ -28,6 +28,8 @@ def ArgParser():
 				formatter_class=argparse.RawTextHelpFormatter)
 
 	# --- 引数を追加 ---
+	parser.add_argument('--fifo', dest='fifo', type=str, default=None, required=False, \
+			help='学習制御用FIFO')
 	parser.add_argument('--data_type', dest='data_type', type=str, default='CIFAR-10', required=False, \
 			help='データ種別(MNIST, CIFAR-10)')
 	parser.add_argument('--dataset_dir', dest='dataset_dir', type=str, default=None, required=True, \
@@ -82,6 +84,7 @@ def main():
 	# --- 引数処理 ---
 	args = ArgParser()
 	print('[INFO] Arguments')
+	print('  * args.fifo = {}'.format(args.fifo))
 	print('  * args.data_type = {}'.format(args.data_type))
 	print('  * args.dataset_dir = {}'.format(args.dataset_dir))
 	print('  * args.model_type = {}'.format(args.model_type))
@@ -151,7 +154,7 @@ def main():
 	else:
 		print('[ERROR] Unknown model_type: {}'.format(args.model_type))
 		quit()
-	trainer.fit(x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
+	trainer.fit(args.fifo, x_train, y_train, x_val=x_val, y_val=y_val, x_test=x_test, y_test=y_test,
 		batch_size=args.batch_size, da_params=data_augmentation, epochs=args.epochs)
 	trainer.save_model()
 	
