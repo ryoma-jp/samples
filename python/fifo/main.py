@@ -36,6 +36,8 @@ def ArgParser():
     parser.add_argument('--list', dest='list', action='store_true', required=False, \
             help='ワーカプロセスの一覧を表示する\n'
                  '本フラグが設定された場合は--commandは無視する')
+    parser.add_argument('--non-blocking', dest='non_blocking', action='store_true', required=False, \
+            help='ワーカプロセスがFIFOをノンブロッキングで読み込む(1[sec]毎のポーリング)')
     
     args = parser.parse_args()
 
@@ -61,6 +63,7 @@ def main():
     print('args.command : {}'.format(args.command))
     print('args.pid : {}'.format(args.command))
     print('args.list : {}'.format(args.list))
+    print('args.non_blocking : {}'.format(args.non_blocking))
 
     # --- ワーカ一覧表示 or コマンド送信 ---
     if (args.list):
@@ -78,7 +81,10 @@ def main():
             
             subprocess.run(['mkdir', '-p', f'{BASE_DIR}/{sub_proc_hash}'])
             subprocess.run(['mkfifo', f'{BASE_DIR}/{sub_proc_hash}/{FIFO_NAME}'])
-            sub_proc = subprocess.Popen(['python', 'sub_proc.py'])
+            if (args.non_blocking):
+                sub_proc = subprocess.Popen(['python', 'sub_proc.py', '--non-blocking'])
+            else:
+                sub_proc = subprocess.Popen(['python', 'sub_proc.py'])
             
             subproc_list = _get_subproc_list(SUBPROC_LIST)
             if (subproc_list is None):
