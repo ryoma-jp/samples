@@ -18,6 +18,7 @@
 |[fifo](./fifo) |FIFOを介したプロセス間通信のサンプル |
 |[float2byte](./float2byte) |floatをbyteデータに変換するサンプル |
 |[glob_sample](./glob_sample) |globモジュールを用いたファイル探索のサンプル |
+|[jupyter_nb_template](./jupyter_nb_template) |Docker上のJupyter Notebook環境 |
 |[k-medoids_sample](./medoids_sample) |k-medoids法によるクラスタリングのサンプル |
 |[lambda_sample](./lambda_sample) |無名関数lambdaの利用サンプル |
 |[matplotlib_sample](./matplotlib_sample) |matplotlibを用いたグラフ描画のサンプル |
@@ -28,9 +29,9 @@
 |[pca_sample](./pca_sample) | PCA(主成分分析)による次元圧縮のサンプル |
 |[read_csv_with_stringio](./read_csv_with_stringio) |カンマ区切りの文字列をpandas.read_csvで読み込むサンプル |
 |[resize_circle](./resize_circle) |Pythonモジュールごとの円のリサイズ(ダウンサンプリングのされ方が異なる) |
+|[save_class_object](./save_class_object) |クラスオブジェクトをバイナリ保存するサンプルコード |
 |[subprocess_run](./subprocess_run) |外部プログラムを実行するサンプル |
 |[tabnet_sample](./tabnet_sample) |TabNetの実装サンプル |
-|[jupyter_nb_template](./jupyter_nb_template) |Docker上のJupyter Notebook環境 |
 |[tensorflow_sample](./tensorflow_sample) |TensorFlowの実装サンプル |
 |[transformer](./transformer) |Transformerの実装サンプル |
 |[tsne_sample](./tsne_sample) | t-SNEによる次元圧縮のサンプル |
