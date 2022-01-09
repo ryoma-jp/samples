@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block main %}
+<div class ="welcome">
+  <h1 class="title">Select Forms</h1>
+  
+  <h2>選択項目一覧</h2>
+  
+  <p><a class="btn btn-primary" href="{% url 'select_forms_add_item' %}">選択項目を追加</a></p>
+  
+  <p>
+  {% if select_items %}
+    <ul class="list-group">
+    {% for select_item in select_items %}
+      <li class="list-group-item">{{ select_item }}</li>
+    {% endfor %}
+    </ul>
+  {% else %}
+    No Items
+  {% endif %}
+  </p>
+  
+  {% if select_items %}
+    <h2>チェックボックス</h2>
+    <form method="post">
+    {% csrf_token %}
+      <p>
+      <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+      {% for select_item in select_items %}
+        <input type="checkbox" class="btn-check" name="checkbox" id="checkbox {{ select_item.item_name }}" value="{{ select_item.item_name }}" autocomplete="off" {{ select_item.check_status }}>
+        <label class="btn btn-outline-primary" for="checkbox {{ select_item.item_name }}">{{ select_item.item_name }}</label>
+      {% endfor %}
+      </div>
+      </p>
+      <p><button class="btn btn-primary" type="submit" name="save_check_status">チェックボックスの状態を保存</button></p>
+    </form>
+    
+    <h2>ラジオボタン</h2>
+    <form method="post">
+    {% csrf_token %}
+      <p>
+      <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+      {% for select_item in select_items %}
+        <input type="radio" class="btn-check" name="radiobox" id="radiobox {{ select_item.item_name }}" value="{{ select_item.item_name }}" autocomplete="off" {{ select_item.radio_status }}>
+        <label class="btn btn-outline-primary" for="radiobox {{ select_item.item_name }}">{{ select_item.item_name }}</label>
+      {% endfor %}
+      </div>
+      </p>
+      <p><button class="btn btn-primary" type="submit" name="save_radio_status">ラジオボタンの状態を保存</button></p>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}

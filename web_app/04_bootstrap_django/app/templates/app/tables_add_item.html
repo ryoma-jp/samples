@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block main %}
+<div class ="welcome">
+  <h1 class="title">Add Table Item</h1>
+  
+  <form method="post">
+      {% csrf_token %}
+      {% bootstrap_form form %}
+      {% bootstrap_button button_type="submit" content="追加" %}
+  </form>
+</div>
+{% endblock %}
