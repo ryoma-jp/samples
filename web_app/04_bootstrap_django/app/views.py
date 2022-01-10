@@ -72,20 +72,51 @@ def select_forms_add_item(request):
     return render(request, "app/select_forms_add_item.html", {'form': form})
 
 # --- Side bar page ---
+class SidebarActiveContent():
+    def __init__(self):
+        self.home = ''
+        self.orders = ''
+        self.products = ''
+        self.customers = ''
+        
 @require_safe
 def side_bar_home(request):
-    return render(request, "app/side_bar_home.html", {})
+    sidebar_status = SidebarActiveContent()
+    sidebar_status.home = 'active'
+    
+    context = {
+        'sidebar_status': sidebar_status
+    }
+    return render(request, "app/side_bar_home.html", context)
 
 @require_safe
 def side_bar_orders(request):
-    return render(request, "app/side_bar_orders.html", {})
+    sidebar_status = SidebarActiveContent()
+    sidebar_status.orders = 'active'
+    
+    context = {
+        'sidebar_status': sidebar_status
+    }
+    return render(request, "app/side_bar_orders.html", context)
 
 @require_safe
 def side_bar_products(request):
-    return render(request, "app/side_bar_products.html", {})
+    sidebar_status = SidebarActiveContent()
+    sidebar_status.products = 'active'
+    
+    context = {
+        'sidebar_status': sidebar_status
+    }
+    return render(request, "app/side_bar_products.html", context)
 
 @require_safe
 def side_bar_customers(request):
-    return render(request, "app/side_bar_customers.html", {})
+    sidebar_status = SidebarActiveContent()
+    sidebar_status.customers = 'active'
+    
+    context = {
+        'sidebar_status': sidebar_status
+    }
+    return render(request, "app/side_bar_customers.html", context)
 
 
