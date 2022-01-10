@@ -9,9 +9,27 @@ CSSフレームワークにはBootstrapを使用する
 $ ./run_server.sh
 ```
 
+## OSS利用について
+
+本コードには下記のOSSを利用している
+
+* static/css/dashboard.css
+  * [Bootstrap公式のExamples](https://getbootstrap.jp/docs/5.0/examples/)からダウンロード
+    * https://github.com/twbs/bootstrap/releases/download/v5.0.2/bootstrap-5.0.2-examples.zip
+
+
 ## Reference
 
 * [Introduction](https://getbootstrap.com/docs/4.3/getting-started/introduction/)
   * レイアウトやコンポーネントなどのコードをコピーできる
-
+* [integrity 属性を使った改ざん検知](https://mgng.mugbum.info/1468)
+  * ソースのハッシュ値を取得する方法  
+  ```
+    $ cat FILENAME | openssl dgst -sha384 -binary | openssl base64 -A
+  ```
+* 静的ファイルの扱い方
+  * [Djangoにおける静的ファイル(static file)の取り扱い](https://qiita.com/saira/items/a1c565c4a2eace268a07)
+  * [Django staticファイル まとめ](https://qiita.com/okoppe8/items/38688fa9259f261c9440)
+  * 静的ファイルの読み込みで404エラーが出る場合  
+    → STATICFILES_DIRSを設定する
 

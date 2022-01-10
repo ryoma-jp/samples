@@ -70,3 +70,10 @@ def select_forms_add_item(request):
         form = SelectFormItemsForm()
     
     return render(request, "app/select_forms_add_item.html", {'form': form})
+
+# --- Side bar page ---
+@require_safe
+def side_bar(request):
+    return render(request, "app/side_bar.html", {})
+
+
