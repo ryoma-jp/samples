@@ -14,6 +14,7 @@ class SelectFormItems(models.Model):
     item_name = models.CharField('Item Name', max_length=32)
     check_status = models.CharField('Check Box Status', max_length=10, default='unchecked')  # checked or unchecked
     radio_status = models.CharField('Radio Box Status', max_length=10, default='unchecked')  # checked or unchecked
+    dropdown_status = models.CharField('Dropdown Status', max_length=10, default='unchecked')  # checked or unchecked
     
     def __str__(self):
         return self.item_name

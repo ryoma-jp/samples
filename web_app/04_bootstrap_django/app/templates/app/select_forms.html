@@ -48,6 +48,21 @@
       </p>
       <p><button class="btn btn-primary" type="submit" name="save_radio_status">ラジオボタンの状態を保存</button></p>
     </form>
+    
+    <h2>ドロップダウン</h2>
+    <form method="post">
+    {% csrf_token %}
+      <div class="btn-group">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          {{ dropdown_text }}
+        </button>
+        <ul class="dropdown-menu">
+        {% for select_item in select_items %}
+          <li><button class="dropdown-item" type="submit" name="dropdown" value="{{ select_item.item_name }}">{{ select_item.item_name }}</button></li>
+        {% endfor %}
+        </ul>
+      </div>
+    </form>
   {% endif %}
 </div>
 {% endblock %}

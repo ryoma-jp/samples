@@ -54,9 +54,29 @@ def select_forms(request):
                     item.radio_status = 'unchecked'
                 item.save()
             return redirect('select_forms')
+        elif ('dropdown' in request.POST):
+            dropdown = request.POST.getlist('dropdown')
+            for item in SelectFormItems.objects.all():
+                if (item.item_name in dropdown):
+                    item.dropdown_status = 'checked'
+                else:
+                    item.dropdown_status = 'unchecked'
+                item.save()
+            return redirect('select_forms')
+        else:
+            return redirect('select_forms')
     else:
         select_items = SelectFormItems.objects.all()
-        return render(request, "app/select_forms.html", {'select_items': select_items})
+        dropdown_text = 'Item Select'
+        for item in select_items:
+            if (item.dropdown_status == 'checked'):
+                dropdown_text = item.item_name
+        
+        context = {
+            'select_items': select_items,
+            'dropdown_text': dropdown_text
+        }
+        return render(request, "app/select_forms.html", context)
 
 @require_http_methods(["GET", "POST", "HEAD"])
 def select_forms_add_item(request):
