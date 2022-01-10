@@ -73,7 +73,19 @@ def select_forms_add_item(request):
 
 # --- Side bar page ---
 @require_safe
-def side_bar(request):
-    return render(request, "app/side_bar.html", {})
+def side_bar_home(request):
+    return render(request, "app/side_bar_home.html", {})
+
+@require_safe
+def side_bar_orders(request):
+    return render(request, "app/side_bar_orders.html", {})
+
+@require_safe
+def side_bar_products(request):
+    return render(request, "app/side_bar_products.html", {})
+
+@require_safe
+def side_bar_customers(request):
+    return render(request, "app/side_bar_customers.html", {})
 
 
