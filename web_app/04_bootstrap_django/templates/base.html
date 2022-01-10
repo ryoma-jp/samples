@@ -36,58 +36,11 @@
     </div>
   </nav>
   
-  
-      <div class="container-fluid">
-        <div class="row">
-
-  <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse bg-dark">
-    <div class="position-sticky pt-3 flex-shrink-0 p-3 text-white bg-dark">
-      <ul class="nav nav-pills flex-column mb-auto">
-        <li class="nav-item">
-          <!--
-          <a href="#" class="nav-link active" aria-current="page">
-          -->
-          <a href="#" class="nav-link text-white">
-            <svg class="bi me-2" width="16" height="16"><use xlink:href="#home"/></svg>
-            Home
-          </a>
-        </li>
-        <li>
-          <a href="#" class="nav-link text-white">
-            <svg class="bi me-2" width="16" height="16"><use xlink:href="#speedometer2"/></svg>
-            Dashboard
-          </a>
-        </li>
-        <li>
-          <a href="#" class="nav-link text-white">
-            <svg class="bi me-2" width="16" height="16"><use xlink:href="#table"/></svg>
-            Orders
-          </a>
-        </li>
-        <li>
-          <a href="#" class="nav-link text-white">
-            <svg class="bi me-2" width="16" height="16"><use xlink:href="#grid"/></svg>
-            Products
-          </a>
-        </li>
-        <li>
-          <a href="#" class="nav-link text-white">
-            <svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"/></svg>
-            Customers
-          </a>
-        </li>
-      </ul>
-    </div>
-  </nav>
-
-  <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-    <div class="tab-content">
-          {% block main %}{% endblock %}
+  <main>
+    <div class="container-fluid">
+      {% block main %}{% endblock %}
     </div>
   </main>
 
-        </div>
-      </div>
-  
 </body>
 </html>
