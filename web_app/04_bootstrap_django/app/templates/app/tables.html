@@ -5,75 +5,92 @@
   <h1 class="title">Tables</h1>
   <p><a href="https://getbootstrap.com/docs/5.1/getting-started/introduction/">Official Reference (Bootstrap v5.1)</a></p>
   
-  <p><a class="btn btn-primary" href="{% url 'table_add_item' %}">テーブルアイテムを追加</a></p>
+  <a class="btn btn-primary" href="{% url 'table_add_item' %}">テーブルアイテムを追加</a>
   
+  <div class="container">
   {% if table_items %}
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">First</th>
-          <th scope="col">Last</th>
-          <th scope="col">Handle</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for table_item in table_items %}
-          <tr>
-            <th scope="row">{{ table_item.id }}</th>
-            <td>{{ table_item.first }}</td>
-            <td>{{ table_item.last }}</td>
-            <td>{{ table_item.handle }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="row">
+      <div class="col-6">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">First</th>
+              <th scope="col">Last</th>
+              <th scope="col">Handle</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for table_item in table_items %}
+              <tr>
+                <th scope="row">{{ table_item.id }}</th>
+                <td>{{ table_item.first }}</td>
+                <td>{{ table_item.last }}</td>
+                <td>{{ table_item.handle }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-6">
+        <table class="table table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">First</th>
+              <th scope="col">Last</th>
+              <th scope="col">Handle</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for table_item in table_items %}
+              <tr>
+                <th scope="row">{{ table_item.id }}</th>
+                <td>{{ table_item.first }}</td>
+                <td>{{ table_item.last }}</td>
+                <td>{{ table_item.handle }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-    <table class="table table-hover">
-      <thead class="table-dark">
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">First</th>
-          <th scope="col">Last</th>
-          <th scope="col">Handle</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for table_item in table_items %}
-          <tr>
-            <th scope="row">{{ table_item.id }}</th>
-            <td>{{ table_item.first }}</td>
-            <td>{{ table_item.last }}</td>
-            <td>{{ table_item.handle }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-    <table class="table table-hover">
-      <thead class="table-light">
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">First</th>
-          <th scope="col">Last</th>
-          <th scope="col">Handle</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for table_item in table_items %}
-          <tr>
-            <th scope="row">{{ table_item.id }}</th>
-            <td>{{ table_item.first }}</td>
-            <td>{{ table_item.last }}</td>
-            <td>{{ table_item.handle }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="row">
+      <div class="col-6">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">First</th>
+              <th scope="col">Last</th>
+              <th scope="col">Handle</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for table_item in table_items %}
+              <tr>
+                <th scope="row">{{ table_item.id }}</th>
+                <td>{{ table_item.first }}</td>
+                <td>{{ table_item.last }}</td>
+                <td>{{ table_item.handle }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
 
   {% else %}
-    <p>No Items</p>
+    <div class="row">
+      <div class="col-6">
+        <p>No Items</p>
+      </div>
+    </div>
   {% endif %}
-  
+  </div>
 </div>
 {% endblock %}
