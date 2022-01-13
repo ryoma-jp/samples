@@ -34,7 +34,7 @@ def table_add_item(request):
 # --- Select Forms page ---
 @require_http_methods(["GET", "POST", "HEAD"])
 def select_forms(request):
-    #print(f'[DEBUG] {request.method}, {request.POST}')
+    # print(f'[DEBUG] {request.method}, {request.POST}')
     if (request.method == 'POST'):
         if ('save_check_status' in request.POST):
             checkbox = request.POST.getlist('checkbox')
@@ -63,6 +63,16 @@ def select_forms(request):
                     item.dropdown_status = 'unchecked'
                 item.save()
             return redirect('select_forms')
+        elif ('save_dropdown_item' in request.POST):
+            dropdown = request.POST.getlist('dropdownMenuButton1_submit')
+            for item in SelectFormItems.objects.all():
+                if (item.item_name in dropdown):
+                    item.dropdown_status_with_submit = 'checked'
+                else:
+                    item.dropdown_status_with_submit = 'unchecked'
+                item.save()
+            return redirect('select_forms')
+            
         else:
             return redirect('select_forms')
     else:
@@ -72,9 +82,15 @@ def select_forms(request):
             if (item.dropdown_status == 'checked'):
                 dropdown_text = item.item_name
         
+        dropdown_text_with_submit = 'Item Select'
+        for item in select_items:
+            if (item.dropdown_status_with_submit == 'checked'):
+                dropdown_text_with_submit = item.item_name
+        
         context = {
             'select_items': select_items,
-            'dropdown_text': dropdown_text
+            'dropdown_text': dropdown_text,
+            'dropdown_text_with_submit': dropdown_text_with_submit,
         }
         return render(request, "app/select_forms.html", context)
 

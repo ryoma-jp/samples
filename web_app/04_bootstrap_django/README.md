@@ -9,6 +9,17 @@ CSSフレームワークにはBootstrapを使用する
 $ ./run_server.sh
 ```
 
+## 追加予定の機能
+
+* [x] 表
+* [x] チェックボックス
+* [x] ラジオボタン
+* [x] ドロップダウンボタン
+* [ ] サイドバー
+* [ ] ファイルアップロード
+* [ ] グラフ
+* [ ] 画像表示
+
 ## OSS利用について
 
 本コードには下記のOSSを利用している
@@ -32,4 +43,9 @@ $ ./run_server.sh
   * [Django staticファイル まとめ](https://qiita.com/okoppe8/items/38688fa9259f261c9440)
   * 静的ファイルの読み込みで404エラーが出る場合  
     → STATICFILES_DIRSを設定する
+* [スペース設定](https://getbootstrap.com/docs/5.1/utilities/spacing/)
+* レイアウト
+  * [Flex](https://getbootstrap.com/docs/5.1/utilities/flex/)
+  * [Comumns](https://getbootstrap.com/docs/5.1/layout/columns/)
+
 

@@ -66,13 +66,13 @@
     
     <h2>ドロップダウン（Submitボタン押下で反映）</h2>
     <div class="dropdown">
-      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-        Dropdown button
+      <button class="btn btn-primary dropdown-toggle" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+        {{ dropdown_text_with_submit }}
       </button>
       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" id="dropdownMenuButton1_list">
-        <li><button class="dropdown-item" value="Action">Action</li>
-        <li><button class="dropdown-item" value="Another action">Another action</li>
-        <li><button class="dropdown-item" value="Something else here">Something else here</li>
+        {% for select_item in select_items %}
+          <li><button class="dropdown-item" value="{{ select_item.item_name }}">{{ select_item.item_name }}</li>
+        {% endfor %}
       </ul>
       <script>
         // id=dropdownMenuButton1_listのdropdown-menu内のliタグに対してリスナにクリックイベントを追加する
@@ -84,13 +84,23 @@
             
             display = document.getElementById('dropdownMenuButton1');
             display.innerText = el.textContent;
+            
+            ele = document.getElementById('dropdownMenuButton1_submit')
+            ele.value = el.textContent;
           });
         });
       </script>
     </div>
-    
-    
-
+    <form method="post">
+    {% csrf_token %}
+      <!--
+        buttonタグをformタグで囲むとドロップダウン押下時にPOSTされてしまうので，
+        form外にbuttonを作成して，Javascriptでform内のhidden型のvalueを設定する
+      -->
+      <input type="hidden" name="dropdownMenuButton1_submit" id="dropdownMenuButton1_submit" value="">
+      <p><button class="btn btn-primary" type="submit" name="save_dropdown_item" id="save_dropdown_item">ドロップダウンの状態を保存</button></p>
+    </form>
+  
   {% endif %}
 </div>
 {% endblock %}
