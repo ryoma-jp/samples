@@ -84,45 +84,46 @@
     
     <h2>ドロップダウン（Submitボタン押下で反映）</h2>
     <div class="container">
-      <div class="row">
-        <div class="dropdown">
-          <button class="btn btn-primary dropdown-toggle col-4 my-1" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-            {{ dropdown_text_with_submit }}
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" id="dropdownMenuButton1_list">
-            {% for select_item in select_items %}
-              <li><button class="dropdown-item" value="{{ select_item.item_name }}">{{ select_item.item_name }}</li>
-            {% endfor %}
-          </ul>
-          <script>
-            // id=dropdownMenuButton1_listのdropdown-menu内のliタグに対してリスナにクリックイベントを追加する
-            dropdown_list = document.querySelector('#dropdownMenuButton1_list')
-            dropdown_list.querySelectorAll('li').forEach( function(el) {
-              el.addEventListener('click', function() {
-                // console.log('Click dropdown item');
-                // console.log(el.textContent);
-                
-                display = document.getElementById('dropdownMenuButton1');
-                display.innerText = el.textContent;
-                
-                ele = document.getElementById('dropdownMenuButton1_submit')
-                ele.value = el.textContent;
-              });
-            });
-          </script>
-        </div>
-      </div>
-      <div class="row">
-        <form method="post">
+      <form method="post">
         {% csrf_token %}
+        <div class="row">
+          <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle col-4 my-1" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+              {{ dropdown_text_with_submit }}
+            </button>
+            <ul class="dropdown-menu col-4 my-1" aria-labelledby="dropdownMenuButton1" id="dropdownMenuButton1_list">
+              {% for select_item in select_items %}
+                <li><button class="dropdown-item" type="button" value="{{ select_item.item_name }}">{{ select_item.item_name }}</li>
+              {% endfor %}
+            </ul>
+            <script>
+              // id=dropdownMenuButton1_listのdropdown-menu内のliタグに対してリスナにクリックイベントを追加する
+              dropdown_list = document.querySelector('#dropdownMenuButton1_list')
+              dropdown_list.querySelectorAll('li').forEach( function(el) {
+                el.addEventListener('click', function() {
+                  // console.log('Click dropdown item');
+                  // console.log(el.textContent);
+                  
+                  display = document.getElementById('dropdownMenuButton1');
+                  display.innerText = el.textContent;
+                  
+                  ele = document.getElementById('dropdownMenuButton1_submit')
+                  ele.value = el.textContent;
+                });
+              });
+            </script>
+            
           <!--
-            buttonタグをformタグで囲むとドロップダウン押下時にPOSTされてしまうので，
-            form外にbuttonを作成して，Javascriptでform内のhidden型のvalueを設定する
+            button型で選択されたアイテムはPOSTで送信されないようなので，
+            Javascriptでhidden型inputフォームのvalueを設定する
           -->
           <input type="hidden" name="dropdownMenuButton1_submit" id="dropdownMenuButton1_submit" value="">
-          <p><button class="btn btn-primary col-4 my-1" type="submit" name="save_dropdown_item" id="save_dropdown_item">ドロップダウンの状態を保存</button></p>
-        </form>
-      </div>
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn btn-primary col-4 my-1" type="submit" name="save_dropdown_item" id="save_dropdown_item">ドロップダウンの状態を保存</button>
+        </div>
+      </form>
     </div>
   
   {% endif %}
