@@ -1,8 +1,8 @@
 from django.views.decorators.http import require_safe, require_http_methods
 from django.shortcuts import render, redirect
 
-from app.models import TableItems, SelectFormItems
-from app.forms import TableItemsForm, SelectFormItemsForm
+from app.models import TableItems, SelectFormItems, UploadFiles
+from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm
 
 # Create your views here.
 
@@ -156,7 +156,26 @@ def side_bar_customers(request):
     return render(request, "app/side_bar_customers.html", context)
 
 # --- File Upload page ---
-@require_safe
+@require_http_methods(["GET", "POST", "HEAD"])
 def file_upload(request):
-    return render(request, "app/file_upload.html")
+    # print('-------------------------------')
+    # print(request)
+    # print(request.POST)
+    # print(request.FILES)
+    # print('-------------------------------')
+    if (request.method == 'POST'):
+        form = UploadFileForm(request.POST, request.FILES)
+        if (form.is_valid()):
+            form.save()
+            return redirect('file_upload')
+        else:
+            print('[INFO] UploadFileForm is invalid')
+            upload_file_form = UploadFileForm()
+    else:
+        upload_file_form = UploadFileForm()
+    
+    context = {
+        'upload_file_form': upload_file_form,
+    }
+    return render(request, "app/file_upload.html", context)
 

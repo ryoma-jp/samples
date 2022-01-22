@@ -1,10 +1,18 @@
 {% extends "base.html" %}
+{% load django_bootstrap5 %}
 
 {% block main %}
 <div class ="welcome">
   <h1 class="title">File Upload</h1>
   
   <div class="container">
+    <div class="col-4">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% bootstrap_form upload_file_form %}
+        <button class="btn btn-primary" type="submit">Upload</button>
+      </form>
+    </div>
   </div>
 </div>
 {% endblock %}

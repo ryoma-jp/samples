@@ -20,3 +20,14 @@ class SelectFormItems(models.Model):
     def __str__(self):
         return self.item_name
 
+class UploadFiles(models.Model):
+    # --- Reference ---
+    #  * https://ymgsapo.com/2018/11/05/file-upload/
+    #  * https://qiita.com/okoppe8/items/86776b8df566a4513e96
+    description = models.CharField(max_length=255, blank=True)
+    upload_file = models.FileField(
+                      upload_to='',
+                      verbose_name='Upload File',
+                  )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
