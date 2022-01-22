@@ -174,8 +174,10 @@ def file_upload(request):
     else:
         upload_file_form = UploadFileForm()
     
+    uploaded_files = UploadFiles.objects.all()
     context = {
         'upload_file_form': upload_file_form,
+        'uploaded_files': uploaded_files,
     }
     return render(request, "app/file_upload.html", context)
 
