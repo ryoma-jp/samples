@@ -10,4 +10,5 @@ urlpatterns = [
     path('side_bar/orders/', views.side_bar_orders, name='side_bar_orders'),
     path('side_bar/products/', views.side_bar_products, name='side_bar_products'),
     path('side_bar/customers/', views.side_bar_customers, name='side_bar_customers'),
+    path('file_upload/', views.file_upload, name='file_upload'),
 ]

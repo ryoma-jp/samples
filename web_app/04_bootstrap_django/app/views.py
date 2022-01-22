@@ -155,4 +155,8 @@ def side_bar_customers(request):
     }
     return render(request, "app/side_bar_customers.html", context)
 
+# --- File Upload page ---
+@require_safe
+def file_upload(request):
+    return render(request, "app/file_upload.html")
 
