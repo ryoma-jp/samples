@@ -11,4 +11,5 @@ urlpatterns = [
     path('side_bar/products/', views.side_bar_products, name='side_bar_products'),
     path('side_bar/customers/', views.side_bar_customers, name='side_bar_customers'),
     path('file_upload/', views.file_upload, name='file_upload'),
+    path('image_gallery/', views.image_gallery, name='image_gallery'),
 ]

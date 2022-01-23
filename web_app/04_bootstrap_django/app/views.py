@@ -181,3 +181,8 @@ def file_upload(request):
     }
     return render(request, "app/file_upload.html", context)
 
+# --- Image Gallery page ---
+@require_http_methods(["GET", "POST", "HEAD"])
+def image_gallery(request):
+    return render(request, "app/image_gallery.html")
+
