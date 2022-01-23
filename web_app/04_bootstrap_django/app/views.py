@@ -198,3 +198,9 @@ def image_gallery(request):
     }
     return render(request, "app/image_gallery.html", context)
 
+# --- Graph page ---
+@require_http_methods(["GET", "POST", "HEAD"])
+def graph(request):
+    return render(request, "app/graph.html")
+
+
