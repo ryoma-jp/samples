@@ -1,5 +1,11 @@
 #! /bin/bash
 
+# --- デフォルト値 --
+DEFAULT_DATASET="imagenet_v2"
+DEFAULT_DATASET_DIR="_download"
+DEFAULT_IMAGE_DIR="_images"
+DEFAULT_LOG_FILE="download_images.log"
+
 # --- 必要なパッケージのインストール
 pip3 install tfds-nightly==4.4.0.dev202201220107 tensorflow==2.8.0rc0
 
@@ -17,7 +23,15 @@ Usage:
     $(basename ${0}) [command] [<options>]
 
 Options:
+    --dataset         specify dataset name(ex: cifar10, mnist, imagenet_v2, ...)
+                      see https://www.tensorflow.org/datasets/catalog/overview#image_classification
+                      default: ${DEFAULT_DATASET}
+    --dataset_dir     specify directory to save dataset
+                      default: ${DEFAULT_DATASET_DIR}
+    --image_dir       specify directory to save images
+                      default: ${DEFAULT_IMAGE_DIR}
     --log, -l         specify log file
+                      default: ${DEFAULT_LOG_FILE}
     --version, -v     print $(basename ${0}) version
     --help, -h        print this
 EOF
@@ -37,6 +51,21 @@ do
             exit
         ;;
         
+        --dataset)
+            DATASET=${2}
+            shift
+        ;;
+
+        --dataset_dir)
+            DATASET_DIR=${2}
+            shift
+        ;;
+
+        --image_dir)
+            IMAGE_DIR=${2}
+            shift
+        ;;
+
         --log|-l)
             LOG_FILE=${2}
             shift
@@ -51,9 +80,22 @@ do
     shift
 done
 
+if [ ! ${DATASET} ]; then
+    DATASET=${DEFAULT_DATASET}
+fi
+if [ ! ${DATASET_DIR} ]; then
+    DATASET_DIR=${DEFAULT_DATASET_DIR}
+fi
+if [ ! ${IMAGE_DIR} ]; then
+    IMAGE_DIR=${DEFAULT_IMAGE_DIR}
+fi
 if [ ! ${LOG_FILE} ]; then
-    LOG_FILE="download_images.log"
+    LOG_FILE=${DEFAULT_LOG_FILE}
 fi
 
-python download_images.py --dataset imagenet_v2 > ${LOG_FILE}
+python download_images.py \
+    --dataset ${DATASET} \
+    --dataset_dir ${DATASET_DIR} \
+    --image_dir ${IMAGE_DIR} \
+    > ${LOG_FILE}
 
