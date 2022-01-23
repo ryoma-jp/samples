@@ -4,6 +4,8 @@ from django.shortcuts import render, redirect
 from app.models import TableItems, SelectFormItems, UploadFiles
 from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm
 
+from pathlib import Path
+
 # Create your views here.
 
 # --- Top page ---
@@ -184,5 +186,15 @@ def file_upload(request):
 # --- Image Gallery page ---
 @require_http_methods(["GET", "POST", "HEAD"])
 def image_gallery(request):
-    return render(request, "app/image_gallery.html")
+    image_path = Path('media', 'images')
+    image_files = [f'/{str(x)}' for x in list(image_path.glob('**/*.*'))]
+    # print('-----------------------------')
+    # print(image_files)
+    # print('-----------------------------')
+    
+    
+    context = {
+        'image_files': image_files,
+    }
+    return render(request, "app/image_gallery.html", context)
 

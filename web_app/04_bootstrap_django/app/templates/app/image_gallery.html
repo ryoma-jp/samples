@@ -3,5 +3,12 @@
 {% block main %}
 <div class ="welcome">
   <h1 class="title">Image Gallery</h1>
+  
+  {% for image_file in image_files %}
+    <figure class="figure">
+      <img src="{{ image_file }}" alt="Responsive image" class="img-thumbnail">
+      <figcaption class="figure-caption">{{ image_file }}</figcaption>
+    </figure>
+  {% endfor %}
 </div>
 {% endblock %}
