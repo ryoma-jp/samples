@@ -1,5 +1,8 @@
 #! /bin/bash
 
+# --- 環境設定 --
+SCRIPT_DIR=$(cd $(dirname $0); pwd)
+
 # --- デフォルト値 --
 DEFAULT_DATASET="imagenet_v2"
 DEFAULT_DATASET_DIR="_download"
@@ -93,7 +96,7 @@ if [ ! ${LOG_FILE} ]; then
     LOG_FILE=${DEFAULT_LOG_FILE}
 fi
 
-python download_images.py \
+python ${SCRIPT_DIR}/download_images.py \
     --dataset ${DATASET} \
     --dataset_dir ${DATASET_DIR} \
     --image_dir ${IMAGE_DIR} \

@@ -1,5 +1,21 @@
 #! /bin/bash
 
+# --- download images ---
+IMAGE_DIR="media/images"
+if [ -e ${IMAGE_DIR} ]; then
+	echo "--- Skip Download Images (Images are already exist) ---"
+else
+	echo "--- Download Images ---"
+	docker-compose run web /code/tools/prepare_images/run.sh --dataset imagenet_v2 --dataset_dir /code/tools/prepare_images/download/ --image_dir /code/media/images/ --log /tmp/prepare_images.log
+	STAT_BUILD=$?
+	echo ${STAT_BUILD}
+	if [ ! ${STAT_BUILD} -eq 0 ]; then
+		echo "[ERROR] Failed to download images: (exit-status = ${STAT_BUILD})"
+		exit
+	fi
+	echo "--- Download Images DONE ---"
+fi
+
 # --- create local_settings.py ---
 echo "--- Create local_settings.py ---"
 docker-compose run web python tools/create_local_settings/create_local_settings.py --output_file djangoproject/local_settings.py
