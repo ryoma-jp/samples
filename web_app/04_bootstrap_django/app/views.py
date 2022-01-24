@@ -5,6 +5,7 @@ from app.models import TableItems, SelectFormItems, UploadFiles
 from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm
 
 from pathlib import Path
+import numpy as np
 
 # Create your views here.
 
@@ -201,6 +202,19 @@ def image_gallery(request):
 # --- Graph page ---
 @require_http_methods(["GET", "POST", "HEAD"])
 def graph(request):
-    return render(request, "app/graph.html")
+    def _sin(n_data=20):
+        T = 2 * np.pi
+        
+        x = np.linspace(0, T, n_data)
+        y = np.sin(x)
+        
+        return x, y
+    
+    x, y = _sin()
+    context = {
+        'graph_x': list(x),
+        'graph_y': list(y),
+    }
+    return render(request, "app/graph.html", context)
 
 
