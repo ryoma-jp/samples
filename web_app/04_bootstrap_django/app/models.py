@@ -31,3 +31,10 @@ class UploadFiles(models.Model):
                   )
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
+class GraphSignalSelector(models.Model):
+    SIGNAL_CHOICES = [
+        ('sin', 'sin'),
+        ('cos', 'cos'),
+    ]
+    signal = models.CharField(max_length=3, choices=SIGNAL_CHOICES, default='sin')
+

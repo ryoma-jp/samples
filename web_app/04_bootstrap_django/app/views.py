@@ -1,8 +1,8 @@
 from django.views.decorators.http import require_safe, require_http_methods
 from django.shortcuts import render, redirect
 
-from app.models import TableItems, SelectFormItems, UploadFiles
-from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm
+from app.models import TableItems, SelectFormItems, UploadFiles, GraphSignalSelector
+from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm, GraphSignalSelectorForm
 
 from pathlib import Path
 import numpy as np
@@ -202,6 +202,14 @@ def image_gallery(request):
 # --- Graph page ---
 @require_http_methods(["GET", "POST", "HEAD"])
 def graph(request):
+    def _cos(n_data=20):
+        T = 2 * np.pi
+        
+        x = np.linspace(0, T, n_data)
+        y = np.cos(x)
+        
+        return x, y
+    
     def _sin(n_data=20):
         T = 2 * np.pi
         
@@ -210,8 +218,33 @@ def graph(request):
         
         return x, y
     
-    x, y = _sin()
+    try:
+        signal = GraphSignalSelector.objects.get(pk=1)
+    except:
+        signal = None
+    
+    if (request.method == 'POST'):
+        if (signal is not None):
+            signal.signal = request.POST['signal']
+            signal.save()
+        else:
+            GraphSignalSelector.objects.create(signal=request.POST['signal'])
+        return redirect('graph')
+    
+    if (signal is not None):
+        form = GraphSignalSelectorForm(initial={'signal': signal.signal})
+        signal_type = signal.signal
+    else:
+        form = GraphSignalSelectorForm()
+        signal_type = 'sin'   # default
+    
+    if (signal_type == 'sin'):
+        x, y = _sin()
+    else:  # elif (signal_type == 'cos'):
+        x, y = _cos()
+
     context = {
+        'form': form,
         'graph_x': list(x),
         'graph_y': list(y),
     }
