@@ -1,11 +1,12 @@
 from django.views.decorators.http import require_safe, require_http_methods
 from django.shortcuts import render, redirect
 
-from app.models import TableItems, SelectFormItems, UploadFiles, GraphSignalSelector
-from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm, GraphSignalSelectorForm
+from app.models import TableItems, SelectFormItems, UploadFiles, ImageGallery, GraphSignalSelector
+from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm, ImageGalleryForm, GraphSignalSelectorForm
 
 from pathlib import Path
 import numpy as np
+from natsort import natsorted
 
 # Create your views here.
 
@@ -187,14 +188,43 @@ def file_upload(request):
 # --- Image Gallery page ---
 @require_http_methods(["GET", "POST", "HEAD"])
 def image_gallery(request):
-    image_path = Path('media', 'images')
-    image_files = [f'/{str(x)}' for x in list(image_path.glob('**/*.*'))]
+    print('-------------------------------')
+    print(request)
+    print(request.POST)
+    print('-------------------------------')
+    
+    try:
+        gallery = ImageGallery.objects.get(pk=1)
+    except:
+        ImageGallery.objects.create()
+        gallery = ImageGallery.objects.get(pk=1)
+    
+    if (request.method == 'POST'):
+        print(request.POST['images_per_page'])
+        request.session['images_per_page'] = int(request.POST['images_per_page'])
+#        gallery.images_per_page = request.POST['images_per_page']
+#        gallery.save()
+        return redirect('image_gallery')
+    
+    image_file_list = request.session.get('image_file_list', None)
+    images_per_page = request.session.get('images_per_page', 50)
+    print(f'images_per_page: {images_per_page}')
+    if (image_file_list is None):
+        image_path = Path('media', 'images')
+        image_file_list = natsorted(list(image_path.glob('**/*.*')), key=lambda x:x.name)
+        image_file_list = [f'/{str(x)}' for x in image_file_list]
+        request.session['image_file_list'] = image_file_list
+    print(f'image_file_list: {image_file_list[0:10]}')
+    image_files = image_file_list[0:images_per_page]
+#    image_files = image_file_list[0:50]
     # print('-----------------------------')
     # print(image_files)
     # print('-----------------------------')
     
+    form = ImageGalleryForm(initial={'images_per_page': images_per_page})
     
     context = {
+        'form': form,
         'image_files': image_files,
     }
     return render(request, "app/image_gallery.html", context)

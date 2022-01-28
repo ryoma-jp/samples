@@ -31,6 +31,15 @@ class UploadFiles(models.Model):
                   )
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
+class ImageGallery(models.Model):
+    SHOW_IMAGES_NUM = [
+        (50, '50'),
+        (100, '100'),
+        (150, '150'),
+        (200, '200'),
+    ]
+    images_per_page = models.IntegerField(choices=SHOW_IMAGES_NUM, default=50)
+
 class GraphSignalSelector(models.Model):
     SIGNAL_CHOICES = [
         ('sin', 'sin'),

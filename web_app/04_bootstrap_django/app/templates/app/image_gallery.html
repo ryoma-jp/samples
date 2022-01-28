@@ -1,12 +1,19 @@
 {% extends "base.html" %}
+{% load django_bootstrap5 %}
 
 {% block main %}
 <div class ="welcome">
   <h1 class="title">Image Gallery</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button class="btn btn-primary" type="submit" name="submit_img_num">Submit</button>
+  </form>
   
   {% for image_file in image_files %}
     <figure class="figure">
-      <img src="{{ image_file }}" alt="Responsive image" class="img-thumbnail">
+      <img src="{{ image_file }}" alt="Responsive image" class="img-fluid img-thumbnail">
       <figcaption class="figure-caption">{{ image_file }}</figcaption>
     </figure>
   {% endfor %}

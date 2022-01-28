@@ -1,6 +1,6 @@
 from django import forms
 
-from app.models import TableItems, SelectFormItems, UploadFiles, GraphSignalSelector
+from app.models import TableItems, SelectFormItems, UploadFiles, ImageGallery, GraphSignalSelector
 
 class TableItemsForm(forms.ModelForm):
     class Meta:
@@ -16,6 +16,11 @@ class UploadFileForm(forms.ModelForm):
     class Meta:
         model = UploadFiles
         fields = ('description', 'upload_file', )
+
+class ImageGalleryForm(forms.ModelForm):
+    class Meta:
+        model = ImageGallery
+        fields = ('images_per_page',)
 
 class GraphSignalSelectorForm(forms.ModelForm):
     class Meta:
