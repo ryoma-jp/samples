@@ -7,8 +7,31 @@
 
   <form method="post">
     {% csrf_token %}
-    {% bootstrap_form form %}
-    <button class="btn btn-primary" type="submit" name="submit_img_num">Submit</button>
+    <div class="row">
+      <div class="btn-group col-1 my-1">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          Images per Page: {{ gallery_form.images_per_page.default }}
+        </button>
+        <ul class="dropdown-menu">
+        {% for item in gallery_form.images_per_page.items %}
+          <li><button class="dropdown-item" type="submit" name="images_per_page" value="{{ item }}">{{ item }}</button></li>
+        {% endfor %}
+        </ul>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="btn-group col-1 my-1">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          Select Page: {{ gallery_form.select_page.now }} of {{ gallery_form.select_page.max }}
+        </button>
+        <ul class="dropdown-menu customScrollableDropdown">
+        {% for page in gallery_form.select_page.list %}
+          <li><button class="dropdown-item" type="submit" name="select_page" value="{{ page }}">{{ page }}</button></li>
+        {% endfor %}
+        </ul>
+      </div>
+    </div>
   </form>
   
   {% for image_file in image_files %}

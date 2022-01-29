@@ -1,12 +1,13 @@
 from django.views.decorators.http import require_safe, require_http_methods
 from django.shortcuts import render, redirect
 
-from app.models import TableItems, SelectFormItems, UploadFiles, ImageGallery, GraphSignalSelector
-from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm, ImageGalleryForm, GraphSignalSelectorForm
+from app.models import TableItems, SelectFormItems, UploadFiles, GraphSignalSelector
+from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm, GraphSignalSelectorForm
 
 from pathlib import Path
 import numpy as np
 from natsort import natsorted
+import math
 
 # Create your views here.
 
@@ -188,43 +189,48 @@ def file_upload(request):
 # --- Image Gallery page ---
 @require_http_methods(["GET", "POST", "HEAD"])
 def image_gallery(request):
-    print('-------------------------------')
-    print(request)
-    print(request.POST)
-    print('-------------------------------')
-    
-    try:
-        gallery = ImageGallery.objects.get(pk=1)
-    except:
-        ImageGallery.objects.create()
-        gallery = ImageGallery.objects.get(pk=1)
+    # print('-------------------------------')
+    # print(request)
+    # print(request.POST)
+    # print('-------------------------------')
     
     if (request.method == 'POST'):
-        print(request.POST['images_per_page'])
-        request.session['images_per_page'] = int(request.POST['images_per_page'])
-#        gallery.images_per_page = request.POST['images_per_page']
-#        gallery.save()
+        if ('images_per_page' in request.POST):
+            request.session['images_per_page'] = int(request.POST['images_per_page'])
+            request.session['select_page'] = 1  # Reset
+        
+        if ('select_page' in request.POST):
+            request.session['select_page'] = int(request.POST['select_page'])
+        
         return redirect('image_gallery')
     
-    image_file_list = request.session.get('image_file_list', None)
-    images_per_page = request.session.get('images_per_page', 50)
-    print(f'images_per_page: {images_per_page}')
+    image_file_list = request.session.get('image_file_list', None)  # default=None
+    images_per_page = request.session.get('images_per_page', 50)    # default=50
+    select_page = request.session.get('select_page', 1)             # default=1
+    max_page = math.ceil(len(image_file_list) / images_per_page)
+    idx = select_page * images_per_page
+    page_list = np.arange(0, max_page) + 1
+    
     if (image_file_list is None):
         image_path = Path('media', 'images')
         image_file_list = natsorted(list(image_path.glob('**/*.*')), key=lambda x:x.name)
         image_file_list = [f'/{str(x)}' for x in image_file_list]
         request.session['image_file_list'] = image_file_list
-    print(f'image_file_list: {image_file_list[0:10]}')
-    image_files = image_file_list[0:images_per_page]
-#    image_files = image_file_list[0:50]
-    # print('-----------------------------')
-    # print(image_files)
-    # print('-----------------------------')
+    image_files = image_file_list[idx:idx+images_per_page]
     
-    form = ImageGalleryForm(initial={'images_per_page': images_per_page})
-    
+    gallery_form = {
+        'images_per_page': {
+            'default': images_per_page,
+            'items': [50, 100, 150, 200],
+        },
+        'select_page': {
+            'now': select_page,
+            'list': page_list,
+            'max': max_page,
+        }
+    }
     context = {
-        'form': form,
+        'gallery_form': gallery_form,
         'image_files': image_files,
     }
     return render(request, "app/image_gallery.html", context)
