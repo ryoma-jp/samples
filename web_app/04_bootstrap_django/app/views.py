@@ -1,8 +1,8 @@
 from django.views.decorators.http import require_safe, require_http_methods
 from django.shortcuts import render, redirect
 
-from app.models import TableItems, SelectFormItems, UploadFiles, GraphSignalSelector
-from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm, GraphSignalSelectorForm
+from app.models import TableItems, SelectFormItems, UploadFiles
+from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm
 
 from pathlib import Path
 import numpy as np
@@ -254,25 +254,11 @@ def graph(request):
         
         return x, y
     
-    try:
-        signal = GraphSignalSelector.objects.get(pk=1)
-    except:
-        signal = None
-    
     if (request.method == 'POST'):
-        if (signal is not None):
-            signal.signal = request.POST['signal']
-            signal.save()
-        else:
-            GraphSignalSelector.objects.create(signal=request.POST['signal'])
+        request.session['signal'] = request.POST['select_signal']
         return redirect('graph')
     
-    if (signal is not None):
-        form = GraphSignalSelectorForm(initial={'signal': signal.signal})
-        signal_type = signal.signal
-    else:
-        form = GraphSignalSelectorForm()
-        signal_type = 'sin'   # default
+    signal_type = request.session.get('signal', 'sin')  # default='sin'
     
     if (signal_type == 'sin'):
         x, y = _sin()
@@ -280,7 +266,10 @@ def graph(request):
         x, y = _cos()
 
     context = {
-        'form': form,
+        'signal': {
+            'now': signal_type,
+            'list': ['sin', 'cos'],
+        },
         'graph_x': list(x),
         'graph_y': list(y),
     }

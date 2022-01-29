@@ -1,6 +1,6 @@
 from django import forms
 
-from app.models import TableItems, SelectFormItems, UploadFiles, GraphSignalSelector
+from app.models import TableItems, SelectFormItems, UploadFiles
 
 class TableItemsForm(forms.ModelForm):
     class Meta:
@@ -16,11 +16,3 @@ class UploadFileForm(forms.ModelForm):
     class Meta:
         model = UploadFiles
         fields = ('description', 'upload_file', )
-
-class GraphSignalSelectorForm(forms.ModelForm):
-    class Meta:
-        model = GraphSignalSelector
-        fields = ('signal',)
-
-
-
