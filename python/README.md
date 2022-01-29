@@ -12,6 +12,7 @@
 |[csg_sample](./csg_sample) |CSGによる指標化サンプル |
 |[data_analysis](./data_analysis) |データ分析モジュールの動作確認 |
 |[data_loader](./data_loader) |データセット読み込み処理のサンプル |
+|[explainable_ai](./explainable_ai) |機械学習モデルや推定結果の解釈あるいは可視化を行う手法のサンプル |
 |[dist_sample](./dist_sample) |配布用パッケージ作成サンプル |
 |[feature_engineering](./feature_engineering) |特徴量エンジニアリングのサンプル |
 |[filter](./filter) |信号処理フィルタのサンプル |
