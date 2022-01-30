@@ -19,7 +19,7 @@
 |[Integrated Grad](https://arxiv.org/abs/1703.01365)|(T.B.D)|
 |[Smooth Grad](https://arxiv.org/abs/1706.03825)|(T.B.D)|
 |[Deep LIFT](https://arxiv.org/abs/1704.02685)|(T.B.D)|
-|[Grad-CAM](https://arxiv.org/abs/1610.02391)|(T.B.D)|
+|[Grad-CAM](https://arxiv.org/abs/1610.02391)|[Grad-CAM.ipynb](./Grad-CAM.ipynb)|
 |[Eigen-CAM](https://arxiv.org/abs/2008.00299)|(T.B.D)|
 |[PSS(Parameter-Space Saliency)](https://arxiv.org/abs/2108.01335)|(T.B.D)|
 
