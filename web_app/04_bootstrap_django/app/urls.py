@@ -13,4 +13,5 @@ urlpatterns = [
     path('file_upload/', views.file_upload, name='file_upload'),
     path('image_gallery/', views.image_gallery, name='image_gallery'),
     path('graph/', views.graph, name='graph'),
+    path('progress/', views.progress, name='progress'),
 ]

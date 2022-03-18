@@ -276,3 +276,10 @@ def graph(request):
     return render(request, "app/graph.html", context)
 
 
+# --- Progress page ---
+@require_http_methods(["GET", "POST", "HEAD"])
+def progress(request):
+    context = {}
+    return render(request, "app/progress.html", context)
+
+
