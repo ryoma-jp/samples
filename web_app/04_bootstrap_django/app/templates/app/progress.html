@@ -5,8 +5,54 @@
 
 <div class ="welcome">
   <h1 class="title">Progress</h1>
-  
   <div class="container">
+    <div class="row">
+      <button class="btn btn-primary col-4 mx-2 my-4" id="start_button">
+        Start
+      </button>
+      <button class="btn btn-primary col-4 mx-2 my-4" id="stop_button">
+        Stop
+      </button>
+      <div id="progress">Progress bar space</div>
+    </div>
+    <script>
+      // JavascriptでGETとかPOSTする時用のテンプレ
+      //   https://phithon.hatenablog.jp/entry/20100327/1269699247
+      // Django+Javascriptでプログレスバーを実装する
+      //   https://www.sw-mono.blog/entry/2020/01/06/140153
+      
+      const progresshtml = '<div id="progress">Progress bar space</div>';
+      let timer_id = 0;
+      let progress_pk = -1;
+      
+      start_button = document.querySelector('#start_button');
+      start_button.addEventListener('click', function() {
+        timer_id = setInterval(function() { console.log("start") }, 1000)
+        
+        request = new XMLHttpRequest();
+        url = "{% url 'progress_setup' %}"
+        request.open('GET', url);
+        request.onreadystatechange = function () {
+          if (request.readyState != 4) {
+            console.log("requesting");
+          } else if (request.status != 200) {
+            console.log("failed");
+          } else {
+            progress_pk = request.responseText;
+            console.log(progress_pk);
+            start_button.disabled = true;
+          }
+        };
+        request.send(null);
+      })
+      
+      stop_button = document.querySelector('#stop_button');
+      stop_button.addEventListener('click', function() {
+        console.log("stop");
+        clearInterval(timer_id);
+        start_button.disabled = false;
+      })
+    </script>
   </div>
 </div>
 {% endblock %}

@@ -31,3 +31,5 @@ class UploadFiles(models.Model):
                   )
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
+class Progress(models.Model):
+    now = models.IntegerField("now", default=0)

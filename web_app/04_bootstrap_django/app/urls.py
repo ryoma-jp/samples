@@ -14,4 +14,5 @@ urlpatterns = [
     path('image_gallery/', views.image_gallery, name='image_gallery'),
     path('graph/', views.graph, name='graph'),
     path('progress/', views.progress, name='progress'),
+    path('progress_setup/', views.progress_setup, name='progress_setup'),
 ]

@@ -1,7 +1,7 @@
 from django.views.decorators.http import require_safe, require_http_methods
-from django.shortcuts import render, redirect
+from django.shortcuts import HttpResponse, render, redirect
 
-from app.models import TableItems, SelectFormItems, UploadFiles
+from app.models import TableItems, SelectFormItems, UploadFiles, Progress
 from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm
 
 from pathlib import Path
@@ -282,4 +282,8 @@ def progress(request):
     context = {}
     return render(request, "app/progress.html", context)
 
+@require_http_methods(["GET"])
+def progress_setup(request):
+    progress = Progress.objects.create()
+    return HttpResponse(progress.pk)
 
