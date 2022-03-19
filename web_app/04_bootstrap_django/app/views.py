@@ -298,13 +298,11 @@ def progress_processing(request):
         for i in range(100):
             time.sleep(0.1)
             if (i % 10 == 0):
-                # print(f'[DEBUG]{i}')
                 progress = get_object_or_404(Progress, pk=progress_pk)
                 progress.now += 10
                 progress.save()
         return redirect('progress')
     else:
-        print(f'[DEBUG]{request.GET}')
         return HttpResponse("ERROR")
     
 
@@ -314,7 +312,6 @@ def progress_get_persent(request):
         progress_pk = request.GET.get("progress_pk")
         progress = get_object_or_404(Progress, pk=progress_pk)
         persent = f'{int(100 * progress.now / progress.max)}'
-        print(f'[DEBUG]{persent}')
         
         return HttpResponse(persent)
     else:
