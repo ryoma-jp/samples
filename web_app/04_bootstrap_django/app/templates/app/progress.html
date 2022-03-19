@@ -45,7 +45,23 @@
         request.send(null);
         
         function ShowProgressBar(progress_pk) {
-          console.log("start");
+          console.log("count");
+          request = new XMLHttpRequest();
+          param = "progress_pk=" + progress_pk;
+          var url = "{% url 'progress_get_persent' %}?" + param;
+          console.log(progress_pk, url);
+          request.open('GET', url);
+          request.onreadystatechange = function () {
+            if (request.readyState != 4) {
+              console.log("progress_processing requesting");
+            } else if (request.status != 200) {
+              console.log("progress_processing failed");
+            } else {
+              response = request.responseText;
+              console.log(response);
+            }
+          }
+          request.send(null);
         };
         
         function Processing(progress_pk) {

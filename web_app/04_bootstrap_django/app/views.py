@@ -280,7 +280,9 @@ def graph(request):
 # --- Progress page ---
 @require_http_methods(["GET", "POST", "HEAD"])
 def progress(request):
-    context = {}
+    context = {
+        'persent': 0,
+    }
     return render(request, "app/progress.html", context)
 
 @require_http_methods(["GET"])
@@ -298,7 +300,7 @@ def progress_processing(request):
         for i in range(100):
             time.sleep(0.1)
             if (i % 10 == 0):
-                print(f'[DEBUG]{i}')
+                # print(f'[DEBUG]{i}')
                 progress = get_object_or_404(Progress, pk=progress_pk)
                 progress.now += 10
                 progress.save()
@@ -308,3 +310,14 @@ def progress_processing(request):
         return HttpResponse("ERROR")
     
 
+@require_http_methods(["GET"])
+def progress_get_persent(request):
+    if 'progress_pk' in request.GET:
+        progress_pk = request.GET.get("progress_pk")
+        progress = get_object_or_404(Progress, pk=progress_pk)
+        persent = f'{int(100 * progress.now / progress.max)}%'
+        print(f'[DEBUG]{persent}')
+        
+        return HttpResponse(persent)
+    else:
+        return HttpResponse("ERROR")

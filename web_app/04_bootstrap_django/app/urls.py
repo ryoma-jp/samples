@@ -16,4 +16,5 @@ urlpatterns = [
     path('progress/', views.progress, name='progress'),
     path('progress_setup/', views.progress_setup, name='progress_setup'),
     path('progress_processing/', views.progress_processing, name='progress_processing'),
+    path('progress_get_persent/', views.progress_get_persent, name='progress_get_persent'),
 ]
