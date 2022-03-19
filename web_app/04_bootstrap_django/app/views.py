@@ -1,5 +1,5 @@
 from django.views.decorators.http import require_safe, require_http_methods
-from django.shortcuts import HttpResponse, render, redirect
+from django.shortcuts import HttpResponse, render, redirect, get_object_or_404
 
 from app.models import TableItems, SelectFormItems, UploadFiles, Progress
 from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm
@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 from natsort import natsorted
 import math
+import functools
 
 # Create your views here.
 
@@ -286,4 +287,24 @@ def progress(request):
 def progress_setup(request):
     progress = Progress.objects.create()
     return HttpResponse(progress.pk)
+
+@require_http_methods(["GET"])
+def progress_processing(request):
+    
+    import time
+    
+    if 'progress_pk' in request.GET:
+        progress_pk = request.GET.get("progress_pk")
+        for i in range(100):
+            time.sleep(0.1)
+            if (i % 10 == 0):
+                print(f'[DEBUG]{i}')
+                progress = get_object_or_404(Progress, pk=progress_pk)
+                progress.now += 10
+                progress.save()
+        return redirect('progress')
+    else:
+        print(f'[DEBUG]{request.GET}')
+        return HttpResponse("ERROR")
+    
 

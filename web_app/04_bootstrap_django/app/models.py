@@ -33,3 +33,4 @@ class UploadFiles(models.Model):
 
 class Progress(models.Model):
     now = models.IntegerField("now", default=0)
+    max = models.IntegerField("max", default=100)

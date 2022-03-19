@@ -10,9 +10,6 @@
       <button class="btn btn-primary col-4 mx-2 my-4" id="start_button">
         Start
       </button>
-      <button class="btn btn-primary col-4 mx-2 my-4" id="stop_button">
-        Stop
-      </button>
       <div id="progress">Progress bar space</div>
     </div>
     <script>
@@ -27,7 +24,6 @@
       
       start_button = document.querySelector('#start_button');
       start_button.addEventListener('click', function() {
-        timer_id = setInterval(function() { console.log("start") }, 1000)
         
         request = new XMLHttpRequest();
         url = "{% url 'progress_setup' %}"
@@ -41,16 +37,37 @@
             progress_pk = request.responseText;
             console.log(progress_pk);
             start_button.disabled = true;
+            
+            timer_id = setInterval(function() { ShowProgressBar(progress_pk) }, 1000);
+            Processing(progress_pk);
           }
         };
         request.send(null);
-      })
+        
+        function ShowProgressBar(progress_pk) {
+          console.log("start");
+        };
+        
+        function Processing(progress_pk) {
+          request = new XMLHttpRequest();
+          param = "progress_pk=" + progress_pk;
+          var url = "{% url 'progress_processing' %}?" + param;
+          console.log(progress_pk, url);
+          request.open('GET', url);
+          request.onreadystatechange = function () {
+            if (request.readyState != 4) {
+              console.log("progress_processing requesting");
+            } else if (request.status != 200) {
+              console.log("progress_processing failed");
+            } else {
+              console.log("stop");
+              clearInterval(timer_id);
+              start_button.disabled = false;
+            }
+          }
+          request.send(null);
+        };
       
-      stop_button = document.querySelector('#stop_button');
-      stop_button.addEventListener('click', function() {
-        console.log("stop");
-        clearInterval(timer_id);
-        start_button.disabled = false;
       })
     </script>
   </div>
