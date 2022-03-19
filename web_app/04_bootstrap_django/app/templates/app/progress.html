@@ -10,7 +10,9 @@
       <button class="btn btn-primary col-4 mx-2 my-4" id="start_button">
         Start
       </button>
-      <div id="progress">Progress bar space</div>
+      <div id="progress">
+        Progress bar space
+      </div>
     </div>
     <script>
       // JavascriptでGETとかPOSTする時用のテンプレ
@@ -18,7 +20,7 @@
       // Django+Javascriptでプログレスバーを実装する
       //   https://www.sw-mono.blog/entry/2020/01/06/140153
       
-      const progresshtml = '<div id="progress">Progress bar space</div>';
+      const progresshtml_init = 'Progress bar space';
       let timer_id = 0;
       let progress_pk = -1;
       
@@ -58,7 +60,10 @@
               console.log("progress_processing failed");
             } else {
               response = request.responseText;
-              console.log(response);
+              // progresshtml = '<div class="progress progress-bar" style="width:' + response + '">' + response + '%</div>';
+              progresshtml = '<div class="progress progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="' + response + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + response + '%">' + response + '%</div>'
+              document.getElementById("progress").innerHTML = progresshtml;
+              console.log(progresshtml);
             }
           }
           request.send(null);
@@ -79,6 +84,7 @@
               console.log("stop");
               clearInterval(timer_id);
               start_button.disabled = false;
+              document.getElementById("progress").innerHTML = progresshtml_init;
             }
           }
           request.send(null);

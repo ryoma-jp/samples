@@ -280,9 +280,7 @@ def graph(request):
 # --- Progress page ---
 @require_http_methods(["GET", "POST", "HEAD"])
 def progress(request):
-    context = {
-        'persent': 0,
-    }
+    context = {}
     return render(request, "app/progress.html", context)
 
 @require_http_methods(["GET"])
@@ -315,7 +313,7 @@ def progress_get_persent(request):
     if 'progress_pk' in request.GET:
         progress_pk = request.GET.get("progress_pk")
         progress = get_object_or_404(Progress, pk=progress_pk)
-        persent = f'{int(100 * progress.now / progress.max)}%'
+        persent = f'{int(100 * progress.now / progress.max)}'
         print(f'[DEBUG]{persent}')
         
         return HttpResponse(persent)
