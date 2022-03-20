@@ -19,6 +19,12 @@
       //   https://phithon.hatenablog.jp/entry/20100327/1269699247
       // Django+Javascriptでプログレスバーを実装する
       //   https://www.sw-mono.blog/entry/2020/01/06/140153
+      // 同期と非同期のリクエスト
+      //   https://developer.mozilla.org/ja/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests
+      //   * XMLHttpRequest.timeout
+      //       https://developer.mozilla.org/ja/docs/Web/API/XMLHttpRequest/timeout
+      //   * XMLHttpRequest.onreadystatechange
+      //       https://developer.mozilla.org/ja/docs/Web/API/XMLHttpRequest/readystatechange_event
       
       const progresshtml_init = 'Progress bar space';
       let timer_id = 0;
@@ -46,28 +52,6 @@
         };
         request.send(null);
         
-        function ShowProgressBar(progress_pk) {
-          request = new XMLHttpRequest();
-          param = "progress_pk=" + progress_pk;
-          var url = "{% url 'progress_get_persent' %}?" + param;
-          // console.log("[DEBUG] progress_pk=" + progress_pk + ", url=" + url);
-          request.open('GET', url);
-          request.onreadystatechange = function () {
-            if (request.readyState != 4) {
-              console.log("progress_processing requesting");
-            } else if (request.status != 200) {
-              console.log("progress_processing failed");
-            } else {
-              response = request.responseText;
-              // progresshtml = '<div class="progress progress-bar" style="width:' + response + '">' + response + '%</div>';
-              progresshtml = '<div class="progress progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="' + response + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + response + '%">' + response + '%</div>'
-              document.getElementById("progress").innerHTML = progresshtml;
-              // console.log(progresshtml);
-            }
-          }
-          request.send(null);
-        };
-        
         function Processing(progress_pk) {
           request = new XMLHttpRequest();
           param = "progress_pk=" + progress_pk;
@@ -90,6 +74,33 @@
         };
       
       })
+      
+      function ShowProgressBar(progress_pk) {
+        persent = GetProgress(progress_pk);
+        console.log("[INFO] persent = " + persent + "%");
+        
+        // progresshtml = '<div class="progress progress-bar" style="width:' + persent + '">' + persent + '%</div>';
+        progresshtml = '<div class="progress progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="' + persent + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + persent + '%">' + persent + '%</div>'
+        document.getElementById("progress").innerHTML = progresshtml;
+        // console.log(progresshtml);
+      };
+      
+      function GetProgress(progress_pk) {
+        request = new XMLHttpRequest();
+        param = "progress_pk=" + progress_pk;
+        var url = "{% url 'progress_get_persent' %}?" + param;
+        var persent = 0;
+        // console.log("[DEBUG] progress_pk=" + progress_pk + ", url=" + url);
+        request.open('GET', url, false);
+        request.onload = function () {
+          response = request.responseText;
+          persent = response;
+        };
+        request.send(null);
+        
+        return persent;
+      };
+      
     </script>
   </div>
 </div>

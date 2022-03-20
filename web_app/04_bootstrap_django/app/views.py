@@ -312,6 +312,7 @@ def progress_get_persent(request):
         progress_pk = request.GET.get("progress_pk")
         progress = get_object_or_404(Progress, pk=progress_pk)
         persent = f'{int(100 * progress.now / progress.max)}'
+        print(f'[INFO] persent = {persent}%')
         
         return HttpResponse(persent)
     else:
