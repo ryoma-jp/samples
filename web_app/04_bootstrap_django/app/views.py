@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 from natsort import natsorted
 import math
-import functools
+import json
 
 # Create your views here.
 
@@ -300,6 +300,8 @@ def progress_processing(request):
             if (i % 10 == 0):
                 progress = get_object_or_404(Progress, pk=progress_pk)
                 progress.now += 10
+                if (progress.now >= progress.max):
+                    progress.status = progress.STATUS_DONE
                 progress.save()
         return redirect('progress')
     else:
@@ -307,13 +309,17 @@ def progress_processing(request):
     
 
 @require_http_methods(["GET"])
-def progress_get_persent(request):
+def progress_get(request):
     if 'progress_pk' in request.GET:
         progress_pk = request.GET.get("progress_pk")
         progress = get_object_or_404(Progress, pk=progress_pk)
         persent = f'{int(100 * progress.now / progress.max)}'
         print(f'[INFO] persent = {persent}%')
         
-        return HttpResponse(persent)
+        context = {
+            'persent': persent,
+            'status': progress.status,
+        }
+        return HttpResponse(json.dumps(context, ensure_ascii=False, indent=2))
     else:
         return HttpResponse("ERROR")

@@ -34,3 +34,12 @@ class UploadFiles(models.Model):
 class Progress(models.Model):
     now = models.IntegerField("now", default=0)
     max = models.IntegerField("max", default=100)
+
+    STATUS_PROCESSING = 'processing'
+    STATUS_DONE= 'done'
+    STATUS = (
+        (STATUS_PROCESSING, STATUS_PROCESSING),
+        (STATUS_DONE, STATUS_DONE),
+    )
+    status = models.CharField(max_length=16, choices=STATUS, default='processing')
+    

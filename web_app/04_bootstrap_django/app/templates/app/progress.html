@@ -76,7 +76,8 @@
       })
       
       function ShowProgressBar(progress_pk) {
-        persent = GetProgress(progress_pk);
+        progress = GetProgress(progress_pk);
+        persent = progress.persent
         console.log("[INFO] persent = " + persent + "%");
         
         // progresshtml = '<div class="progress progress-bar" style="width:' + persent + '">' + persent + '%</div>';
@@ -88,17 +89,16 @@
       function GetProgress(progress_pk) {
         request = new XMLHttpRequest();
         param = "progress_pk=" + progress_pk;
-        var url = "{% url 'progress_get_persent' %}?" + param;
-        var persent = 0;
+        var url = "{% url 'progress_get' %}?" + param;
+        var progress = JSON.parse('{"persent":0, "status":"processing"}');
         // console.log("[DEBUG] progress_pk=" + progress_pk + ", url=" + url);
         request.open('GET', url, false);
         request.onload = function () {
-          response = request.responseText;
-          persent = response;
+          progress = JSON.parse(request.responseText);
         };
         request.send(null);
         
-        return persent;
+        return progress;
       };
       
     </script>
