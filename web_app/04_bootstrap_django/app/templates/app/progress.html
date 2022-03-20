@@ -30,50 +30,62 @@
       let timer_id = 0;
       let progress_pk = -1;
       
-      start_button = document.querySelector('#start_button');
-      start_button.addEventListener('click', function() {
-        
-        request = new XMLHttpRequest();
-        url = "{% url 'progress_setup' %}"
-        request.open('GET', url);
-        request.onreadystatechange = function () {
-          if (request.readyState != 4) {
-            console.log("requesting");
-          } else if (request.status != 200) {
-            console.log("failed");
-          } else {
-            progress_pk = request.responseText;
-            console.log(progress_pk);
-            start_button.disabled = true;
-            
-            timer_id = setInterval(function() { ShowProgressBar(progress_pk) }, 1000);
-            Processing(progress_pk);
+      progress = GetProgress(-1);
+      for (let i = 0; i < progress.num; i++) {
+          if (progress.status[i] == 'processing') {
+              progress_pk = progress.pk[i];
           }
-        };
-        request.send(null);
-        
-        function Processing(progress_pk) {
+      }
+      
+      // console.log("[DEBUG] progress_pk = " + progress_pk);
+      if (progress_pk == -1) {
+        start_button = document.querySelector('#start_button');
+        start_button.addEventListener('click', function() {
+          
           request = new XMLHttpRequest();
-          param = "progress_pk=" + progress_pk;
-          var url = "{% url 'progress_processing' %}?" + param;
-          // console.log("[DEBUG] progress_pk=" + progress_pk + ", url=" + url);
+          url = "{% url 'progress_setup' %}"
           request.open('GET', url);
           request.onreadystatechange = function () {
             if (request.readyState != 4) {
-              console.log("progress_processing requesting");
+              console.log("requesting");
             } else if (request.status != 200) {
-              console.log("progress_processing failed");
+              console.log("failed");
             } else {
-              console.log("[INFO] Processing done");
-              clearInterval(timer_id);
-              start_button.disabled = false;
-              document.getElementById("progress").innerHTML = progresshtml_init;
+              progress_pk = request.responseText;
+              console.log(progress_pk);
+              start_button.disabled = true;
+              
+              timer_id = setInterval(function() { ShowProgressBar(progress_pk) }, 1000);
+              Processing(progress_pk);
             }
-          }
+          };
           request.send(null);
-        };
-      
-      })
+          
+          function Processing(progress_pk) {
+            request = new XMLHttpRequest();
+            param = "progress_pk=" + progress_pk;
+            var url = "{% url 'progress_processing' %}?" + param;
+            // console.log("[DEBUG] progress_pk=" + progress_pk + ", url=" + url);
+            request.open('GET', url);
+            request.onreadystatechange = function () {
+              if (request.readyState != 4) {
+                console.log("progress_processing requesting");
+              } else if (request.status != 200) {
+                console.log("progress_processing failed");
+              } else {
+                console.log("[INFO] Processing done");
+                ProcessingDone();
+              }
+            }
+            request.send(null);
+          };
+        
+        })
+      } else {
+        ShowProgressBar(progress_pk);
+        start_button.disabled = true;
+        timer_id = setInterval(function() { ShowProgressBar(progress_pk) }, 1000);
+      }
       
       function ShowProgressBar(progress_pk) {
         progress = GetProgress(progress_pk);
@@ -84,6 +96,10 @@
         progresshtml = '<div class="progress progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="' + persent + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + persent + '%">' + persent + '%</div>'
         document.getElementById("progress").innerHTML = progresshtml;
         // console.log(progresshtml);
+        
+        if (persent == 100) {
+          ProcessingDone();
+        }
       };
       
       function GetProgress(progress_pk) {
@@ -99,6 +115,12 @@
         request.send(null);
         
         return progress;
+      };
+      
+      function ProcessingDone() {
+        clearInterval(timer_id);
+        start_button.disabled = false;
+        document.getElementById("progress").innerHTML = progresshtml_init;
       };
       
     </script>

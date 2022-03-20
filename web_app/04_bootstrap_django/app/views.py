@@ -310,16 +310,41 @@ def progress_processing(request):
 
 @require_http_methods(["GET"])
 def progress_get(request):
+    """
+      指定されたプライマリキー(progress_pk)の処理進捗を返す
+      progress_pk==-1の場合は，データベースに登録済みの全処理の進捗を返す
+    """
+    # print(f'[DEBUG] {request.GET}')
     if 'progress_pk' in request.GET:
-        progress_pk = request.GET.get("progress_pk")
-        progress = get_object_or_404(Progress, pk=progress_pk)
-        persent = f'{int(100 * progress.now / progress.max)}'
-        print(f'[INFO] persent = {persent}%')
+        progress_pk = int(request.GET.get("progress_pk"))
+        # print(f'[DEBUG] progress_pk = {progress_pk}')
+        if (progress_pk == -1):
+            progress = Progress.objects.all()
+            context = {
+                'num': len(progress),
+                'pk': [],
+                'persent':[],
+                'status':[],
+            }
+            for progress_ in progress:
+                context['pk'].append(progress_.id)
+                context['persent'].append(f'{int(100 * progress_.now / progress_.max)}')
+                context['status'].append(progress_.status)
+            # print(f'[DEBUG]\n{context}')
+            
+        else:
+            progress = get_object_or_404(Progress, pk=progress_pk)
+            persent = f'{int(100 * progress.now / progress.max)}'
+            print(f'[INFO] persent = {persent}%')
+            
+            context = {
+                'num': 1,
+                'pk': progress_pk,
+                'persent': persent,
+                'status': progress.status,
+            }
         
-        context = {
-            'persent': persent,
-            'status': progress.status,
-        }
         return HttpResponse(json.dumps(context, ensure_ascii=False, indent=2))
+        
     else:
         return HttpResponse("ERROR")
