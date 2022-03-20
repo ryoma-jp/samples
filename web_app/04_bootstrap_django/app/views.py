@@ -208,15 +208,16 @@ def image_gallery(request):
     image_file_list = request.session.get('image_file_list', None)  # default=None
     images_per_page = request.session.get('images_per_page', 50)    # default=50
     select_page = request.session.get('select_page', 1)             # default=1
-    max_page = math.ceil(len(image_file_list) / images_per_page)
-    idx = select_page * images_per_page
-    page_list = np.arange(0, max_page) + 1
     
     if (image_file_list is None):
         image_path = Path('media', 'images')
         image_file_list = natsorted(list(image_path.glob('**/*.*')), key=lambda x:x.name)
         image_file_list = [f'/{str(x)}' for x in image_file_list]
         request.session['image_file_list'] = image_file_list
+    
+    max_page = math.ceil(len(image_file_list) / images_per_page)
+    idx = select_page * images_per_page
+    page_list = np.arange(0, max_page) + 1
     image_files = image_file_list[idx:idx+images_per_page]
     
     gallery_form = {
