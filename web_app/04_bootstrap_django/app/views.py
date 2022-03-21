@@ -9,6 +9,7 @@ import numpy as np
 from natsort import natsorted
 import math
 import json
+import time
 
 # Create your views here.
 
@@ -205,6 +206,15 @@ def image_gallery(request):
         
         return redirect('image_gallery')
     
+    image_loading = request.session.get('image_loading', None)  # default=None
+    if (image_loading is None):
+        image_loading = True
+        request.session['image_loading'] = image_loading
+        context = {
+            'image_loading': image_loading,
+        }
+        return render(request, "app/image_gallery.html", context)
+    
     image_file_list = request.session.get('image_file_list', None)  # default=None
     images_per_page = request.session.get('images_per_page', 50)    # default=50
     select_page = request.session.get('select_page', 1)             # default=1
@@ -214,12 +224,15 @@ def image_gallery(request):
         image_file_list = natsorted(list(image_path.glob('**/*.*')), key=lambda x:x.name)
         image_file_list = [f'/{str(x)}' for x in image_file_list]
         request.session['image_file_list'] = image_file_list
+        
+        request.session['image_loading'] = False    # Image loading is done
     
     max_page = math.ceil(len(image_file_list) / images_per_page)
     idx = select_page * images_per_page
     page_list = np.arange(0, max_page) + 1
     image_files = image_file_list[idx:idx+images_per_page]
     
+    image_loading = request.session.get('image_loading', None)  # default=None
     gallery_form = {
         'images_per_page': {
             'default': images_per_page,
@@ -232,6 +245,7 @@ def image_gallery(request):
         }
     }
     context = {
+        'image_loading': image_loading,
         'gallery_form': gallery_form,
         'image_files': image_files,
     }
@@ -291,8 +305,6 @@ def progress_setup(request):
 
 @require_http_methods(["GET"])
 def progress_processing(request):
-    
-    import time
     
     if 'progress_pk' in request.GET:
         progress_pk = request.GET.get("progress_pk")
