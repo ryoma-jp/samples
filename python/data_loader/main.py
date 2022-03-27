@@ -97,11 +97,34 @@ def main():
 		print(test_images.shape)
 		print(test_labels.shape)
 		
+		df_train = common.save_image_files(train_images, train_labels, os.path.join(args.dataset_dir, 'train_images'), img_shape=(28, 28))
+		df_test = common.save_image_files(test_images, test_labels, os.path.join(args.dataset_dir, 'test_images'), img_shape=(28, 28))
+		
 	else:
 		print('[ERROR] Unknown data_type: {}'.format(args.data_type))
 		quit()
 	
-
+	# --- JSON形式での保存 ---
+	json_params = {
+		'samples': df_train['file'],
+		'labels': train_labels,
+		'onehot': True,
+		'name': 'train_dataset',
+		'save_dir': os.path.join(args.dataset_dir, 'train_images'),
+		'task': 'image_classification',
+	}
+	common.convert_json(json_params)
+	
+	json_params = {
+		'samples': df_test['file'],
+		'labels': test_labels,
+		'onehot': True,
+		'name': 'test_dataset',
+		'save_dir': os.path.join(args.dataset_dir, 'test_images'),
+		'task': 'image_classification',
+	}
+	common.convert_json(json_params)
+	
 	return
 
 #---------------------------------
