@@ -51,6 +51,8 @@ def main():
 	print(args.data_type)
 	print(args.dataset_dir)
 	
+	# --- データセットのロード処理 ---
+	save_json = False
 	if (args.data_type == "CIFAR-10"):
 		train_images, train_labels, test_images, test_labels = cifar10.load_cifar10(args.dataset_dir, img_dir='./cifar10_images')
 		print(train_images.shape)
@@ -62,6 +64,11 @@ def main():
 		print(label_index.shape)
 		for _label_index in label_index:
 			print(train_labels[_label_index].argmax(axis=1).min(), train_labels[_label_index].argmax(axis=1).max())
+			
+		df_train = common.save_image_files(train_images, train_labels, os.path.join(args.dataset_dir, 'train_images'))
+		df_test = common.save_image_files(test_images, test_labels, os.path.join(args.dataset_dir, 'test_images'))
+		save_json = True
+		
 	elif (args.data_type == "Titanic"):
 		train_data, train_labels, test_data = titanic.load_titanic(args.dataset_dir)
 		print(train_data.shape)
@@ -99,31 +106,33 @@ def main():
 		
 		df_train = common.save_image_files(train_images, train_labels, os.path.join(args.dataset_dir, 'train_images'), img_shape=(28, 28))
 		df_test = common.save_image_files(test_images, test_labels, os.path.join(args.dataset_dir, 'test_images'), img_shape=(28, 28))
+		save_json = True
 		
 	else:
 		print('[ERROR] Unknown data_type: {}'.format(args.data_type))
 		quit()
 	
 	# --- JSON形式での保存 ---
-	json_params = {
-		'samples': df_train['file'],
-		'labels': train_labels,
-		'onehot': True,
-		'name': 'train_dataset',
-		'save_dir': os.path.join(args.dataset_dir, 'train_images'),
-		'task': 'image_classification',
-	}
-	common.convert_json(json_params)
-	
-	json_params = {
-		'samples': df_test['file'],
-		'labels': test_labels,
-		'onehot': True,
-		'name': 'test_dataset',
-		'save_dir': os.path.join(args.dataset_dir, 'test_images'),
-		'task': 'image_classification',
-	}
-	common.convert_json(json_params)
+	if (save_json):
+		json_params = {
+			'samples': df_train['file'],
+			'labels': train_labels,
+			'onehot': True,
+			'name': 'train_dataset',
+			'save_dir': os.path.join(args.dataset_dir, 'train_images'),
+			'task': 'image_classification',
+		}
+		common.convert_json(json_params)
+		
+		json_params = {
+			'samples': df_test['file'],
+			'labels': test_labels,
+			'onehot': True,
+			'name': 'test_dataset',
+			'save_dir': os.path.join(args.dataset_dir, 'test_images'),
+			'task': 'image_classification',
+		}
+		common.convert_json(json_params)
 	
 	return
 
