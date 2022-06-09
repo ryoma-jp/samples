@@ -6,6 +6,8 @@
 # --- for machine learning ---
 FROM tensorflow/tensorflow:latest-gpu-jupyter
 
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
 RUN apt update
 RUN apt upgrade -y
 RUN apt install -y libgl1-mesa-dev
