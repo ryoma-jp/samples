@@ -24,3 +24,7 @@ RUN pip install pycaret shap
 # --- AutoKeras ---
 RUN pip install git+https://github.com/keras-team/keras-tuner.git
 RUN pip install autokeras
+
+# --- auto-sklearn ---
+RUN pip install auto-sklearn
+
