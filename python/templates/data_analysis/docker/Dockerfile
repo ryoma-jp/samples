@@ -7,7 +7,7 @@ FROM tensorflow/tensorflow:latest-gpu-jupyter
 
 RUN apt update ; \
     apt upgrade -y ; \
-    apt install -y libgl1-mesa-dev
+    apt install -y libgl1-mesa-dev fonts-ipaexfont
 
 RUN pip install setuptools==57.4.0
 RUN pip install opencv-python natsort numpy pandas xfeat \
