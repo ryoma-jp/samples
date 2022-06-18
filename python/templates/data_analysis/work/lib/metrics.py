@@ -12,9 +12,10 @@ class CalcMetrics():
 
     メトリクス計算クラス
 
-    :var mae: Mean Average Error: par1
-    :var mse: Mean Squared Error: par2
-    :var r2_score: R2 Score: par3
+    Attributes:
+        mae: Mean Average Error
+        mse: Mean Squared Error
+        r2_score: R2 Score
     """
 
     def __init__(self, pred, target):

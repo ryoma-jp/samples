@@ -12,8 +12,10 @@ def load_dataset():
     データセットをロードする
 
     Returns:
-        df_x(pandas.DataFrame): 入力データ
-        df_y(pandas.DataFrame): 出力データ
+        ロードしたデータセット
+
+        - df_x(pandas.DataFrame): 入力データ
+        - df_y(pandas.DataFrame): 出力データ
     """
 
     california_housing = fetch_california_housing()
