@@ -24,6 +24,7 @@
 |[matplotlib_sample](./matplotlib_sample) |matplotlibを用いたグラフ描画のサンプル |
 |[measuring_dataset_granularity](./measuring_dataset_granularity) |データセットの粒度計算のサンプル |
 |[module_import_sample](./module_import_sample) |独自で作成したモジュールをimportするサンプル |
+|[module_list](./module_list) |Pythonモジュールを一覧化する方法いろいろ |
 |[multi_thread](./multi_thread) |マルチスレッドのサンプル |
 |[numpy_sample](./numpy_sample) |numpyモジュールの動作確認 |
 |[pca_sample](./pca_sample) | PCA(主成分分析)による次元圧縮のサンプル |
