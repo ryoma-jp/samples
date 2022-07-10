@@ -5,5 +5,16 @@
 # --- for machine learning ---
 FROM jupyter/scipy-notebook:latest
 
-RUN pip install pip-licenses==3.5.4 pipdeptree==2.2.1
+USER root
+
+RUN apt update ; \
+    apt upgrade -y ; \
+    apt install -y graphviz
+
+USER jovyan
+
+RUN pip install pip-licenses==3.5.4 \
+		pipdeptree==2.2.1 \
+		graphviz==0.20 \
+		pydeps==1.10.18 
 
