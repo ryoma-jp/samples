@@ -14,6 +14,9 @@
     ├── lib
     │   ├── data_loader.py
     │   └── metrics.py
+    ├── models
+    ├── table_data_analysis_template.ipynb
+    ├── table_data_inference_template.ipynb
     ├── table_data_preprocessing_template.ipynb
     └── table_data_training_template.ipynb
 ```
@@ -27,6 +30,9 @@
 |work|本ディレクトリ直下にメインプログラムやスクリプト等を置く|
 |work/dataset|前処理で抽出した学習用データセットの保存用ディレクトリ|
 |work/lib|分析・学習用の自作ライブラリを格納する|
+|work/models|学習済みモデルを保存する|
+|work/table_data_analysis_template.ipynb|データ分析処理用テンプレート|
+|work/table_data_inference_template.ipynb|テーブルデータ推論用テンプレート|
 |work/table_data_preprocessing_template.ipynb|テーブルデータ前処理用テンプレート|
 |work/table_data_training_template.ipynb|テーブルデータ学習用テンプレート|
 
@@ -39,3 +45,4 @@
 
 * ```load_dataset()```でカリフォルニア住宅価格予測用データセットがダウンロードできない
   * Dockerコンテナ内の/etc/resolv.confに記載されているnamespaceを8.8.8.8に変更する
+
