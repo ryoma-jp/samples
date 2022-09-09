@@ -1,0 +1,20 @@
+services:
+  data_analysis:
+    build: .
+    volumes:
+      - type: bind
+        source: "../work"
+        target: "/tf/work"
+      - type: bind
+        source: "../data"
+        target: "/tf/data"
+    ports:
+      - 35000:8888
+    deploy:
+      resources:
+        reservations:
+          devices:
+           - driver: nvidia
+             device_ids: ['0']
+             capabilities: [gpu]
+
