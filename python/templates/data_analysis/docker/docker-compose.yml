@@ -1,6 +1,6 @@
 services:
-  data_analysis:
-    build: .
+  data_analysis_tf:
+    build: "./tensorflow"
     volumes:
       - type: bind
         source: "../work"
@@ -10,6 +10,8 @@ services:
         target: "/tf/data"
     ports:
       - 35000:8888
+    env_file:
+      - './tensorflow/.env'
     deploy:
       resources:
         reservations:

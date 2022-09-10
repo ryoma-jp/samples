@@ -5,36 +5,41 @@
 .
 ├── data
 ├── docker
-│   ├── Dockerfile
-│   └── docker_run.sh
+│   ├── docker-compose.yml
+│   └── tensorflow
+│       └── Dockerfile
 ├── README.md
 └── work
-    ├── dataset
     ├── how-to-create-document.md
     ├── lib
     │   ├── data_loader.py
     │   └── metrics.py
-    ├── models
-    ├── table_data_analysis_template.ipynb
-    ├── table_data_inference_template.ipynb
-    ├── table_data_preprocessing_template.ipynb
-    └── table_data_training_template.ipynb
+    └── nb_samples
+        └── table_data-lightgbm
+            ├── dataset
+            ├── models
+            ├── table_data_analysis_template.ipynb
+            ├── table_data_inference_template.ipynb
+            ├── table_data_preprocessing_template.ipynb
+            └── table_data_training_template.ipynb
 ```
 
 |directory/file|description|
 |:--|:--|
 |data|データセットを格納する|
-|docker/Dockerfile|本プロジェクトを実行するための環境構築用Dockerfile|
-|docker/docker_run.sh|Docker Containerを起動するためのスクリプト|
+|docker/docker-compose.yml|アプリケーションサービスの設定ファイル|
+|docker/tensorflow/Dockerfile|TensorFlow用アプリケーション向けのDockerfile|
 |README.md|本ファイル|
 |work|本ディレクトリ直下にメインプログラムやスクリプト等を置く|
-|work/dataset|前処理で抽出した学習用データセットの保存用ディレクトリ|
-|work/lib|分析・学習用の自作ライブラリを格納する|
-|work/models|学習済みモデルを保存する|
-|work/table_data_analysis_template.ipynb|データ分析処理用テンプレート|
-|work/table_data_inference_template.ipynb|テーブルデータ推論用テンプレート|
-|work/table_data_preprocessing_template.ipynb|テーブルデータ前処理用テンプレート|
-|work/table_data_training_template.ipynb|テーブルデータ学習用テンプレート|
+|work/lib|分析・学習用のライブラリを格納する|
+|work/how-to-create-document.md|Sphinxを用いたドキュメント生成方法|
+|work/nb_samples/table_data-lightgbm|テーブルデータの分析サンプル。学習モデルはLightGBM|
+|work/nb_samples/table_data-lightgbm/dataset|前処理で抽出した学習用データセットの保存用ディレクトリ|
+|work/nb_samples/table_data-lightgbm/models|学習済みモデルを保存する|
+|work/nb_samples/table_data-lightgbm/table_data_analysis_template.ipynb|データ分析処理用テンプレート|
+|work/nb_samples/table_data-lightgbm/table_data_inference_template.ipynb|テーブルデータ推論用テンプレート|
+|work/nb_samples/table_data-lightgbm/table_data_preprocessing_template.ipynb|テーブルデータ前処理用テンプレート|
+|work/nb_samples/table_data-lightgbm/table_data_training_template.ipynb|テーブルデータ学習用テンプレート|
 
 ## 分析環境の実行手順
 
