@@ -6,11 +6,11 @@ Project, Author部分は適宜修正
     $ sphinx-apidoc -F -H Project -A Author -o ./docs ./lib
     ```
 1. conf.pyの編集  
-下記3行のコメントを外す
+下記3行を追加する
     ```
-    # import os
-    # import sys
-    # sys.path.insert(0, '/tf/work/lib')
+    import os
+    import sys
+    sys.path.insert(0, '/tf/work/lib')
     ```
 extensionsに```sphinx.napoleon```を追加する
     ```
