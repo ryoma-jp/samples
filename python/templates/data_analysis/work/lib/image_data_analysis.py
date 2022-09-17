@@ -13,7 +13,7 @@ def get_mean_images(x, y, label_names):
     Args:
         x (numpy.ndarray): 入力画像群 [NHWC], C=RGB
         y (numpy.ndarray): 正解ラベル
-        label_names: ラベル名
+        label_names (list): ラベル名
 
     Returns:
         平均画像
@@ -50,3 +50,53 @@ def get_mean_images(x, y, label_names):
     
     return img_mean, img_mean_r, img_mean_g, img_mean_b
     
+def get_pixel_hist(x, y, label_names, bins):
+    """get_pixel_count
+
+    画素値のヒストグラムを取得する
+    
+    Args:
+        x (numpy.ndarray): 入力画像群 [NHWC], C=RGB
+        y (numpy.ndarray): 正解ラベル
+        label_names (list): ラベル名
+        bins (uint8): ヒストグラムのbin数
+
+    Returns:
+        クラスごとの画素値のヒストグラムを，RGB，HSV，YUVそれぞれに対する計算結果を返す
+        
+        ヒストグラムはdict形式で，度数は'frequency'，階数境界は'floor_boundary'である．
+        度数はChannelごと・クラスごとに計算し，shapeは[チャネル数(RGB, HSV, or YUV), クラス数, bins]である．
+
+        - pixel_hist_rgb (dict): RGBヒストグラム
+        - pixel_hist_hsv (dict): HSVヒストグラム
+        - pixel_hist_yuv (dict): YUVヒストグラム
+    """
+    
+    pixel_hist_rgb = None
+    pixel_hist_hsv = None
+    pixel_hist_yuv = None
+    
+    n_classes = len(label_names)
+    hist_r = []
+    hist_g = []
+    hist_b = []
+    for label_id in range(n_classes):
+        label_idx = np.arange(len(y))[y==label_id]
+        train_images = x[label_idx]
+        
+        r = np.histogram(train_images[:, :, :, 0], bins, range=(0, 255))
+        g = np.histogram(train_images[:, :, :, 1], bins, range=(0, 255))
+        b = np.histogram(train_images[:, :, :, 2], bins, range=(0, 255))
+        
+        hist_r.append(r[0])
+        hist_g.append(g[0])
+        hist_b.append(b[0])
+        
+    floor_boundary = [f'{r[1][i]}-{r[1][i+1]}' for i in range(bins)]
+    
+    pixel_hist_rgb = {
+        'frequency': np.vstack(([hist_r], [hist_g], [hist_b])),
+        'floor_boundary': np.array(floor_boundary)
+    }
+    
+    return pixel_hist_rgb, pixel_hist_hsv, pixel_hist_yuv
