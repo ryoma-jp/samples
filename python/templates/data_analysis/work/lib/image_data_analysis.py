@@ -3,6 +3,7 @@
 画像データ分析用モジュール
 """
 
+import cv2
 import numpy as np
 
 def get_mean_images(x, y, label_names):
@@ -77,25 +78,39 @@ def get_pixel_hist(x, y, label_names, bins):
     pixel_hist_yuv = None
     
     n_classes = len(label_names)
-    hist_r = []
-    hist_g = []
-    hist_b = []
+    rgb_hist = {'r': [], 'g': [], 'b': []}
+    hsv_hist = {'h': [], 's': [], 'v': []}
+    yuv_hist = {'y': [], 'u': [], 'v': []}
     for label_id in range(n_classes):
         label_idx = np.arange(len(y))[y==label_id]
         train_images = x[label_idx]
+        train_images_hsv = np.array([cv2.cvtColor(img, cv2.COLOR_RGB2HSV) for img in x[label_idx]])
         
         r = np.histogram(train_images[:, :, :, 0], bins, range=(0, 255))
         g = np.histogram(train_images[:, :, :, 1], bins, range=(0, 255))
         b = np.histogram(train_images[:, :, :, 2], bins, range=(0, 255))
         
-        hist_r.append(r[0])
-        hist_g.append(g[0])
-        hist_b.append(b[0])
+        rgb_hist['r'].append(r[0])
+        rgb_hist['g'].append(g[0])
+        rgb_hist['b'].append(b[0])
+        
+        h = np.histogram(train_images_hsv[:, :, :, 0], bins, range=(0, 255))
+        s = np.histogram(train_images_hsv[:, :, :, 1], bins, range=(0, 255))
+        v = np.histogram(train_images_hsv[:, :, :, 2], bins, range=(0, 255))
+        
+        hsv_hist['h'].append(h[0])
+        hsv_hist['s'].append(s[0])
+        hsv_hist['v'].append(v[0])
         
     floor_boundary = [f'{r[1][i]}-{r[1][i+1]}' for i in range(bins)]
     
     pixel_hist_rgb = {
-        'frequency': np.vstack(([hist_r], [hist_g], [hist_b])),
+        'frequency': np.vstack(([rgb_hist['r']], [rgb_hist['g']], [rgb_hist['b']])),
+        'floor_boundary': np.array(floor_boundary)
+    }
+    
+    pixel_hist_hsv = {
+        'frequency': np.vstack(([hsv_hist['h']], [hsv_hist['s']], [hsv_hist['v']])),
         'floor_boundary': np.array(floor_boundary)
     }
     
