@@ -6,12 +6,11 @@
 FROM tensorflow/tensorflow:latest-gpu-jupyter
 
 RUN apt update ; \
-    apt upgrade -y ; \
     apt install -y libgl1-mesa-dev fonts-ipaexfont vim
 
 RUN pip install setuptools==57.4.0
-RUN pip install opencv-python natsort numpy pandas xfeat \
-                seaborn optuna scikit-learn japanize-matplotlib \
+RUN pip install opencv-python natsort numpy pandas xfeat seaborn japanize-matplotlib \
+                optuna scikit-learn umap-learn \
                 sphinx sphinx_rtd_theme
 
 
