@@ -25,15 +25,16 @@
       </div>
     </form>
     
-    <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+    <canvas class="my-4 w-100" id="myChart_Line" width="900" height="380"></canvas>
     <script type="text/javascript">
-      var ctx = document.getElementById('myChart')
+      var ctx = document.getElementById('myChart_Line')
       var myChart = new Chart(ctx, {
         type: 'line',
         data: {
           labels: {{ graph_x }},
           datasets: [{
             data: {{ graph_y }},
+            label: "{{ signal.now }}",
             lineTension: 0,
             backgroundColor: 'transparent',
             borderColor: '#007bff',
@@ -55,6 +56,38 @@
         }
       })
     </script>
+    
+    <canvas class="my-4 w-100" id="myChart_Bar" width="900" height="380"></canvas>
+    <script type="text/javascript">
+      var ctx = document.getElementById('myChart_Bar')
+      var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: {{ graph_x }},
+          datasets: [{
+            data: {{ graph_y }},
+            label: "{{ signal.now }}",
+            lineTension: 0,
+            borderColor: '#007bff',
+            borderWidth: 1,
+            pointBackgroundColor: '#007bff'
+          }]
+        },
+        options: {
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: false
+              }
+            }]
+          },
+          legend: {
+            display: false
+          }
+        }
+      })
+    </script>
+    
   </div>
 </div>
 {% endblock %}
