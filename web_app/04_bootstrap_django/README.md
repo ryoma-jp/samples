@@ -6,6 +6,7 @@ CSSフレームワークにはBootstrapを使用する
 ## サーバ起動手順
 
 ```
+$ docker-compose build
 $ ./run_server.sh
 ```
 

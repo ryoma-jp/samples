@@ -10,6 +10,7 @@ DEFAULT_IMAGE_DIR="_images"
 DEFAULT_LOG_FILE="download_images.log"
 
 # --- 必要なパッケージのインストール
+python3 --version
 pip3 install tfds-nightly==4.4.0.dev202201220107 tensorflow==2.8.0rc0
 
 # --- 関数: version ---
