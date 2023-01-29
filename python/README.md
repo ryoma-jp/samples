@@ -14,6 +14,7 @@
 |[data_loader](./data_loader) |データセット読み込み処理のサンプル |
 |[explainable_ai](./explainable_ai) |機械学習モデルや推定結果の解釈あるいは可視化を行う手法のサンプル |
 |[dist_sample](./dist_sample) |配布用パッケージ作成サンプル |
+|[fair_mot](./fair_mot) |[FairMOT](https://github.com/ifzhang/FairMOT)を動作する環境構築手順および実行方法サンプル |
 |[feature_engineering](./feature_engineering) |特徴量エンジニアリングのサンプル |
 |[filter](./filter) |信号処理フィルタのサンプル |
 |[fifo](./fifo) |FIFOを介したプロセス間通信のサンプル |

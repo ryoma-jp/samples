@@ -1,0 +1,18 @@
+services:
+  fair_mot_env:
+    build: "."
+    volumes:
+      - type: bind
+        source: "../work"
+        target: "/work"
+      - type: bind
+        source: "../data"
+        target: "/data"
+    deploy:
+      resources:
+        reservations:
+          devices:
+           - driver: nvidia
+             device_ids: ['0']
+             capabilities: [gpu]
+
