@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% load custom_filter %}
+
+{% block main %}
+<!-- https://cdnjs.com/libraries/Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js" integrity="sha512-TW5s0IT/IppJtu76UbysrBH9Hy/5X41OTAbQuffZFU6lQ1rdcLHzpU5BzVvr/YFykoiMYZVWlr/PX1mDcfM9Qg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<div class ="welcome">
+  <h1 class="title">Implementations</h1>
+  
+  <div class="container">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="btn-group col-1 my-1">
+          <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            Select Key1: {{ implementation_nd_key1 }}
+          </button>
+          <ul class="dropdown-menu">
+          {% for item in nested_dict.keys %}
+            <li><button class="dropdown-item" type="submit" name="implementation_nd_key1" value="{{ item }}">{{ item }}</button></li>
+          {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </form>
+    
+    <form method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="btn-group col-1 my-1">
+          <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            Select Key2: {{ implementation_nd_key2 }}
+          </button>
+          <ul class="dropdown-menu">
+          {% for item in nested_dict|dict_keys:implementation_nd_key1 %}
+            <li><button class="dropdown-item" type="submit" name="implementation_nd_key2" value="{{ item }}">{{ item }}</button></li>
+          {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </form>
+    
+    <form method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="btn-group col-1 my-1">
+          <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            Select Key3: {{ implementation_nd_key3 }}
+          </button>
+          <ul class="dropdown-menu">
+          {% with implementation_nd_key1|add:","|add:implementation_nd_key2 as implementation_nd_key12 %}
+            {% for item in nested_dict|dict_keys:implementation_nd_key12 %}
+              <li><button class="dropdown-item" type="submit" name="implementation_nd_key3" value="{{ item }}">{{ item }}</button></li>
+            {% endfor %}
+          {% endwith %}
+          </ul>
+        </div>
+      </div>
+    </form>
+    
+    {% if implementation_nd_key1 and implementation_nd_key2 and implementation_nd_key3 %}
+      {% with implementation_nd_key1|add:","|add:implementation_nd_key2|add:","|add:implementation_nd_key3 as implementation_nd_key123 %}
+        <p>
+        Value of netted_dict[key1][key2][key3] = {{ nested_dict|dict_value:implementation_nd_key123 }}
+        </p>
+      {% endwith %}
+    {% endif %}
+    
+</div>
+{% endblock %}

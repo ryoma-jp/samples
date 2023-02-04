@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block main %}
+<div class ="welcome">
+  <h1 class="title">Image Gallery</h1>
+
+  {% if image_loading %}
+    <p>Image Loading...</p>
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only"></span>
+    </div>
+    <script>
+      window.location.href = "{% url 'image_gallery' %}"
+    </script>
+  {% else %}
+    <form method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="btn-group col-1 my-1">
+          <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            Images per Page: {{ gallery_form.images_per_page.default }}
+          </button>
+          <ul class="dropdown-menu">
+          {% for item in gallery_form.images_per_page.items %}
+            <li><button class="dropdown-item" type="submit" name="images_per_page" value="{{ item }}">{{ item }}</button></li>
+          {% endfor %}
+          </ul>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="btn-group col-1 my-1">
+          <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            Select Page: {{ gallery_form.select_page.now }} of {{ gallery_form.select_page.max }}
+          </button>
+          <ul class="dropdown-menu customScrollableDropdown">
+          {% for page in gallery_form.select_page.list %}
+            <li><button class="dropdown-item" type="submit" name="select_page" value="{{ page }}">{{ page }}</button></li>
+          {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </form>
+    
+    {% for image_file in image_files %}
+      <figure class="figure">
+        <img src="{{ image_file }}" alt="Responsive image" class="img-fluid img-thumbnail">
+        <figcaption class="figure-caption">{{ image_file }}</figcaption>
+      </figure>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}
