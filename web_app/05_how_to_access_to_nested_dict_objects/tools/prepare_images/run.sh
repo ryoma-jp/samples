@@ -4,14 +4,15 @@
 SCRIPT_DIR=$(cd $(dirname $0); pwd)
 
 # --- デフォルト値 --
-DEFAULT_DATASET="imagenet_v2"
+DEFAULT_DATASET="kitti"
 DEFAULT_DATASET_DIR="_download"
 DEFAULT_IMAGE_DIR="_images"
 DEFAULT_LOG_FILE="download_images.log"
 
 # --- 必要なパッケージのインストール
 python3 --version
-pip3 install tfds-nightly==4.4.0.dev202201220107 tensorflow==2.8.0rc0
+#pip3 install tfds-nightly==4.4.0.dev202201220107 tensorflow==2.8.0rc0
+pip3 install tfds-nightly==4.9.0.dev202304090044 tensorflow==2.8.0rc0
 
 # --- 関数: version ---
 function version {
@@ -27,7 +28,7 @@ Usage:
     $(basename ${0}) [command] [<options>]
 
 Options:
-    --dataset         specify dataset name(ex: cifar10, mnist, imagenet_v2, ...)
+    --dataset         specify dataset name(ex: cifar10, mnist, kitti, ...)
                       see https://www.tensorflow.org/datasets/catalog/overview#image_classification
                       default: ${DEFAULT_DATASET}
     --dataset_dir     specify directory to save dataset

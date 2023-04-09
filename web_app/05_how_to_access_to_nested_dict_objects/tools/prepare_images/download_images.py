@@ -24,6 +24,7 @@ fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", 
 handler.setFormatter(fmt)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 #---------------------------------
 # 定数定義
@@ -53,9 +54,11 @@ def main():
     # --- 引数処理 ---
     args = ArgParser()
     logger.info('<< arguments >>')
+    logger.info('--------------------------------------')
     logger.info(f'args.dataset : {args.dataset}')
     logger.info(f'args.dataset_dir : {args.dataset_dir}')
     logger.info(f'args.image_dir : {args.image_dir}')
+    logger.info('--------------------------------------')
     
     # --- データダウンロード ---
     ds, info = tfds.load(args.dataset, split='test', shuffle_files=True, with_info=True, data_dir=args.dataset_dir)
@@ -70,7 +73,7 @@ def main():
         if (i % (n_ds // 10) == 0):
             logger.info(f'[Progress] {i} / {n_ds}')
         
-        im, name = ds_['image'], ds_['file_name']
+        im, name = ds_['image'], ds_['image/file_name']
         logger.debug(tf.get_static_value(name).decode())
         logger.debug(tf.get_static_value(im))
         

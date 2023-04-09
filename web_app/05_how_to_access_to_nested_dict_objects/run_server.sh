@@ -6,7 +6,7 @@ if [ -e ${IMAGE_DIR} ]; then
 	echo "--- Skip Download Images (Images are already exist) ---"
 else
 	echo "--- Download Images ---"
-	docker-compose run web /code/tools/prepare_images/run.sh --dataset imagenet_v2 --dataset_dir /code/tools/prepare_images/download/ --image_dir /code/media/images/ --log /tmp/prepare_images.log
+	docker-compose run web /code/tools/prepare_images/run.sh --dataset kitti --dataset_dir /code/tools/prepare_images/download/ --image_dir /code/media/images/ --log /tmp/prepare_images.log
 	STAT_BUILD=$?
 	echo ${STAT_BUILD}
 	if [ ! ${STAT_BUILD} -eq 0 ]; then
