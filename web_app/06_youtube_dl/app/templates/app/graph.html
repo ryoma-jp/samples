@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block main %}
+<!-- https://cdnjs.com/libraries/Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js" integrity="sha512-TW5s0IT/IppJtu76UbysrBH9Hy/5X41OTAbQuffZFU6lQ1rdcLHzpU5BzVvr/YFykoiMYZVWlr/PX1mDcfM9Qg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<div class ="welcome">
+  <h1 class="title">Graph</h1>
+  
+  <div class="container">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row">
+        <div class="btn-group col-1 my-1">
+          <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            Select Signal: {{ signal.now }}
+          </button>
+          <ul class="dropdown-menu">
+          {% for item in signal.list %}
+            <li><button class="dropdown-item" type="submit" name="select_signal" value="{{ item }}">{{ item }}</button></li>
+          {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </form>
+    
+    <canvas class="my-4 w-100" id="myChart_Line" width="900" height="380"></canvas>
+    <script type="text/javascript">
+      var ctx = document.getElementById('myChart_Line')
+      var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: {{ graph_x }},
+          datasets: [{
+            data: {{ graph_y }},
+            label: "{{ signal.now }}",
+            lineTension: 0,
+            backgroundColor: 'transparent',
+            borderColor: '#007bff',
+            borderWidth: 4,
+            pointBackgroundColor: '#007bff'
+          }]
+        },
+        options: {
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: false
+              }
+            }]
+          },
+          legend: {
+            display: false
+          }
+        }
+      })
+    </script>
+    
+    <canvas class="my-4 w-100" id="myChart_Bar" width="900" height="380"></canvas>
+    <script type="text/javascript">
+      var ctx = document.getElementById('myChart_Bar')
+      var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: {{ graph_x }},
+          datasets: [{
+            data: {{ graph_y }},
+            label: "{{ signal.now }}",
+            lineTension: 0,
+            borderColor: '#007bff',
+            borderWidth: 1,
+            pointBackgroundColor: '#007bff'
+          }]
+        },
+        options: {
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: false
+              }
+            }]
+          },
+          legend: {
+            display: false
+          }
+        }
+      })
+    </script>
+    
+  </div>
+</div>
+{% endblock %}

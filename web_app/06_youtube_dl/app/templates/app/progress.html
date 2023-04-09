@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block main %}
+
+<div class ="welcome">
+  <h1 class="title">Progress</h1>
+  <div class="container">
+    <div class="row">
+      <button class="btn btn-primary col-4 mx-2 my-4" id="start_button">
+        Start
+      </button>
+      <div id="progress">
+        Progress bar space
+      </div>
+    </div>
+    <script>
+      // JavascriptでGETとかPOSTする時用のテンプレ
+      //   https://phithon.hatenablog.jp/entry/20100327/1269699247
+      // Django+Javascriptでプログレスバーを実装する
+      //   https://www.sw-mono.blog/entry/2020/01/06/140153
+      // 同期と非同期のリクエスト
+      //   https://developer.mozilla.org/ja/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests
+      //   * XMLHttpRequest.timeout
+      //       https://developer.mozilla.org/ja/docs/Web/API/XMLHttpRequest/timeout
+      //   * XMLHttpRequest.onreadystatechange
+      //       https://developer.mozilla.org/ja/docs/Web/API/XMLHttpRequest/readystatechange_event
+      
+      const progresshtml_init = 'Progress bar space';
+      let timer_id = 0;
+      let progress_pk = -1;
+      
+      progress = GetProgress(-1);
+      for (let i = 0; i < progress.num; i++) {
+          if (progress.status[i] == 'processing') {
+              progress_pk = progress.pk[i];
+          }
+      }
+      
+      // console.log("[DEBUG] progress_pk = " + progress_pk);
+      if (progress_pk == -1) {
+        start_button = document.querySelector('#start_button');
+        start_button.addEventListener('click', function() {
+          
+          request = new XMLHttpRequest();
+          url = "{% url 'progress_setup' %}"
+          request.open('GET', url);
+          request.onreadystatechange = function () {
+            if (request.readyState != 4) {
+              console.log("requesting");
+            } else if (request.status != 200) {
+              console.log("failed");
+            } else {
+              progress_pk = request.responseText;
+              console.log(progress_pk);
+              start_button.disabled = true;
+              
+              timer_id = setInterval(function() { ShowProgressBar(progress_pk) }, 1000);
+              Processing(progress_pk);
+            }
+          };
+          request.send(null);
+          
+          function Processing(progress_pk) {
+            request = new XMLHttpRequest();
+            param = "progress_pk=" + progress_pk;
+            var url = "{% url 'progress_processing' %}?" + param;
+            // console.log("[DEBUG] progress_pk=" + progress_pk + ", url=" + url);
+            request.open('GET', url);
+            request.onreadystatechange = function () {
+              if (request.readyState != 4) {
+                console.log("progress_processing requesting");
+              } else if (request.status != 200) {
+                console.log("progress_processing failed");
+              } else {
+                console.log("[INFO] Processing done");
+                ProcessingDone();
+              }
+            }
+            request.send(null);
+          };
+        
+        })
+      } else {
+        ShowProgressBar(progress_pk);
+        start_button.disabled = true;
+        timer_id = setInterval(function() { ShowProgressBar(progress_pk) }, 1000);
+      }
+      
+      function ShowProgressBar(progress_pk) {
+        progress = GetProgress(progress_pk);
+        persent = progress.persent
+        console.log("[INFO] persent = " + persent + "%");
+        
+        // progresshtml = '<div class="progress progress-bar" style="width:' + persent + '">' + persent + '%</div>';
+        progresshtml = '<div class="progress progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="' + persent + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + persent + '%">' + persent + '%</div>'
+        document.getElementById("progress").innerHTML = progresshtml;
+        // console.log(progresshtml);
+        
+        if (persent == 100) {
+          ProcessingDone();
+        }
+      };
+      
+      function GetProgress(progress_pk) {
+        request = new XMLHttpRequest();
+        param = "progress_pk=" + progress_pk;
+        var url = "{% url 'progress_get' %}?" + param;
+        var progress = JSON.parse('{"persent":0, "status":"processing"}');
+        // console.log("[DEBUG] progress_pk=" + progress_pk + ", url=" + url);
+        request.open('GET', url, false);
+        request.onload = function () {
+          progress = JSON.parse(request.responseText);
+        };
+        request.send(null);
+        
+        return progress;
+      };
+      
+      function ProcessingDone() {
+        clearInterval(timer_id);
+        start_button.disabled = false;
+        document.getElementById("progress").innerHTML = progresshtml_init;
+      };
+      
+    </script>
+  </div>
+</div>
+{% endblock %}

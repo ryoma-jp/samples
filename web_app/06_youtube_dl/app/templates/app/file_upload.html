@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block main %}
+<div class ="welcome">
+  <h1 class="title">File Upload</h1>
+  
+  <h2>Select File</h2>
+  <div class="container">
+    <div class="col-4">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% bootstrap_form upload_file_form %}
+        <button class="btn btn-primary" type="submit">Upload</button>
+      </form>
+    </div>
+  </div>
+  
+  <h2>Uploaded Files</h2>
+  <div class="container">
+    {% if uploaded_files %}
+      <div class="row">
+        <div class="col-6">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Description</th>
+                <th scope="col">File</th>
+                <th scope="col">Uploaded at</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for uploaded_file in uploaded_files %}
+                <tr>
+                  <td>{{ uploaded_file.description }}</td>
+                  <td><a href="{{ uploaded_file.upload_file }}">{{ uploaded_file.upload_file }}</a></td>
+                  <td>{{ uploaded_file.uploaded_at }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <p>No files are uploaded</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
