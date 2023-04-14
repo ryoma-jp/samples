@@ -1,5 +1,6 @@
 from django.views.decorators.http import require_safe, require_http_methods
 from django.shortcuts import HttpResponse, render, redirect, get_object_or_404
+from django.http.response import StreamingHttpResponse
 
 from app.models import TableItems, SelectFormItems, UploadFiles, Progress
 from app.forms import TableItemsForm, SelectFormItemsForm, UploadFileForm
@@ -10,6 +11,7 @@ from natsort import natsorted
 import math
 import json
 import time
+import cv2
 
 # Create your views here.
 
@@ -467,4 +469,24 @@ def youtube_dl(request):
 
     context = {}
     return render(request, "app/youtube_dl.html", context)
+
+@require_http_methods(["GET", "POST", "HEAD"])
+def youtube_dl_img(request):
+    
+    def gen():
+        """Generator
+        
+        This function is generator of byte frame for StreamingHttpResponse
+        """
+        frame = np.zeros([240, 320, 3], dtype=np.uint8)
+        
+        while True:
+            # --- Encode and Return byte frame ---
+            time.sleep(0.1)
+            image_bytes = cv2.imencode('.jpg', frame)[1].tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + image_bytes + b'\r\n\r\n')
+
+    return StreamingHttpResponse(gen(),
+               content_type='multipart/x-mixed-replace; boundary=frame')
 

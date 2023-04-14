@@ -19,4 +19,5 @@ urlpatterns = [
     path('progress_get/', views.progress_get, name='progress_get'),
     path('implementations/', views.implementations, name='implementations'),
     path('youtube_dl/', views.youtube_dl, name='youtube_dl'),
+    path('youtube_dl_img/', views.youtube_dl_img, name='youtube_dl_img'),
 ]
