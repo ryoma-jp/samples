@@ -483,24 +483,35 @@ def youtube_dl_img(request):
             url (string): YouTube URL
         """
         
-        resolution = '720p60'
+        #resolution = '720p60'
+        resolution = '240p'
+        fps = 30
+        frame_duration = 1 / fps
         cap = cap_from_youtube(url, resolution)
         
         while True:
+            start = time.time()
+            
             # --- Get frame ---
             ret, frame = cap.read()
+            end = time.time()
             
             if not ret:
                 cap = cap_from_youtube(url, resolution)
                 continue
             
             else:
+                sleep_time = frame_duration - (end - start)
+                if (sleep_time > 0):
+                    time.sleep(sleep_time)
+                
                 # --- Encode and Return byte frame ---
                 image_bytes = cv2.imencode('.jpg', frame)[1].tobytes()
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + image_bytes + b'\r\n\r\n')
     
-    url = 'https://www.youtube.com/watch?v=LXb3EKWsInQ'
+    #url = 'https://www.youtube.com/watch?v=LXb3EKWsInQ'
+    url = 'https://www.youtube.com/watch?v=Ii8u5eywxgI'
     
     return StreamingHttpResponse(gen(url),
                content_type='multipart/x-mixed-replace; boundary=frame')
