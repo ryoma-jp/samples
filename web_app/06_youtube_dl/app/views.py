@@ -12,6 +12,7 @@ import math
 import json
 import time
 import cv2
+from cap_from_youtube import cap_from_youtube
 
 # Create your views here.
 
@@ -473,20 +474,36 @@ def youtube_dl(request):
 @require_http_methods(["GET", "POST", "HEAD"])
 def youtube_dl_img(request):
     
-    def gen():
+    def gen(url):
         """Generator
         
         This function is generator of byte frame for StreamingHttpResponse
+        
+        Args:
+            url (string): YouTube URL
         """
-        frame = np.zeros([240, 320, 3], dtype=np.uint8)
+        
+        resolution = '720p60'
+        cap = cap_from_youtube(url, resolution)
         
         while True:
-            # --- Encode and Return byte frame ---
-            time.sleep(0.1)
-            image_bytes = cv2.imencode('.jpg', frame)[1].tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + image_bytes + b'\r\n\r\n')
-
-    return StreamingHttpResponse(gen(),
+            # --- Get frame ---
+            ret, frame = cap.read()
+            
+            if not ret:
+                cap = cap_from_youtube(url, resolution)
+                continue
+            
+            else:
+                # --- Encode and Return byte frame ---
+                image_bytes = cv2.imencode('.jpg', frame)[1].tobytes()
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + image_bytes + b'\r\n\r\n')
+    
+    #url = 'https://www.youtube.com/watch?v=gNC-63xK5Cg'
+    #url = 'https://youtu.be/LXb3EKWsInQ'
+    url = 'https://www.youtube.com/watch?v=LXb3EKWsInQ'
+    
+    return StreamingHttpResponse(gen(url),
                content_type='multipart/x-mixed-replace; boundary=frame')
 
