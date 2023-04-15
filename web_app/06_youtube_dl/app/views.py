@@ -500,8 +500,6 @@ def youtube_dl_img(request):
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + image_bytes + b'\r\n\r\n')
     
-    #url = 'https://www.youtube.com/watch?v=gNC-63xK5Cg'
-    #url = 'https://youtu.be/LXb3EKWsInQ'
     url = 'https://www.youtube.com/watch?v=LXb3EKWsInQ'
     
     return StreamingHttpResponse(gen(url),
