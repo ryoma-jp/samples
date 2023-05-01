@@ -1,0 +1,8 @@
+services:
+  ubuntu_python:
+    build: "./docker"
+    tty: true
+    volumes:
+      - type: bind
+        source: "."
+        target: "/work"
