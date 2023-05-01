@@ -32,7 +32,6 @@ def main():
     
     if (args.file_size == 'small'):
         url = 'http://images.cocodataset.org/annotations/annotations_trainval2017.zip'
-        #url = 'http://images.cocodataset.org/zips/train2017.zip'
         
         save_file = Path(args.download_dir, Path(url).name)
         content = requests.get(url).content
@@ -40,9 +39,13 @@ def main():
         with open(save_file, mode='wb') as f:
             f.write(content)
     else:
-        print('T.B.D')
-    
-
+        url = 'http://images.cocodataset.org/zips/train2017.zip'
+        
+        save_file = Path(args.download_dir, Path(url).name)
+        with requests.get(url, stream=True) as r:
+          with open(save_file, mode='wb') as f:
+              for chunk in r.iter_content(chunk_size=1048576):
+                  f.write(chunk)
 
 # --- main routine ---
 if __name__=='__main__':

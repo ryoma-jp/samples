@@ -26,10 +26,12 @@ $ python3 file_download.py --file_size small
 
 #### 分割ダウンロード
 
-T.B.D
+```
+$ python3 file_download.py --file_size big
+```
 
 ## 参照
 
-* [Pythonで作るHTTP分割ダウンロードするやつ](https://qiita.com/johejo/items/398f7208ebc2bc5a4724)
+* [PythonのRequestsでサイズの大きいファイルをダウンロード](https://qiita.com/ousaan/items/c83e068c4e46035f49bd)
 
 
