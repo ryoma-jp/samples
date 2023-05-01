@@ -1,0 +1,8 @@
+services:
+  file_download:
+    build: "./docker"
+    tty: true
+    volumes:
+      - type: bind
+        source: "."
+        target: "/work"

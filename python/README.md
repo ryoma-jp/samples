@@ -16,6 +16,7 @@
 |[dist_sample](./dist_sample) |配布用パッケージ作成サンプル |
 |[fair_mot](./fair_mot) |[FairMOT](https://github.com/ifzhang/FairMOT)を動作する環境構築手順および実行方法サンプル |
 |[feature_engineering](./feature_engineering) |特徴量エンジニアリングのサンプル |
+|[file_download](./file_download) |ファイルをダウンロードする処理のサンプル |
 |[filter](./filter) |信号処理フィルタのサンプル |
 |[fifo](./fifo) |FIFOを介したプロセス間通信のサンプル |
 |[float2byte](./float2byte) |floatをbyteデータに変換するサンプル |
