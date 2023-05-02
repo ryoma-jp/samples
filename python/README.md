@@ -31,6 +31,7 @@
 |[numpy_sample](./numpy_sample) |numpyモジュールの動作確認 |
 |[performance_monitor](./performance_monitor) | PCの稼働状態(CPU使用率，メモリ使用率など)を取得するサンプル |
 |[pca_sample](./pca_sample) | PCA(主成分分析)による次元圧縮のサンプル |
+|[read_coco_dataset_annotations](./read_coco_dataset_annotations) |COCOデータセットのアノテーション情報を読み込むサンプル |
 |[read_csv_with_stringio](./read_csv_with_stringio) |カンマ区切りの文字列をpandas.read_csvで読み込むサンプル |
 |[resize_circle](./resize_circle) |Pythonモジュールごとの円のリサイズ(ダウンサンプリングのされ方が異なる) |
 |[save_class_object](./save_class_object) |クラスオブジェクトをバイナリ保存するサンプルコード |
