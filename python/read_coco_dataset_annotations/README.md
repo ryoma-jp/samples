@@ -21,5 +21,7 @@ $ python3 read_coco_dataset_annotations.py
 
 ### ドキュメントの作成 ([Sphinx](https://www.sphinx-doc.org))
 
-T.B.D
+```
+$ sphinx-build -b html docs/source/ docs/build/html
+```
 
