@@ -11,7 +11,7 @@ logging.basicConfig(encoding='utf-8', level=logging.DEBUG)
 def download_and_extract(output_dir='downloads'):
     """Download and extract COCO Dataset
     
-    Download and eztract COCO Dataset.
+    Download and extract COCO Dataset.
     
     Args:
         output_dir (string): directory path of output files
