@@ -77,14 +77,13 @@ def read_coco_annotations(captions_json, instances_json, person_keypoints_json):
         COCO Annotations as pandas.DataFrame
     """
     
-    def _get_captions_licenses(x, dict_caption_licenses=None):
-        license = dict_caption_licenses[x.license]
+    def _get_licenses(x, df_licenses=None):
+        license = df_licenses[df_licenses['id']==x['license']].iloc[0]
         
-        dict_rename = dict(zip(license.keys(), [f'license_{key}' for key in license.keys()]))
-        ret = pd.Series(license)
-        ret.rename(dict_rename, inplace=True)
+        dict_rename = dict(zip(license.index, [f'license_{index}' for index in license.index]))
+        license.rename(dict_rename, inplace=True)
         
-        return ret
+        return license
     
     def _get_captions_annotations(x, df_annotations=None):
         annotation = df_annotations[df_annotations['image_id']==x['id']].iloc[0]
@@ -93,28 +92,66 @@ def read_coco_annotations(captions_json, instances_json, person_keypoints_json):
         
         return annotation
     
+    def _get_instances_annotations(x, df_images=None, df_categories=None):
+        image = df_images[df_images['id']==x['image_id']].iloc[0]
+        image.rename({'id': 'image_id'}, inplace=True)
+        
+        x.drop(index='image_id', inplace=True)
+        x.rename({'id': 'instance_id'}, inplace=True)
+        
+        category = df_categories[df_categories['id']==x['category_id']].iloc[0]
+        category.rename({'id': 'category_id', 'name': 'category_name'}, inplace=True)
+        
+        x.drop(index='category_id', inplace=True)
+        
+        annotation = pd.concat([image, x, category])
+        
+        return annotation
+    
+    # --- get captions ---
     with open(captions_json, 'r') as f:
         caption_data = json.load(f)
     
+    df_captions = pd.DataFrame(caption_data["images"])
+    
     logging.info(f'caption_data.keys(): {caption_data.keys()}')
     
-    dict_caption_licenses_key = [l['id'] for l in caption_data["licenses"]]
-    dict_caption_licenses = dict(zip(dict_caption_licenses_key, caption_data["licenses"]))
+    df_captions_licenses = df_captions.apply(_get_licenses, axis=1, df_licenses=pd.DataFrame(caption_data["licenses"]))
+    df_captions = pd.concat([df_captions, df_captions_licenses], axis=1)
+    df_captions.drop(columns=['license'], inplace=True)
     
-    df_coco_annotations = pd.DataFrame(caption_data["images"])
+    df_captions_annotations = df_captions.apply(_get_captions_annotations, axis=1, df_annotations=pd.DataFrame(caption_data["annotations"]))
+    df_captions.rename(columns={'id': 'image_id'}, inplace=True)
+    df_captions = pd.concat([df_captions, df_captions_annotations], axis=1)
     
-    df_captions_licenses = df_coco_annotations.apply(_get_captions_licenses, axis=1, dict_caption_licenses=dict_caption_licenses)
+    logging.info(f'df_captions.columns:\n{df_captions.columns}')
+    logging.info(f'df_captions:\n{df_captions}')
     
-    df_coco_annotations = pd.concat([df_coco_annotations, df_captions_licenses], axis=1)
-    df_coco_annotations.drop(columns=['license'], inplace=True)
+    # --- get instances ---
+    with open(instances_json, 'r') as f:
+        instance_data = json.load(f)
     
-    df_captions_annotations = df_coco_annotations.apply(_get_captions_annotations, axis=1, df_annotations=pd.DataFrame(caption_data["annotations"]))
+    df_instances = pd.DataFrame(instance_data["images"])
     
-    df_coco_annotations.rename(columns={'id': 'image_id'}, inplace=True)
-    df_coco_annotations = pd.concat([df_coco_annotations, df_captions_annotations], axis=1)
+    logging.info(f'instance_data.keys(): {instance_data.keys()}')
     
-    logging.info(f'df_coco_annotations.columns:\n{df_coco_annotations.columns}')
-    logging.info(f'df_coco_annotations:\n{df_coco_annotations}')
+    df_instances_licenses = df_instances.apply(_get_licenses, axis=1, df_licenses=pd.DataFrame(instance_data["licenses"]))
+    df_instances = pd.concat([df_instances, df_instances_licenses], axis=1)
+    df_instances.drop(columns=['license'], inplace=True)
+    
+    logging.info(f'df_instances.columns: {df_instances.columns}')
+    logging.info(f'df_instances: {df_instances}')
+    
+    df_instances_annotations = pd.DataFrame(instance_data['annotations'])
+    df_instances_categories = pd.DataFrame(instance_data['categories'])
+    df_instances = df_instances_annotations.apply(
+                       _get_instances_annotations,
+                       axis=1,
+                       df_images=df_instances,
+                       df_categories=df_instances_categories)
+    
+    logging.info(f'df_instances.columns:\n{df_instances.columns}')
+    logging.info(f'df_instances:\n{df_instances}')
     
 
 def main():
