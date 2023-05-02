@@ -75,6 +75,9 @@ def read_coco_annotations(captions_json, instances_json, person_keypoints_json):
     
     Returns:
         COCO Annotations as pandas.DataFrame
+            - df_captions: annotation data of captions
+            - df_instances: annotation data of instances
+            - df_keypoints: annotation data of person keypoints
     """
     
     def _get_licenses(x, df_licenses=None):
@@ -98,6 +101,22 @@ def read_coco_annotations(captions_json, instances_json, person_keypoints_json):
         
         x.drop(index='image_id', inplace=True)
         x.rename({'id': 'instance_id'}, inplace=True)
+        
+        category = df_categories[df_categories['id']==x['category_id']].iloc[0]
+        category.rename({'id': 'category_id', 'name': 'category_name'}, inplace=True)
+        
+        x.drop(index='category_id', inplace=True)
+        
+        annotation = pd.concat([image, x, category])
+        
+        return annotation
+    
+    def _get_keypoints_annotations(x, df_images=None, df_categories=None):
+        image = df_images[df_images['id']==x['image_id']].iloc[0]
+        image.rename({'id': 'image_id'}, inplace=True)
+        
+        x.drop(index='image_id', inplace=True)
+        x.rename({'id': 'keypoint_id'}, inplace=True)
         
         category = df_categories[df_categories['id']==x['category_id']].iloc[0]
         category.rename({'id': 'category_id', 'name': 'category_name'}, inplace=True)
@@ -139,9 +158,6 @@ def read_coco_annotations(captions_json, instances_json, person_keypoints_json):
     df_instances = pd.concat([df_instances, df_instances_licenses], axis=1)
     df_instances.drop(columns=['license'], inplace=True)
     
-    logging.info(f'df_instances.columns: {df_instances.columns}')
-    logging.info(f'df_instances: {df_instances}')
-    
     df_instances_annotations = pd.DataFrame(instance_data['annotations'])
     df_instances_categories = pd.DataFrame(instance_data['categories'])
     df_instances = df_instances_annotations.apply(
@@ -153,7 +169,31 @@ def read_coco_annotations(captions_json, instances_json, person_keypoints_json):
     logging.info(f'df_instances.columns:\n{df_instances.columns}')
     logging.info(f'df_instances:\n{df_instances}')
     
-
+    # --- get keypoints ---
+    with open(person_keypoints_json, 'r') as f:
+        keypoints_data = json.load(f)
+    
+    df_keypoints = pd.DataFrame(keypoints_data["images"])
+    
+    logging.info(f'keypoints_data.keys(): {keypoints_data.keys()}')
+    
+    df_keypoints_licenses = df_keypoints.apply(_get_licenses, axis=1, df_licenses=pd.DataFrame(keypoints_data["licenses"]))
+    df_keypoints = pd.concat([df_keypoints, df_keypoints_licenses], axis=1)
+    df_keypoints.drop(columns=['license'], inplace=True)
+    
+    df_keypoints_annotations = pd.DataFrame(keypoints_data['annotations'])
+    df_keypoints_categories = pd.DataFrame(keypoints_data['categories'])
+    df_keypoints = df_keypoints_annotations.apply(
+                       _get_keypoints_annotations,
+                       axis=1,
+                       df_images=df_keypoints,
+                       df_categories=df_keypoints_categories)
+    
+    logging.info(f'df_keypoints.columns:\n{df_keypoints.columns}')
+    logging.info(f'df_keypoints:\n{df_keypoints}')
+    
+    return df_captions, df_instances, df_keypoints
+    
 def main():
     """main
     
@@ -165,11 +205,15 @@ def main():
     logging.info(f'    - args.output_dir: {args.output_dir}')
     
     download_and_extract()
-    read_coco_annotations(
+    df_captions, df_instances, df_keypoints = read_coco_annotations(
         Path(args.output_dir, 'annotations', 'captions_val2017.json'),
         Path(args.output_dir, 'annotations', 'instances_val2017.json'),
         Path(args.output_dir, 'annotations', 'person_keypoints_val2017.json'),
     )
+    
+    df_captions.to_csv(Path(args.output_dir, 'captions.csv'))
+    df_instances.to_csv(Path(args.output_dir, 'instances.csv'))
+    df_keypoints.to_csv(Path(args.output_dir, 'keypoints.csv'))
     
     return
 
