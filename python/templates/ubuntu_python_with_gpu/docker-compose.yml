@@ -1,0 +1,15 @@
+services:
+  ubuntu_python:
+    build: "./docker"
+    tty: true
+    volumes:
+      - type: bind
+        source: "."
+        target: "/work"
+    deploy:
+      resources:
+        reservations:
+          devices:
+           - driver: nvidia
+             device_ids: ['0']
+             capabilities: [gpu]
