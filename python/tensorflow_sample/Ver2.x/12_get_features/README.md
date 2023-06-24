@@ -7,7 +7,7 @@ Functional Layerに対しては``get_config()``を用いてFunctional Layerの�
 
 本サンプルプログラムでは，中間層の値を取得できる例とできない例を示す．
 
-詳細な解説はこちら → []()
+詳細な解説はこちら → [TensorFlowで中間層の値を取得する方法](https://qiita.com/ryoma-jp/items/583722ddea414eea30f8)
 
 ## 中間層の値を取得できるモデル例
 

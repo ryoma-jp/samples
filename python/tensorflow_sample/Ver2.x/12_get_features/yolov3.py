@@ -23,6 +23,7 @@ def main():
         elif (layer.__class__.__name__ == 'Functional'):
             layer_config = layer.get_config()
             for j, func_layer in enumerate(layer_config['layers']):
+                logging.info(func_layer['class_name'])
                 if (func_layer['class_name'] in feature_attr):
                     feature_list.append(layer.layers[j].output)
     logging.info(feature_list)
