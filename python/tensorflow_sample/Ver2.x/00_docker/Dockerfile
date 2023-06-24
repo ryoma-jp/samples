@@ -1,8 +1,8 @@
 
 # --- build command ---
-#   docker build -t tf_sample_v2/tensorflow:21.03-tf2-py3 .
+#   docker build -t tf_sample_v2/tensorflow:ubuntu22.04 .
 
-FROM ubuntu:23.04
+FROM ubuntu:22.04
 
 RUN apt update && \
     apt upgrade -y xorg-input-abi-24 wget vim python3-pip libgl1-mesa-dev graphviz 
@@ -15,19 +15,18 @@ RUN wget -P /tmp/ https://developer.download.nvidia.com/compute/cuda/repos/wsl-u
     apt update && \
     apt -y install cuda
 
-COPY cudnn-local-repo-ubuntu2004-8.9.2.26_1.0-1_amd64.deb /tmp/
-RUN dpkg -i /tmp/cudnn-local-repo-ubuntu2004-8.9.2.26_1.0-1_amd64.deb && \
-    cp /var/cudnn-local-repo-ubuntu2004-8.9.2.26/cudnn-local-6D0A7AE1-keyring.gpg /usr/share/keyrings/ && \
-    apt update && \
-    apt install libcudnn8 libcudnn8-dev
+COPY libcudnn8_8.1.0.77-1+cuda11.2_amd64.deb /tmp/
+COPY libcudnn8-dev_8.1.0.77-1+cuda11.2_amd64.deb /tmp/
+RUN dpkg -i /tmp/libcudnn8_8.1.0.77-1+cuda11.2_amd64.deb /tmp/libcudnn8-dev_8.1.0.77-1+cuda11.2_amd64.deb
 
-RUN pip install --break-system-packages \
+RUN pip install \
+        tqdm==4.65.0 \
         matplotlib==3.7.1 \
         pandas==2.0.2 \
         opencv-python==4.7.0.72 \
         cython==0.29.35 \
         pydot==1.4.2 \
-        tensorflow==2.12.0
+        tensorflow==2.11.0
 
 
 ENTRYPOINT /bin/bash
