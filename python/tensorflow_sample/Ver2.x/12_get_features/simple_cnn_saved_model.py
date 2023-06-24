@@ -18,7 +18,7 @@ def main():
     model.summary()
     
     # --- Get features ---
-    #  * get output attributes of 'Conv2D' and 'Dense'
+    #  * get output attributes of 'Conv2D'
     inputs = model.input
     feature_attr = ['Conv2D']
     feature_list = []
