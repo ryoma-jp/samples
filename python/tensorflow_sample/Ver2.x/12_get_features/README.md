@@ -39,3 +39,14 @@ ValueError: Graph disconnected: cannot obtain value for tensor KerasTensor(type_
 
 ### 実行手順
 
+```
+python3 hourglass.py
+```
+
+### 中間層の値を取得できない要因
+
+TensorFlow Hubからロードしたモデルは``_UserObject``であり，LayersModelクラスのインスタンスとして読み込むことができない．
+
+```
+AttributeError: '_UserObject' object has no attribute 'summary'
+```
