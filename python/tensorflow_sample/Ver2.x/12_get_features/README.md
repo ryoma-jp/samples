@@ -22,7 +22,20 @@ Functional Layerに対しては``get_config()``を用いてFunctional Layerの�
 
 ### 実行手順
 
+```
+./run_yolov3.sh
+```
+
+### 中間層の値を取得できない要因
+
+モデルを定義する際，中間層に``Input``オブジェクトを指定すると中間層の値を取得できない．  
+厳密には，中間層の値を取得するために，定義した``Input``をモデルのInput Tensorとして与えなければならないが，この値が中間層の出力である為，推論前に値を設定することができない．
+
+```
+ValueError: Graph disconnected: cannot obtain value for tensor KerasTensor(type_spec=TensorSpec(shape=(None, None, None, 3), dtype=tf.float32, name='input_1'), name='input_1', description="created by layer 'input_1'") at layer "conv2d". The following previous layers were accessed without issue: []
+```
 
 ## 中間層の値を取得できないモデル例(CenterNetHourGlass104)
 
 ### 実行手順
+
