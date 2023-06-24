@@ -54,6 +54,12 @@ def main():
     logging.info(f'prediction.shape: {prediction.shape}')
     logging.info(f'prediction.argmax: {prediction.argmax(axis=1)}')
     
+    # --- Save test images ---
+    for img_no, test_image in enumerate(test_images[0:test_num]):
+        os.makedirs('test_image', exist_ok=True)
+        save_file = str(Path('test_image', f'img{img_no}.png'))
+        cv2.imwrite(save_file, cv2.cvtColor(test_image, cv2.COLOR_RGB2BGR))
+    
     # --- Calc accuracy ---
     acc = accuracy_score(test_labels[0:test_num].argmax(axis=1), prediction.argmax(axis=1))
     logging.info(f'accuracy: {acc}')
