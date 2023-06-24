@@ -26,6 +26,7 @@ RUN pip install \
         opencv-python==4.7.0.72 \
         cython==0.29.35 \
         pydot==1.4.2 \
+        scikit-learn==1.2.2 \
         tensorflow==2.11.0
 
 
