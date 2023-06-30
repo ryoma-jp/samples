@@ -5,7 +5,7 @@
 FROM ubuntu:22.04
 
 RUN apt update && \
-    apt upgrade -y xorg-input-abi-24 wget vim python3-pip libgl1-mesa-dev graphviz 
+    apt upgrade -y xorg-input-abi-24 wget vim python3-pip libgl1-mesa-dev graphviz git
 
 RUN wget -P /tmp/ https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-wsl-ubuntu.pin && \
     mv /tmp/cuda-wsl-ubuntu.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
@@ -27,7 +27,8 @@ RUN pip install \
         cython==0.29.35 \
         pydot==1.4.2 \
         scikit-learn==1.2.2 \
-        tensorflow==2.11.0
+        tensorflow==2.11.0 \
+        tensorflow-hub==0.13.0
 
 
 ENTRYPOINT /bin/bash
