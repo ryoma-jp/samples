@@ -21,12 +21,8 @@ RUN dpkg -i /tmp/cudnn-local-repo-ubuntu2004-8.9.2.26_1.0-1_amd64.deb && \
     apt update && \
     apt install libcudnn8 libcudnn8-dev
 
-RUN pip3 install \
-    tensorflow==2.12.0 \
-    Sphinx==7.0.0
-
-RUN pip3 install \
-    torch==1.10.1+cu111 torchvision==0.11.2+cu111 torchaudio==0.10.1 -f https://download.pytorch.org/whl/cu111/torch_stable.html
+COPY requirements.txt /tmp/requirements.txt
+RUN pip3 install -r /tmp/requirements.txt
 
 ENTRYPOINT /bin/bash
 

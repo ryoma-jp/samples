@@ -24,6 +24,80 @@ $ cd /work
 $ python3 check_gpu.py
 ```
 
+### Pythonパッケージのライセンス一覧
+
+```
+$ pip-licenses
+```
+
+#### このテンプレートで使用するPythonパッケージのライセンス一覧
+
+```
+ Name                           Version       License                                                                                          
+ Babel                          2.12.1        BSD License                                                                                      
+ Jinja2                         3.1.2         BSD License                                                                                      
+ Markdown                       3.4.3         BSD License                                                                                      
+ MarkupSafe                     2.1.3         BSD License                                                                                      
+ Pillow                         10.0.0        Historical Permission Notice and Disclaimer (HPND)                                               
+ Pygments                       2.15.1        BSD License                                                                                      
+ Sphinx                         7.0.0         BSD License                                                                                      
+ Werkzeug                       2.3.6         BSD License                                                                                      
+ absl-py                        1.4.0         Apache Software License                                                                          
+ alabaster                      0.7.13        BSD License                                                                                      
+ astunparse                     1.6.3         BSD License                                                                                      
+ cachetools                     5.3.1         MIT License                                                                                      
+ certifi                        2023.5.7      Mozilla Public License 2.0 (MPL 2.0)                                                             
+ charset-normalizer             3.1.0         MIT License                                                                                      
+ docutils                       0.19          BSD License; GNU General Public License (GPL); Public Domain; Python Software Foundation License 
+ flatbuffers                    23.5.26       Apache Software License                                                                          
+ gast                           0.4.0         BSD License                                                                                      
+ google-auth                    2.21.0        Apache Software License                                                                          
+ google-auth-oauthlib           1.0.0         Apache Software License                                                                          
+ google-pasta                   0.2.0         Apache Software License                                                                          
+ grpcio                         1.56.0        Apache Software License                                                                          
+ h5py                           3.9.0         BSD License                                                                                      
+ idna                           3.4           BSD License                                                                                      
+ imagesize                      1.4.1         MIT License                                                                                      
+ importlib-metadata             6.7.0         Apache Software License                                                                          
+ jax                            0.4.13        Apache-2.0                                                                                       
+ keras                          2.12.0        Apache Software License                                                                          
+ libclang                       16.0.0        Apache Software License                                                                          
+ ml-dtypes                      0.2.0         Apache Software License                                                                          
+ numpy                          1.23.5        BSD License                                                                                      
+ oauthlib                       3.2.2         BSD License                                                                                      
+ opt-einsum                     3.3.0         MIT                                                                                              
+ packaging                      23.1          Apache Software License; BSD License                                                             
+ protobuf                       4.23.3        3-Clause BSD License                                                                             
+ pyasn1                         0.5.0         BSD License                                                                                      
+ pyasn1-modules                 0.3.0         BSD License                                                                                      
+ pytz                           2023.3        MIT License                                                                                      
+ requests                       2.31.0        Apache Software License                                                                          
+ requests-oauthlib              1.3.1         BSD License                                                                                      
+ rsa                            4.9           Apache Software License                                                                          
+ scipy                          1.10.1        BSD License                                                                                      
+ six                            1.16.0        MIT License                                                                                      
+ snowballstemmer                2.2.0         BSD License                                                                                      
+ sphinxcontrib-applehelp        1.0.4         BSD License                                                                                      
+ sphinxcontrib-devhelp          1.0.2         BSD License                                                                                      
+ sphinxcontrib-htmlhelp         2.0.1         BSD License                                                                                      
+ sphinxcontrib-jsmath           1.0.1         BSD License                                                                                      
+ sphinxcontrib-qthelp           1.0.3         BSD License                                                                                      
+ sphinxcontrib-serializinghtml  1.1.5         BSD License                                                                                      
+ tensorboard                    2.12.3        Apache Software License                                                                          
+ tensorboard-data-server        0.7.1         Apache Software License                                                                          
+ tensorflow                     2.12.0        Apache Software License                                                                          
+ tensorflow-estimator           2.12.0        Apache Software License                                                                          
+ tensorflow-io-gcs-filesystem   0.32.0        Apache Software License                                                                          
+ termcolor                      2.3.0         MIT License                                                                                      
+ torch                          1.10.1+cu111  BSD License                                                                                      
+ torchaudio                     0.10.1+cu111  BSD License                                                                                      
+ torchvision                    0.11.2+cu111  BSD                                                                                              
+ typing_extensions              4.7.0         Python Software Foundation License                                                               
+ urllib3                        2.0.3         MIT License                                                                                      
+ wrapt                          1.14.1        BSD License                                                                                      
+ zipp                           3.15.0        MIT License                                                                                      
+```
+
 ### ドキュメントの作成 ([Sphinx](https://www.sphinx-doc.org))
 
 #### プロジェクトの作成
