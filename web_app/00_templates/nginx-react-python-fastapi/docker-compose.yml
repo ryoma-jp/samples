@@ -1,0 +1,28 @@
+version: "3.0"
+
+services:
+  backend:
+    volumes:
+      - ./backend:/app
+    build:
+      context: .
+      dockerfile: docker/python/Dockerfile
+    ports:
+      - 4000:4000
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/nodejs/Dockerfile
+    volumes:
+      - ./frontend:/src
+    command: sh -c "cd react-project && yarn start"
+    ports:
+      - "3000:3000"
+
+  nginx:
+    image: nginx:1.27.0-perl
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
