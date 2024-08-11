@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  env:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    shm_size: '8gb'
+    tty: true
+    stdin_open: true
+    environment:
+      - PYTHONPATH=/workspace
+    volumes:
+      - type: bind
+        source: .
+        target: /workspace
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
