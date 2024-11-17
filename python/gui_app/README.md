@@ -19,3 +19,15 @@ A simple clock application.
 cd ./clock
 python clock.py
 ```
+
+### Trouble Shooting
+
+1. _tkinter.TclError: couldn't connect to display
+
+Type `xhost +`.
+
+```
+xhost +
+./enter-docker.sh
+```
+
