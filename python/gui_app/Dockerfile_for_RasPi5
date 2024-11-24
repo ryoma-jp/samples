@@ -1,0 +1,21 @@
+FROM debian:bookworm
+RUN apt update && apt install -y gnupg
+RUN echo "deb http://archive.raspberrypi.org/debian/ bookworm main" > /etc/apt/sources.list.d/raspi.list \
+  && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 82B129927FA3303E
+
+RUN apt update && apt -y upgrade
+RUN apt update && apt install -y \
+    python3-pip \
+    python3-tk \
+    python3-picamera2 \
+    python3-pil python3-pil.imagetk \
+    libgl1-mesa-glx \
+    && apt clean \
+    && apt autoremove \
+    && rm -rf /var/cache/apt/archives/* \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY ./requirements.txt /tmp/requirements.txt
+RUN pip install --break-system-packages --no-cache-dir -r /tmp/requirements.txt
+
+ENTRYPOINT ["/bin/bash"]

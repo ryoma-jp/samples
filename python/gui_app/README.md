@@ -11,13 +11,20 @@ BUild the docker image and run the container.
 ./enter-docker.sh
 ```
 
-## [Clock](./clock)
+## [Clock](./00_clock)
 
 A simple clock application.
 
 ```
-cd ./clock
-python clock.py
+python ./00_clock/clock.py
+```
+
+## [Camera Streraming](./01_camera_streaming)
+
+A camera streaming application.
+
+```
+python ./01_camera_streaming/camera_streaming.py
 ```
 
 ### Trouble Shooting
