@@ -10,12 +10,24 @@ from hailo_platform import (HEF, ConfigureParams, FormatType, HailoSchedulingAlg
                             VDevice)
 import argparse
 import numpy as np
+import time
 
+def time_function(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        print(f"{func.__name__} executed in {end_time - start_time:.4f} seconds")
+        return result
+    return wrapper
+
+@time_function
 def load_model(model_path):
     # Load the Hailo8L model
     hef = HEF(model_path)
     return hef
 
+@time_function
 def extract_detections(input, boxes, scores, classes, num_detections, threshold=0.5):   
     for i, detection in enumerate(input):
         if len(detection) == 0:
@@ -35,6 +47,7 @@ def extract_detections(input, boxes, scores, classes, num_detections, threshold=
              'detection_scores': [scores],
              'num_detections': [num_detections]}
 
+@time_function
 def post_nms_infer(raw_detections, input_name):
     boxes = []
     scores = []
@@ -45,20 +58,33 @@ def post_nms_infer(raw_detections, input_name):
     
     return detections
 
-def post_process(detections, image, id, width, height, min_score=0.45, scale_factor=1):
-    COLORS = np.random.randint(90, 190, size=(100, 3), dtype=np.uint8)
+# Dictionary to store fixed colors for each class
+CLASS_COLORS = {}
+
+@time_function
+def post_process(detections, image, id, width, height, min_score=0.45):
+    global CLASS_COLORS
     boxes = np.array(detections['detection_boxes'])[0]
     classes = np.array(detections['detection_classes'])[0].astype(int)
     scores = np.array(detections['detection_scores'])[0]
     draw = ImageDraw.Draw(image)
+    im_width, im_height = image.size
+    scale_factor = {
+        "width": im_width / width,
+        "height": im_height / height,
+    }
 
     for idx in range(np.array(detections['num_detections'])[0]):
         if scores[idx] >= min_score:
-            color = tuple(int(c) for c in COLORS[classes[idx]])
+            if classes[idx] not in CLASS_COLORS:
+                # Assign a random color if not already assigned
+                CLASS_COLORS[classes[idx]] = tuple(np.random.randint(90, 190, size=3).tolist())
+            color = CLASS_COLORS[classes[idx]]
             scaled_box = [x*width if i%2 else x*height for i,x in enumerate(boxes[idx])]
             label = draw_detection(draw, scaled_box , classes[idx], scores[idx]*100.0, color, scale_factor)
     return image
 
+@time_function
 def draw_detection(draw, d, c, s, color, scale_factor):
     """Draw box and label for 1 detection."""
     # same as coco.txt
@@ -75,57 +101,62 @@ def draw_detection(draw, d, c, s, color, scale_factor):
     label = class_names[c] + ": " + "{:.2f}".format(s) + '%'
     ymin, xmin, ymax, xmax = d
     font = ImageFont.truetype("LiberationSans-Regular.ttf", size=18)
-    draw.rectangle([(xmin * scale_factor, ymin * scale_factor), (xmax * scale_factor, ymax * scale_factor)], outline=color, width=4)
-    text_bbox = draw.textbbox((xmin * scale_factor + 4, ymin * scale_factor + 4), label, font=font)
+    draw.rectangle([(xmin * scale_factor["width"], ymin * scale_factor["height"]), (xmax * scale_factor["width"], ymax * scale_factor["height"])], outline=color, width=4)
+    text_bbox = draw.textbbox((xmin * scale_factor["width"] + 4, ymin * scale_factor["height"] + 4), label, font=font)
     text_bbox = list(text_bbox)
     text_bbox[0] -= 4
     text_bbox[1] -= 4
     text_bbox[2] += 4
     text_bbox[3] += 4
     draw.rectangle(text_bbox, fill=color)
-    draw.text((xmin * scale_factor + 4, ymin * scale_factor + 4), label, fill="black", font=font)
+    draw.text((xmin * scale_factor["width"] + 4, ymin * scale_factor["height"] + 4), label, fill="black", font=font)
     return label
 
-def perform_inference(hef, frame):
-    # Perform inference on the frame using Hailo8L
-    # This implementation is sample code for yolox_s_leaky_h8l_rpi.hef
-    
+@time_function
+def perform_inference_yolox(frame, infer_pipeline, network_group, input_vstream_info):
     # Preprocess the frame
+    start_time = time.time()
     input_tensor = cv2.resize(frame, (640, 640))
-    
-    # Configure network groups
-    params = VDevice.create_params()
-    target = VDevice(params)
-    configure_params = ConfigureParams.create_from_hef(hef=hef, interface=HailoStreamInterface.PCIe)
-    network_groups = target.configure(hef, configure_params)
-    network_group = network_groups[0]
-    network_group_params = network_group.create_params()
-
-    input_vstreams_params = InputVStreamParams.make(network_group, quantized=False,
-                                                    format_type=FormatType.FLOAT32)
-    output_vstreams_params = OutputVStreamParams.make(network_group, quantized=True,
-                                                    format_type=FormatType.FLOAT32)
-
-    input_vstream_info = hef.get_input_vstream_infos()[0]
-    #print("input shape - ", input_vstream_info.shape)
-
-    output_vstream_info = hef.get_output_vstream_infos()[0]
-    #print("output shape - ", output_vstream_info.shape)
+    print(f"Preprocessing executed in {time.time() - start_time:.4f} seconds")
     
     # Perform inference
+    start_time = time.time()
     input_tensor = {input_vstream_info.name: np.array([input_tensor]).astype(np.float32)}
-    with InferVStreams(network_group, input_vstreams_params, output_vstreams_params) as infer_pipeline:
-        with network_group.activate(network_group_params):
-            infer_results = infer_pipeline.infer(input_tensor)
+    infer_results = infer_pipeline.infer(input_tensor)
+    print(f"Inference executed in {time.time() - start_time:.4f} seconds")
     
     # Post-process the output
-    # This is a placeholder for post-processing code
-    #print(infer_results)
+    start_time = time.time()
     processed_results = post_nms_infer(infer_results, "yolox_l_leaky/yolox_nms_postprocess")
     image = Image.fromarray(frame)
     frame = post_process(processed_results, image, 0, 640, 640)
+    print(f"Post-processing executed in {time.time() - start_time:.4f} seconds")
     
     return frame  # Return the frame with detections drawn
+
+@time_function
+def perform_inference_other_model(frame):
+    # Perform inference on the frame using Hailo8L for another model
+    # ...existing code for another model...
+    return frame  # Return the frame with detections drawn
+
+# Dictionary to map model names to their respective inference functions
+MODEL_INFERENCE_FUNCTIONS = {
+    "yolox_s_leaky_h8l_rpi.hef": perform_inference_yolox,
+    "other_model.hef": perform_inference_other_model,
+}
+
+@time_function
+def perform_inference(frame, infer_pipeline, network_group, input_vstream_info):
+    # Determine the model name from the hef object
+    #model_name = hef.get_model_name()  # Assuming hef has a method to get the model name
+    model_name = "yolox_s_leaky_h8l_rpi.hef"
+    
+    # Select the appropriate inference function based on the model name
+    inference_function = MODEL_INFERENCE_FUNCTIONS.get(model_name, perform_inference_yolox)
+    
+    # Perform inference using the selected function
+    return inference_function(frame, infer_pipeline, network_group, input_vstream_info)
 
 def main():
     parser = argparse.ArgumentParser(description="Camera streaming with inference")
@@ -138,24 +169,47 @@ def main():
     
     hef = load_model(args.hef)  # Load the model with the provided path
     
-    root = tk.Tk()
-    root.title("Camera Streaming")
-    label = tk.Label(root)
-    label.pack()
+    # Configure network groups
+    start_time = time.time()
+    params = VDevice.create_params()
+    target = VDevice(params)
+    configure_params = ConfigureParams.create_from_hef(hef=hef, interface=HailoStreamInterface.PCIe)
+    network_groups = target.configure(hef, configure_params)
+    network_group = network_groups[0]
+    network_group_params = network_group.create_params()
+    print(f"Network configuration executed in {time.time() - start_time:.4f} seconds")
+
+    start_time = time.time()
+    input_vstreams_params = InputVStreamParams.make(network_group, quantized=False,
+                                                    format_type=FormatType.FLOAT32)
+    output_vstreams_params = OutputVStreamParams.make(network_group, quantized=True,
+                                                    format_type=FormatType.FLOAT32)
+    input_vstream_info = hef.get_input_vstream_infos()[0]
+    output_vstream_info = hef.get_output_vstream_infos()[0]
+    print(f"Stream parameters setup executed in {time.time() - start_time:.4f} seconds")
     
-    update_camera(camera, label, hef)
-    root.mainloop()
-    
-def update_camera(camera, label, hef):
+    with InferVStreams(network_group, input_vstreams_params, output_vstreams_params) as infer_pipeline:
+        with network_group.activate(network_group_params):
+            root = tk.Tk()
+            root.title("Camera Streaming")
+            label = tk.Label(root)
+            label.pack()
+            
+            update_camera(camera, label, infer_pipeline, network_group, input_vstream_info)
+            root.mainloop()
+
+@time_function
+def update_camera(camera, label, infer_pipeline, network_group, input_vstream_info):
     frame = camera.capture_array()
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+#    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    frame = cv2.cvtColor(frame, cv2.COLOR_RGBA2RGB)
     
-    frame = perform_inference(hef, frame)  # Perform inference
+    frame = perform_inference(frame, infer_pipeline, network_group, input_vstream_info)  # Perform inference
     
     frame = ImageTk.PhotoImage(frame)
     label.config(image=frame)
     label.image = frame
-    label.after(10, lambda: update_camera(camera, label, hef))
+    label.after(10, lambda: update_camera(camera, label, infer_pipeline, network_group, input_vstream_info))
     
 if __name__ == "__main__":
     main()
