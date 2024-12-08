@@ -3,8 +3,15 @@
 MODEL_DIR="$PWD/models/"
 mkdir -p $MODEL_DIR
 
-MODEL="yolox_l_leaky.hef"
+# see: https://github.com/hailo-ai/hailo_model_zoo
+
+# Object Detection
+#MODEL="yolox_l_leaky.hef"
 #MODEL="yolox_s_leaky.hef"
+
+# Semantic Segmentation
+MODEL="deeplab_v3_mobilenet_v2.hef"
+
 if [ -f $MODEL_DIR$MODEL ]; then
     echo "$MODEL_DIR$MODEL exists."
 else
