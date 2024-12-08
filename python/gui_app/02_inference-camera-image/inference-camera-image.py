@@ -48,12 +48,13 @@ def extract_detections(input, boxes, scores, classes, num_detections, threshold=
              'num_detections': [num_detections]}
 
 @time_function
-def post_nms_infer(raw_detections, input_name):
+def post_nms_infer(raw_detections):
     boxes = []
     scores = []
     classes = []
     num_detections = 0
     
+    input_name = list(raw_detections.keys())[0]
     detections = extract_detections(raw_detections[input_name][0], boxes, scores, classes, num_detections)
     
     return detections
@@ -127,7 +128,7 @@ def perform_inference_yolox(frame, infer_pipeline, network_group, input_vstream_
     
     # Post-process the output
     start_time = time.time()
-    processed_results = post_nms_infer(infer_results, "yolox_l_leaky/yolox_nms_postprocess")
+    processed_results = post_nms_infer(infer_results)
     image = Image.fromarray(frame)
     frame = post_process(processed_results, image, 0, 640, 640)
     print(f"Post-processing executed in {time.time() - start_time:.4f} seconds")
@@ -142,16 +143,13 @@ def perform_inference_other_model(frame):
 
 # Dictionary to map model names to their respective inference functions
 MODEL_INFERENCE_FUNCTIONS = {
-    "yolox_s_leaky_h8l_rpi.hef": perform_inference_yolox,
+    "yolox_l_leaky.hef": perform_inference_yolox,
+    "yolox_s_leaky.hef": perform_inference_yolox,
     "other_model.hef": perform_inference_other_model,
 }
 
 @time_function
-def perform_inference(frame, infer_pipeline, network_group, input_vstream_info):
-    # Determine the model name from the hef object
-    #model_name = hef.get_model_name()  # Assuming hef has a method to get the model name
-    model_name = "yolox_s_leaky_h8l_rpi.hef"
-    
+def perform_inference(model_name, frame, infer_pipeline, network_group, input_vstream_info):
     # Select the appropriate inference function based on the model name
     inference_function = MODEL_INFERENCE_FUNCTIONS.get(model_name, perform_inference_yolox)
     
@@ -168,6 +166,7 @@ def main():
     camera.start()
     
     hef = load_model(args.hef)  # Load the model with the provided path
+    hef_name = args.hef.split("/")[-1]
     
     # Configure network groups
     start_time = time.time()
@@ -195,21 +194,20 @@ def main():
             label = tk.Label(root)
             label.pack()
             
-            update_camera(camera, label, infer_pipeline, network_group, input_vstream_info)
+            update_camera(hef_name, camera, label, infer_pipeline, network_group, input_vstream_info)
             root.mainloop()
 
 @time_function
-def update_camera(camera, label, infer_pipeline, network_group, input_vstream_info):
+def update_camera(model_name, camera, label, infer_pipeline, network_group, input_vstream_info):
     frame = camera.capture_array()
-#    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     frame = cv2.cvtColor(frame, cv2.COLOR_RGBA2RGB)
     
-    frame = perform_inference(frame, infer_pipeline, network_group, input_vstream_info)  # Perform inference
+    frame = perform_inference(model_name, frame, infer_pipeline, network_group, input_vstream_info)  # Perform inference
     
     frame = ImageTk.PhotoImage(frame)
     label.config(image=frame)
     label.image = frame
-    label.after(10, lambda: update_camera(camera, label, infer_pipeline, network_group, input_vstream_info))
+    label.after(10, lambda: update_camera(model_name, camera, label, infer_pipeline, network_group, input_vstream_info))
     
 if __name__ == "__main__":
     main()
