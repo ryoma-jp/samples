@@ -1,7 +1,9 @@
 version: '3.7'
 services:
-  env:
-    build: "./docker"
+  converter:
+    build:
+      context: "./docker/converter"
+      dockerfile: "Dockerfile"
     tty: true
     volumes:
       - type: bind
@@ -9,6 +11,27 @@ services:
         target: "/work"
     working_dir: "/work"
     user: "${UID}:${GID}"
+    shm_size: '2g'
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids: ['0']
+            capabilities: [gpu]
+
+  compiler:
+    build:
+      context: "./docker/compiler"
+      dockerfile: "Dockerfile"
+    tty: true
+    volumes:
+      - type: bind
+        source: "."
+        target: "/work"
+    working_dir: "/work"
+    user: "${UID}:${GID}"
+    shm_size: '2g'
     deploy:
       resources:
         reservations:
