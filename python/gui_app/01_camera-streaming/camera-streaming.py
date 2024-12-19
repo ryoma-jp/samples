@@ -21,7 +21,7 @@ def main():
     
 def update_camera(camera, label):
     frame = camera.capture_array()
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    frame = cv2.cvtColor(frame, cv2.COLOR_RGBA2RGB)
     frame = Image.fromarray(frame)
     frame = ImageTk.PhotoImage(frame)
     label.config(image=frame)
