@@ -1,6 +1,7 @@
 import cv2
 import argparse
 import tkinter as tk
+import time
 from tkinter import ttk
 from tkinter import filedialog
 from PIL import Image, ImageTk
@@ -62,8 +63,10 @@ class VideoPlayer:
 
     def update_frame(self):
         if self.playing:
+            start = time.time()
             ret, frame = self.cap.read()
             if ret:
+                # Resize the frame to reduce processing time
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 img = Image.fromarray(frame)
                 self.imgtk = ImageTk.PhotoImage(image=img)  # インスタンス変数として保持
@@ -74,9 +77,12 @@ class VideoPlayer:
                 total_frames = self.cap.get(cv2.CAP_PROP_FRAME_COUNT)
                 fps = self.cap.get(cv2.CAP_PROP_FPS)
                 self.position_scale.set((current_frame / total_frames) * 100)
-                self.position_label.config(text=f"{int(current_frame)} / {int(total_frames)} ({fps:.1f} fps)")
+                self.position_label.config(text=f"{int(current_frame + 1)} / {int(total_frames)} ({fps:.1f} fps)")
                 
-                self.root.after(int(1000 / (fps * self.speed)), self.update_frame)
+                processing_time_ms = (time.time() - start) * 1000
+                #print(f"{processing_time_ms, 1000 / (fps * self.speed)}")
+                interval = max(1, int(1000 / (fps * self.speed) - processing_time_ms))
+                self.root.after(interval, self.update_frame)
             else:
                 self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
                 self.playing = False
