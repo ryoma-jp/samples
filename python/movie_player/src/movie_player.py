@@ -39,7 +39,8 @@ class VideoPlayer:
         self.speed = float(val)
 
     def change_position(self, val):
-        frame_number = int(float(val) * self.cap.get(cv2.CAP_PROP_FRAME_COUNT) / 100)
+        epsilon = 1e-6
+        frame_number = int(float(val) * self.cap.get(cv2.CAP_PROP_FRAME_COUNT) / 100 + epsilon)
         self.cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
 
     def update_frame(self):
@@ -50,6 +51,12 @@ class VideoPlayer:
                 img = Image.fromarray(frame)
                 self.imgtk = ImageTk.PhotoImage(image=img)  # インスタンス変数として保持
                 self.canvas.create_image(0, 0, anchor=tk.NW, image=self.imgtk)
+                
+                # Update the position of the progress bar
+                current_frame = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
+                total_frames = self.cap.get(cv2.CAP_PROP_FRAME_COUNT)
+                self.position_scale.set((current_frame / total_frames) * 100)
+                
                 self.root.after(int(1000 / (self.cap.get(cv2.CAP_PROP_FPS) * self.speed)), self.update_frame)
             else:
                 self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)

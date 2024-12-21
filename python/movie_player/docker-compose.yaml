@@ -8,10 +8,6 @@ services:
         source: "."
         target: "/work"
       - type: bind
-        source: "/run/udev"
-        target: "/run/udev"
-        read_only: true
-      - type: bind
         source: "/tmp/.X11-unix"
         target: "/tmp/.X11-unix"
     working_dir: "/work"
