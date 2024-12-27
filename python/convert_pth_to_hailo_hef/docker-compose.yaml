@@ -24,11 +24,26 @@ services:
     build:
       context: "./docker/compiler"
       dockerfile: "Dockerfile"
+      args:
+        USER_ID: ${UID}
+        GROUP_ID: ${GID}
+        USER_NAME: ${UNAME}
     tty: true
     volumes:
       - type: bind
         source: "."
         target: "/work"
+      - type: bind
+        source: "/home/${UNAME}"
+        target: "/home/${UNAME}"
+      - type: bind
+        source: "/etc/passwd"
+        target: "/etc/passwd"
+        read_only: true
+      - type: bind
+        source: "/etc/group"
+        target: "/etc/group"
+        read_only: true
     working_dir: "/work"
     user: "${UID}:${GID}"
     shm_size: '2g'
