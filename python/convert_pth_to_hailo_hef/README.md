@@ -48,6 +48,7 @@ ln -s ~/.hailomz/data/models_files/coco/2023-08-03/ ~/.hailomz/data/models_files
 
 #### Issue
 
+##### Failed to produce compiled graph
 ```
 ryoichi@8e83775ddc26:/work/yolomodel/runs/detect/retrain_yolov8n/weights$ /tmp/lib/hailo/bin/hailomz compile  yolov8n --hw-arch hailo8l --har ./yolov8n.har 
 [warning] Cannot use graphviz, so no visualizations will be created
