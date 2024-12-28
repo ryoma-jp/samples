@@ -24,7 +24,7 @@ RUN groupadd -g ${GROUP_ID} ${USER_NAME} && \
 USER ${USER_NAME}
 
 ENV PATH="${PATH}:/tmp/lib/hailo/bin"
-ENV PYTHONPATH="${PYTHONPATH}:/tmp/lib/hailo"
+ENV PYTHONPATH="/tmp/lib/hailo"
 RUN pip3 install --target "/tmp/lib/hailo" /tmp/hailo_dataflow_compiler-3.29.0-py3-none-linux_x86_64.whl /tmp/hailo_model_zoo-2.13.0-py3-none-any.whl
 
 # Download hailo_model_zoo

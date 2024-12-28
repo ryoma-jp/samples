@@ -37,6 +37,9 @@ services:
         source: "/home/${UNAME}"
         target: "/home/${UNAME}"
       - type: bind
+        source: ${HOME}/work/dataset
+        target: /dataset
+      - type: bind
         source: "/etc/passwd"
         target: "/etc/passwd"
         read_only: true
