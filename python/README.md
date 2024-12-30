@@ -8,6 +8,7 @@
 |[calc_distance](./calc_distance) |データ間の距離計算処理のサンプル |
 |[cartpole](./cartpole) |Cartpoleを用いたQ学習のサンプル |
 |[camera_input](./camera_input) |カメラ入力サンプル |
+|[convert_pth_to_hailo_hef](./convert_pth_to_hailo_hef) |PyTorchの学習済みモデル(.pth)をHailoの実行形式(.hef)へ変換するサンプルコード |
 |[correlation-analysis_causal-analysis](./correlation-analysis_causal-analysis) |相関分析・因果分析のサンプル |
 |[csg_sample](./csg_sample) |CSGによる指標化サンプル |
 |[data_analysis](./data_analysis) |データ分析モジュールの動作確認 |

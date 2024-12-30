@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+  env:
+    build: "./docker"
+    tty: true
+    volumes:
+      - type: bind
+        source: "."
+        target: "/work"
+      - type: bind
+        source: "/tmp/.X11-unix"
+        target: "/tmp/.X11-unix"
+    working_dir: "/work"
+    user: "${UID}:${GID}"
+    environment:
+      - DISPLAY=${DISPLAY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            device_ids: ['0']
+            capabilities: [gpu]
