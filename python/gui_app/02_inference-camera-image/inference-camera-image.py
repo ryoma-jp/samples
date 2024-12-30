@@ -43,9 +43,9 @@ def extract_detections(input, boxes, scores, classes, num_detections, threshold=
                 classes.append(i)
                 num_detections = num_detections + 1
     return {'detection_boxes': [boxes], 
-              'detection_classes': [classes], 
-             'detection_scores': [scores],
-             'num_detections': [num_detections]}
+            'detection_classes': [classes], 
+            'detection_scores': [scores],
+            'num_detections': [num_detections]}
 
 @time_function
 def post_nms_infer(raw_detections):
@@ -90,15 +90,15 @@ def draw_detection(draw, d, c, s, color, scale_factor):
     """Draw box and label for 1 detection."""
     # same as coco.txt
     class_names = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light',
-               'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
-               'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
-               'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard',
-               'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
-               'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
-               'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard',
-               'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase',
-               'scissors', 'teddy bear', 'hair drier', 'toothbrush']
-
+                'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
+                'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
+                'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard',
+                'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
+                'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
+                'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard',
+                'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase',
+                'scissors', 'teddy bear', 'hair drier', 'toothbrush']
+    
     label = class_names[c] + ": " + "{:.2f}".format(s) + '%'
     ymin, xmin, ymax, xmax = d
     font = ImageFont.truetype("LiberationSans-Regular.ttf", size=18)
