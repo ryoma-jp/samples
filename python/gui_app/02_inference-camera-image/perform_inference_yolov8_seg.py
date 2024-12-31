@@ -192,17 +192,41 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, max_det=300
         if keep.shape[0] > max_det:
             keep = keep[:max_det]
 
-        out = x[keep]
-        scores = out[:, 4]
-        classes = out[:, 5]
-        boxes = out[:, :4]
-        masks = out[:, 6:]
+        if (len(keep) > 0):
+            out = x[keep]
+            scores = out[:, 4]
+            classes = out[:, 5]
+            boxes = out[:, :4]
+            masks = out[:, 6:]
+            
+            print(scores)
+            print(classes)
+            print(boxes)
+            print(masks)
+        else:
+            scores = np.zeros((1,))
+            classes = np.zeros((1,))
+            boxes = np.zeros((1, 4))
+            masks = np.zeros((1, 32))
 
         out = {"detection_boxes": boxes, "mask": masks, "detection_classes": classes, "detection_scores": scores}
 
         output.append(out)
 
     return output
+
+@time_function
+def letterbox_image(image, size):
+    '''resize image with unchanged aspect ratio using padding'''
+    img_w, img_h = image.size
+    model_input_w, model_input_h = size
+    scale = min(model_input_w / img_w, model_input_h / img_h)
+    scaled_w = int(img_w * scale)
+    scaled_h = int(img_h * scale)
+    image = image.resize((scaled_w, scaled_h), Image.Resampling.BICUBIC)
+    new_image = Image.new('RGB', size, (114,114,114))
+    new_image.paste(image, ((model_input_w - scaled_w) // 2, (model_input_h - scaled_h) // 2))
+    return new_image
 
 @time_function
 def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vstream_info):
@@ -250,9 +274,10 @@ def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vst
     # Preprocess the frame
     start_time = time.time()
     frame_height, frame_width = frame.shape[:2]
-    input_tensor = cv2.resize(frame, (640, 640))
-#    input_tensor = np.array([input_tensor]).astype(np.float32).transpose(0, 3, 1, 2) / 255.0
-    input_tensor = np.array([input_tensor]).astype(np.float32) / 255.0
+    #input_tensor = cv2.resize(frame, (640, 640))
+    input_tensor = letterbox_image(Image.fromarray(frame), (640, 640))
+    #input_tensor = np.array([input_tensor]).astype(np.float32).transpose(0, 3, 1, 2)
+    input_tensor = np.array([input_tensor]).astype(np.float32)
     print(input_tensor)
     print(input_tensor.shape)
     print(f"Preprocessing executed in {time.time() - start_time:.4f} seconds")
@@ -296,7 +321,8 @@ def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vst
     scores = np.concatenate(scores, axis=1)
     outputs = []
     decoded_boxes = _yolov8_decoding(raw_boxes, strides, image_dims, reg_max)
-    score_thres = 0.001
+    #score_thres = 0.001
+    score_thres = 0.5
     iou_thres = 0.7
     proto_data = endnodes[9]
     batch_size, _, _, n_masks = proto_data.shape
@@ -330,13 +356,15 @@ def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vst
     print(output.keys())
     
     # Create a mask
-    input_frame = Image.fromarray(frame).resize((640, 640))
+    #input_frame = Image.fromarray(frame).resize((640, 640))
+    input_frame = letterbox_image(Image.fromarray(frame), (640, 640))
     mask = np.zeros_like(np.array(input_frame))
     for detection_mask, detection_class in zip(output["mask"], output["detection_classes"]):
         if detection_class not in CLASS_COLORS:
-            if detection_class == 0:
-                CLASS_COLORS[detection_class] = (0, 0, 0)
-            else:
+#            if detection_class == 0:
+#                CLASS_COLORS[detection_class] = (0, 0, 0)
+#            else:
+#                CLASS_COLORS[detection_class] = tuple(np.random.randint(80, 255, size=3).tolist())
                 CLASS_COLORS[detection_class] = tuple(np.random.randint(80, 255, size=3).tolist())
         print(f"detection_mask.shape: {detection_mask.shape}")
         mask[detection_mask > 0] = np.array(CLASS_COLORS[detection_class])
