@@ -10,7 +10,8 @@ mkdir -p $MODEL_DIR
 #MODEL="yolox_s_leaky.hef"
 
 # Semantic Segmentation
-MODEL="deeplab_v3_mobilenet_v2.hef"
+#MODEL="deeplab_v3_mobilenet_v2.hef"
+MODEL="yolov8s_seg.hef"
 
 if [ -f $MODEL_DIR$MODEL ]; then
     echo "$MODEL_DIR$MODEL exists."

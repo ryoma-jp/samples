@@ -11,6 +11,8 @@ CLASS_COLORS = {}
 def crop_mask(masks, boxes):
     """
     Zeroing out mask region outside of the predicted bbox.
+    https://github.com/hailo-ai/hailo_model_zoo/blob/88365ee4f0d5d2b7a071dcc3bde8db4a81a80009/hailo_model_zoo/core/postprocessing/instance_segmentation_postprocessing.py#L446
+
     Args:
         masks: numpy array of masks with shape [n, h, w]
         boxes: numpy array of bbox coords with shape [n, 4]
@@ -32,6 +34,9 @@ def _sigmoid(x):
 
 @time_function
 def process_mask(protos, masks_in, bboxes, shape, upsample=True, downsample=False):
+    """
+    https://github.com/hailo-ai/hailo_model_zoo/blob/88365ee4f0d5d2b7a071dcc3bde8db4a81a80009/hailo_model_zoo/core/postprocessing/instance_segmentation_postprocessing.py#L465
+    """
     mh, mw, c = protos.shape
     ih, iw = shape
     masks = _sigmoid(masks_in @ protos.reshape((-1, c)).transpose((1, 0))).reshape((-1, mh, mw))
@@ -60,7 +65,10 @@ def process_mask(protos, masks_in, bboxes, shape, upsample=True, downsample=Fals
 
 @time_function
 def iou(box1, box2):
-    """Calculate Intersection over Union (IoU) of two bounding boxes."""
+    """
+    Calculate Intersection over Union (IoU) of two bounding boxes.
+    (Created by GitHub Copilot)
+    """
     x1, y1, x2, y2 = box1
     x1g, y1g, x2g, y2g = box2
 
@@ -79,6 +87,7 @@ def iou(box1, box2):
 @time_function
 def nms(preds, iou_thres):
     """Perform Non-Maximum Suppression (NMS) on the prediction results.
+    (Created by GitHub Copilot)
     
     Args:
         preds (numpy.ndarray): Array of predictions with shape (num_predictions, 5).
@@ -111,6 +120,9 @@ def nms(preds, iou_thres):
 
 @time_function
 def xywh2xyxy(x):
+    """
+    https://github.com/hailo-ai/hailo_model_zoo/blob/88365ee4f0d5d2b7a071dcc3bde8db4a81a80009/hailo_model_zoo/core/postprocessing/instance_segmentation_postprocessing.py#L437
+    """
     y = np.copy(x)
     y[:, 0] = x[:, 0] - x[:, 2] / 2
     y[:, 1] = x[:, 1] - x[:, 3] / 2
@@ -121,6 +133,8 @@ def xywh2xyxy(x):
 @time_function
 def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, max_det=300, nm=32, multi_label=True):
     """Non-Maximum Suppression (NMS) on inference results to reject overlapping detections
+    https://github.com/hailo-ai/hailo_model_zoo/blob/88365ee4f0d5d2b7a071dcc3bde8db4a81a80009/hailo_model_zoo/core/postprocessing/instance_segmentation_postprocessing.py#L351
+
     Args:
         prediction: numpy.ndarray with shape (batch_size, num_proposals, 351)
         conf_thres: confidence threshold for NMS
@@ -198,11 +212,6 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, max_det=300
             classes = out[:, 5]
             boxes = out[:, :4]
             masks = out[:, 6:]
-            
-            print(scores)
-            print(classes)
-            print(boxes)
-            print(masks)
         else:
             scores = np.zeros((1,))
             classes = np.zeros((1,))
@@ -217,7 +226,10 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, max_det=300
 
 @time_function
 def letterbox_image(image, size):
-    '''resize image with unchanged aspect ratio using padding'''
+    '''
+    resize image with unchanged aspect ratio using padding
+    https://github.com/hailo-ai/Hailo-Application-Code-Examples/blob/dd6ada9d0d10e8b75660b74ab56ba018165204c0/runtime/python/instance_segmentation/yoloseg_inference.py#L98
+    '''
     img_w, img_h = image.size
     model_input_w, model_input_h = size
     scale = min(model_input_w / img_w, model_input_h / img_h)
@@ -236,6 +248,9 @@ def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vst
         return np.exp(x) / np.expand_dims(np.sum(np.exp(x), axis=-1), axis=-1)
     
     def _yolov8_decoding(raw_boxes, strides, image_dims, reg_max):
+        """
+        https://github.com/hailo-ai/hailo_model_zoo/blob/88365ee4f0d5d2b7a071dcc3bde8db4a81a80009/hailo_model_zoo/core/postprocessing/instance_segmentation_postprocessing.py#L942
+        """
         boxes = None
         for box_distribute, stride in zip(raw_boxes, strides):
             # create grid
@@ -274,12 +289,8 @@ def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vst
     # Preprocess the frame
     start_time = time.time()
     frame_height, frame_width = frame.shape[:2]
-    #input_tensor = cv2.resize(frame, (640, 640))
     input_tensor = letterbox_image(Image.fromarray(frame), (640, 640))
-    #input_tensor = np.array([input_tensor]).astype(np.float32).transpose(0, 3, 1, 2)
     input_tensor = np.array([input_tensor]).astype(np.float32)
-    print(input_tensor)
-    print(input_tensor.shape)
     print(f"Preprocessing executed in {time.time() - start_time:.4f} seconds")
     
     # Perform inference
@@ -294,7 +305,6 @@ def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vst
     #     - https://github.com/hailo-ai/hailo_model_zoo/blob/master/hailo_model_zoo/core/postprocessing/instance_segmentation_postprocessing.py
     start_time = time.time()
     input_names = list(infer_results.keys())
-    print(input_names)
 
     layer_from_shape: dict = {infer_results[key].shape: key for key in infer_results.keys()}
     mask_channels = 32
@@ -311,7 +321,6 @@ def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vst
                 infer_results[layer_from_shape[1, 80, 80, num_classes]],
                 infer_results[layer_from_shape[1, 80, 80, mask_channels]],
                 infer_results[layer_from_shape[1, 160, 160, mask_channels]]]
-    print(f"endnodes.shape: {[endnodes[i].shape for i in range(len(endnodes))]}")
     
     strides = [32,16,8]
     image_dims = (640, 640)
@@ -321,7 +330,6 @@ def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vst
     scores = np.concatenate(scores, axis=1)
     outputs = []
     decoded_boxes = _yolov8_decoding(raw_boxes, strides, image_dims, reg_max)
-    #score_thres = 0.001
     score_thres = 0.5
     iou_thres = 0.7
     proto_data = endnodes[9]
@@ -352,21 +360,13 @@ def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vst
         output["detection_scores"] = np.array(nms_res[b]["detection_scores"])
         output["detection_classes"] = np.array(nms_res[b]["detection_classes"]).astype(int)
         outputs.append(output)
-    print(output)
-    print(output.keys())
     
     # Create a mask
-    #input_frame = Image.fromarray(frame).resize((640, 640))
     input_frame = letterbox_image(Image.fromarray(frame), (640, 640))
     mask = np.zeros_like(np.array(input_frame))
     for detection_mask, detection_class in zip(output["mask"], output["detection_classes"]):
         if detection_class not in CLASS_COLORS:
-#            if detection_class == 0:
-#                CLASS_COLORS[detection_class] = (0, 0, 0)
-#            else:
-#                CLASS_COLORS[detection_class] = tuple(np.random.randint(80, 255, size=3).tolist())
-                CLASS_COLORS[detection_class] = tuple(np.random.randint(80, 255, size=3).tolist())
-        print(f"detection_mask.shape: {detection_mask.shape}")
+            CLASS_COLORS[detection_class] = tuple(np.random.randint(80, 255, size=3).tolist())
         mask[detection_mask > 0] = np.array(CLASS_COLORS[detection_class])
     
     frame = Image.blend(input_frame, Image.fromarray(mask), alpha=0.5).resize((frame_width, frame_height))

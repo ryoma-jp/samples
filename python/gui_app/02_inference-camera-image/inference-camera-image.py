@@ -67,15 +67,15 @@ def main():
     print(f"Network configuration executed in {time.time() - start_time:.4f} seconds")
 
     start_time = time.time()
-#    input_vstreams_params = InputVStreamParams.make(network_group, quantized=False,
-#                                                    format_type=FormatType.FLOAT32)
-##    output_vstreams_params = OutputVStreamParams.make(network_group, quantized=True,
-##                                                    format_type=FormatType.FLOAT32)
-#    output_vstreams_params = OutputVStreamParams.make(network_group, quantized=False,
-#                                                    format_type=FormatType.FLOAT32)
-    input_vstreams_params = InputVStreamParams.make_from_network_group(network_group, quantized=False,
+    if (hef_name == "yolov8s_seg.hef"):
+        input_quantized = False
+        output_quantized = True
+    else:
+        input_quantized = False
+        output_quantized = False
+    input_vstreams_params = InputVStreamParams.make(network_group, quantized=input_quantized,
                                                     format_type=FormatType.FLOAT32)
-    output_vstreams_params = OutputVStreamParams.make_from_network_group(network_group, quantized=False,
+    output_vstreams_params = OutputVStreamParams.make(network_group, quantized=output_quantized,
                                                     format_type=FormatType.FLOAT32)
     
     height, width, _ = hef.get_input_vstream_infos()[0].shape
