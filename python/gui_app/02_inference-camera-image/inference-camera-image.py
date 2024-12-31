@@ -19,6 +19,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 from utils import time_function
 from perform_inference_yolox import perform_inference_yolox
+from perform_inference_yolov8_seg import perform_inference_yolov8_seg
 from perform_inference_deeplab_v3 import perform_inference_deeplab_v3
 
 @time_function
@@ -31,6 +32,7 @@ def load_model(model_path):
 MODEL_INFERENCE_FUNCTIONS = {
     "yolox_l_leaky.hef": perform_inference_yolox,
     "yolox_s_leaky.hef": perform_inference_yolox,
+    "yolov8s_seg.hef": perform_inference_yolov8_seg,
     "deeplab_v3_mobilenet_v2.hef": perform_inference_deeplab_v3,
 }
 
@@ -65,14 +67,23 @@ def main():
     print(f"Network configuration executed in {time.time() - start_time:.4f} seconds")
 
     start_time = time.time()
-    input_vstreams_params = InputVStreamParams.make(network_group, quantized=False,
+#    input_vstreams_params = InputVStreamParams.make(network_group, quantized=False,
+#                                                    format_type=FormatType.FLOAT32)
+##    output_vstreams_params = OutputVStreamParams.make(network_group, quantized=True,
+##                                                    format_type=FormatType.FLOAT32)
+#    output_vstreams_params = OutputVStreamParams.make(network_group, quantized=False,
+#                                                    format_type=FormatType.FLOAT32)
+    input_vstreams_params = InputVStreamParams.make_from_network_group(network_group, quantized=False,
                                                     format_type=FormatType.FLOAT32)
-    output_vstreams_params = OutputVStreamParams.make(network_group, quantized=True,
+    output_vstreams_params = OutputVStreamParams.make_from_network_group(network_group, quantized=False,
                                                     format_type=FormatType.FLOAT32)
+    
+    height, width, _ = hef.get_input_vstream_infos()[0].shape
+    print(f"Input shape: {height}x{width}")
+    
     input_vstream_info = hef.get_input_vstream_infos()[0]
     output_vstream_info = hef.get_output_vstream_infos()[0]
     print(f"Stream parameters setup executed in {time.time() - start_time:.4f} seconds")
-    
     with InferVStreams(network_group, input_vstreams_params, output_vstreams_params) as infer_pipeline:
         with network_group.activate(network_group_params):
             root = tk.Tk()
