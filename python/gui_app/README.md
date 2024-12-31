@@ -38,3 +38,20 @@ xhost +
 ./enter-docker.sh
 ```
 
+## [Inference Camera Image](./02_inference-camera-image)
+
+An application that performs inference on a camera image.
+
+```
+02_inference-camera-image/run.sh
+```
+
+### Supported Models
+
+- Object Detection
+    - yolox_l_leaky.hef
+    - yolox_s_leaky.hef
+- Semantic Segmentation
+    - deeplab_v3_mobilenet_v2.hef
+- Instance Segmentation
+    - yolov8s_seg.hef
