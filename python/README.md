@@ -28,6 +28,7 @@
 |[measuring_dataset_granularity](./measuring_dataset_granularity) |データセットの粒度計算のサンプル |
 |[module_import_sample](./module_import_sample) |独自で作成したモジュールをimportするサンプル |
 |[module_list](./module_list) |Pythonモジュールを一覧化する方法いろいろ |
+|[movie_player](./movie_player) |動画ファイルを読み込んでウィンドウで再生するサンプル |
 |[multi_thread](./multi_thread) |マルチスレッドのサンプル |
 |[numpy_sample](./numpy_sample) |numpyモジュールの動作確認 |
 |[performance_monitor](./performance_monitor) | PCの稼働状態(CPU使用率，メモリ使用率など)を取得するサンプル |
