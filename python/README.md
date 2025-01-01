@@ -22,6 +22,7 @@
 |[fifo](./fifo) |FIFOを介したプロセス間通信のサンプル |
 |[float2byte](./float2byte) |floatをbyteデータに変換するサンプル |
 |[glob_sample](./glob_sample) |globモジュールを用いたファイル探索のサンプル |
+|[gui_app](./gui_app) |GUIアプリケーションのサンプル |
 |[k-medoids_sample](./medoids_sample) |k-medoids法によるクラスタリングのサンプル |
 |[lambda_sample](./lambda_sample) |無名関数lambdaの利用サンプル |
 |[matplotlib_sample](./matplotlib_sample) |matplotlibを用いたグラフ描画のサンプル |
