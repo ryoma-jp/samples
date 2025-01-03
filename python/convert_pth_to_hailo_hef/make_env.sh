@@ -3,5 +3,5 @@
 cat <<EOF > .env
 UID=$(id -u)
 GID=$(id -g)
-UNAME=$(whoami)
+UNAME=hailo
 EOF
