@@ -18,7 +18,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 from utils import time_function
-from perform_inference_yolox import perform_inference_yolox
+from perform_inference_yolo_det import perform_inference_yolo_det
 from perform_inference_yolov8_seg import perform_inference_yolov8_seg
 from perform_inference_deeplab_v3 import perform_inference_deeplab_v3
 
@@ -30,8 +30,9 @@ def load_model(model_path):
 
 # Dictionary to map model names to their respective inference functions
 MODEL_INFERENCE_FUNCTIONS = {
-    "yolox_l_leaky.hef": perform_inference_yolox,
-    "yolox_s_leaky.hef": perform_inference_yolox,
+    "yolox_l_leaky.hef": perform_inference_yolo_det,
+    "yolox_s_leaky.hef": perform_inference_yolo_det,
+    "yolov8n.hef": perform_inference_yolo_det,
     "yolov8s_seg.hef": perform_inference_yolov8_seg,
     "deeplab_v3_mobilenet_v2.hef": perform_inference_deeplab_v3,
 }
@@ -39,7 +40,7 @@ MODEL_INFERENCE_FUNCTIONS = {
 @time_function
 def perform_inference(model_name, frame, infer_pipeline, network_group, input_vstream_info):
     # Select the appropriate inference function based on the model name
-    inference_function = MODEL_INFERENCE_FUNCTIONS.get(model_name, perform_inference_yolox)
+    inference_function = MODEL_INFERENCE_FUNCTIONS.get(model_name, perform_inference_yolo_det)
     
     # Perform inference using the selected function
     return inference_function(frame, infer_pipeline, network_group, input_vstream_info)

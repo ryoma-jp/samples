@@ -8,12 +8,13 @@ mkdir -p $MODEL_DIR
 # Object Detection
 #MODEL="yolox_l_leaky.hef"
 #MODEL="yolox_s_leaky.hef"
+MODEL="yolov8n.hef"
 
 # Semantic Segmentation
 #MODEL="deeplab_v3_mobilenet_v2.hef"
 
 # Instance Segmentation
-MODEL="yolov8s_seg.hef"
+#MODEL="yolov8s_seg.hef"
 
 if [ -f $MODEL_DIR$MODEL ]; then
     echo "$MODEL_DIR$MODEL exists."

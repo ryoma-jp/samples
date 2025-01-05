@@ -91,7 +91,7 @@ def draw_detection(draw, d, c, s, color, scale_factor):
     return label
 
 @time_function
-def perform_inference_yolox(frame, infer_pipeline, network_group, input_vstream_info):
+def perform_inference_yolo_det(frame, infer_pipeline, network_group, input_vstream_info):
     # Preprocess the frame
     start_time = time.time()
     input_tensor = cv2.resize(frame, (640, 640))
