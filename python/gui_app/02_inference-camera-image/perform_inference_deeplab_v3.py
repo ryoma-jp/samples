@@ -8,13 +8,14 @@ from utils import time_function
 CLASS_COLORS = {}
 
 @time_function
-def perform_inference_deeplab_v3(frame, infer_pipeline, network_group, input_vstream_info):
+def perform_inference_deeplab_v3(frame, input_shape, infer_pipeline, network_group, input_vstream_info):
     # Perform inference on the frame using Hailo8L for semantic segmentation with DeeplabV3
     
     # Preprocess the frame
     start_time = time.time()
+    height, width = input_shape
     frame_height, frame_width = frame.shape[:2]
-    input_tensor = cv2.resize(frame, (513, 513))
+    input_tensor = cv2.resize(frame, (height, width))
     input_tensor = np.array([input_tensor]).astype(np.float32)
     print(f"Preprocessing executed in {time.time() - start_time:.4f} seconds")
     
@@ -31,7 +32,7 @@ def perform_inference_deeplab_v3(frame, infer_pipeline, network_group, input_vst
     output_tensor = np.argmax(output_tensor, axis=-1)
     
     # Create a mask
-    input_frame = Image.fromarray(frame).resize((513, 513))
+    input_frame = Image.fromarray(frame).resize((height, width))
     mask = np.zeros_like(np.array(input_frame))
     for i in range(21):
         if int(i) not in CLASS_COLORS:

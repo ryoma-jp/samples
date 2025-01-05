@@ -91,10 +91,11 @@ def draw_detection(draw, d, c, s, color, scale_factor):
     return label
 
 @time_function
-def perform_inference_yolo_det(frame, infer_pipeline, network_group, input_vstream_info):
+def perform_inference_yolo_det(frame, input_shape, infer_pipeline, network_group, input_vstream_info):
     # Preprocess the frame
     start_time = time.time()
-    input_tensor = cv2.resize(frame, (640, 640))
+    height, width = input_shape
+    input_tensor = cv2.resize(frame, (height, width))
     print(f"Preprocessing executed in {time.time() - start_time:.4f} seconds")
     
     # Perform inference
@@ -107,7 +108,7 @@ def perform_inference_yolo_det(frame, infer_pipeline, network_group, input_vstre
     start_time = time.time()
     processed_results = post_nms_infer(infer_results)
     image = Image.fromarray(frame)
-    frame = post_process(processed_results, image, 0, 640, 640)
+    frame = post_process(processed_results, image, 0, height, width)
     print(f"Post-processing executed in {time.time() - start_time:.4f} seconds")
     
     return frame  # Return the frame with detections drawn

@@ -241,7 +241,7 @@ def letterbox_image(image, size):
     return new_image
 
 @time_function
-def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vstream_info):
+def perform_inference_yolov8_seg(frame, input_shape, infer_pipeline, network_group, input_vstream_info):
     # Perform inference on the frame using Hailo8L for instance segmentation with YOLOv8
     
     def _softmax(x):
@@ -288,8 +288,9 @@ def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vst
     
     # Preprocess the frame
     start_time = time.time()
+    height, width = input_shape
     frame_height, frame_width = frame.shape[:2]
-    input_tensor = letterbox_image(Image.fromarray(frame), (640, 640))
+    input_tensor = letterbox_image(Image.fromarray(frame), (height, width))
     input_tensor = np.array([input_tensor]).astype(np.float32)
     print(f"Preprocessing executed in {time.time() - start_time:.4f} seconds")
     
@@ -323,7 +324,7 @@ def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vst
                 infer_results[layer_from_shape[1, 160, 160, mask_channels]]]
     
     strides = [32,16,8]
-    image_dims = (640, 640)
+    image_dims = (height, width)
     reg_max = 15
     raw_boxes = endnodes[:7:3]
     scores = [np.reshape(s, (-1, s.shape[1] * s.shape[2], num_classes)) for s in endnodes[1:8:3]]
@@ -362,7 +363,7 @@ def perform_inference_yolov8_seg(frame, infer_pipeline, network_group, input_vst
         outputs.append(output)
     
     # Create a mask
-    input_frame = letterbox_image(Image.fromarray(frame), (640, 640))
+    input_frame = letterbox_image(Image.fromarray(frame), (height, width))
     mask = np.zeros_like(np.array(input_frame))
     for detection_mask, detection_class in zip(output["mask"], output["detection_classes"]):
         if detection_class not in CLASS_COLORS:

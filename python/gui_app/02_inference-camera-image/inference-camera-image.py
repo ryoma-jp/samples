@@ -30,20 +30,21 @@ def load_model(model_path):
 
 # Dictionary to map model names to their respective inference functions
 MODEL_INFERENCE_FUNCTIONS = {
+    "yolov8n.hef": perform_inference_yolo_det,
     "yolox_l_leaky.hef": perform_inference_yolo_det,
     "yolox_s_leaky.hef": perform_inference_yolo_det,
-    "yolov8n.hef": perform_inference_yolo_det,
+    "yolox_tiny.hef": perform_inference_yolo_det,
     "yolov8s_seg.hef": perform_inference_yolov8_seg,
     "deeplab_v3_mobilenet_v2.hef": perform_inference_deeplab_v3,
 }
 
 @time_function
-def perform_inference(model_name, frame, infer_pipeline, network_group, input_vstream_info):
+def perform_inference(model_name, frame, input_shape, infer_pipeline, network_group, input_vstream_info):
     # Select the appropriate inference function based on the model name
     inference_function = MODEL_INFERENCE_FUNCTIONS.get(model_name, perform_inference_yolo_det)
     
     # Perform inference using the selected function
-    return inference_function(frame, infer_pipeline, network_group, input_vstream_info)
+    return inference_function(frame, input_shape, infer_pipeline, network_group, input_vstream_info)
 
 def main():
     parser = argparse.ArgumentParser(description="Camera streaming with inference")
@@ -80,6 +81,7 @@ def main():
                                                     format_type=FormatType.FLOAT32)
     
     height, width, _ = hef.get_input_vstream_infos()[0].shape
+    input_shape = (height, width)
     print(f"Input shape: {height}x{width}")
     
     input_vstream_info = hef.get_input_vstream_infos()[0]
@@ -92,20 +94,20 @@ def main():
             label = tk.Label(root)
             label.pack()
             
-            update_camera(hef_name, camera, label, infer_pipeline, network_group, input_vstream_info)
+            update_camera(hef_name, camera, label, input_shape, infer_pipeline, network_group, input_vstream_info)
             root.mainloop()
 
 @time_function
-def update_camera(model_name, camera, label, infer_pipeline, network_group, input_vstream_info):
+def update_camera(model_name, camera, label, input_shape, infer_pipeline, network_group, input_vstream_info):
     frame = camera.capture_array()
     frame = cv2.cvtColor(frame, cv2.COLOR_RGBA2RGB)
     
-    frame = perform_inference(model_name, frame, infer_pipeline, network_group, input_vstream_info)  # Perform inference
+    frame = perform_inference(model_name, frame, input_shape, infer_pipeline, network_group, input_vstream_info)  # Perform inference
     
     frame = ImageTk.PhotoImage(frame)
     label.config(image=frame)
     label.image = frame
-    label.after(10, lambda: update_camera(model_name, camera, label, infer_pipeline, network_group, input_vstream_info))
+    label.after(10, lambda: update_camera(model_name, camera, label, input_shape, infer_pipeline, network_group, input_vstream_info))
     
 if __name__ == "__main__":
     main()

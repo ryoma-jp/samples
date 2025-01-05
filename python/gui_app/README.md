@@ -49,9 +49,13 @@ An application that performs inference on a camera image.
 ### Supported Models
 
 - Object Detection
+    - yolov8n.hef
     - yolox_l_leaky.hef
     - yolox_s_leaky.hef
+    - yolox_tiny.hef
 - Semantic Segmentation
     - deeplab_v3_mobilenet_v2.hef
 - Instance Segmentation
     - yolov8s_seg.hef
+- T.B.D
+    - YOLOX-Nano

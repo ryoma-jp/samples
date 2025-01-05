@@ -6,9 +6,10 @@ mkdir -p $MODEL_DIR
 # see: https://github.com/hailo-ai/hailo_model_zoo
 
 # Object Detection
+#MODEL="yolov8n.hef"
 #MODEL="yolox_l_leaky.hef"
 #MODEL="yolox_s_leaky.hef"
-MODEL="yolov8n.hef"
+MODEL="yolox_tiny.hef"
 
 # Semantic Segmentation
 #MODEL="deeplab_v3_mobilenet_v2.hef"
