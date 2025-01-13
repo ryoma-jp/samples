@@ -91,23 +91,40 @@ def draw_detection(draw, d, c, s, color, scale_factor):
     return label
 
 @time_function
+def padding_image(image, size):
+    '''
+    resize image with unchanged aspect ratio using padding
+    '''
+    img_w, img_h = image.size
+    model_input_w, model_input_h = size
+    scale = min(model_input_w / img_w, model_input_h / img_h)
+    scaled_w = int(img_w * scale)
+    scaled_h = int(img_h * scale)
+    image = image.resize((scaled_w, scaled_h), Image.Resampling.BICUBIC)
+    new_image = Image.new('RGB', size, (114,114,114))
+    new_image.paste(image, (0, 0))
+    return new_image
+
+@time_function
 def perform_inference_yolo_det(frame, input_shape, infer_pipeline, network_group, input_vstream_info):
     # Preprocess the frame
     start_time = time.time()
     height, width = input_shape
-    input_tensor = cv2.resize(frame, (height, width))
+    input_tensor = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+    input_tensor = padding_image(Image.fromarray(input_tensor), (height, width))
     print(f"Preprocessing executed in {time.time() - start_time:.4f} seconds")
     
     # Perform inference
     start_time = time.time()
     input_tensor = {input_vstream_info.name: np.array([input_tensor]).astype(np.float32)}
+    print(f"Input tensor: {np.array(input_tensor)}")
     infer_results = infer_pipeline.infer(input_tensor)
     print(f"Inference executed in {time.time() - start_time:.4f} seconds")
     
     # Post-process the output
     start_time = time.time()
     processed_results = post_nms_infer(infer_results)
-    image = Image.fromarray(frame)
+    image = padding_image(Image.fromarray(frame), (height, width))
     frame = post_process(processed_results, image, 0, height, width)
     print(f"Post-processing executed in {time.time() - start_time:.4f} seconds")
     

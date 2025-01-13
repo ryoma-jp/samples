@@ -34,6 +34,7 @@ MODEL_INFERENCE_FUNCTIONS = {
     "yolox_l_leaky.hef": perform_inference_yolo_det,
     "yolox_s_leaky.hef": perform_inference_yolo_det,
     "yolox_tiny.hef": perform_inference_yolo_det,
+    "yolox_nano.hef": perform_inference_yolo_det,
     "yolov8s_seg.hef": perform_inference_yolov8_seg,
     "deeplab_v3_mobilenet_v2.hef": perform_inference_deeplab_v3,
 }

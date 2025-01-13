@@ -10,6 +10,7 @@ mkdir -p $MODEL_DIR
 #MODEL="yolox_l_leaky.hef"
 #MODEL="yolox_s_leaky.hef"
 MODEL="yolox_tiny.hef"
+#MODEL="yolox_nano.hef" # not working(nothing detected for unknown reason)
 
 # Semantic Segmentation
 #MODEL="deeplab_v3_mobilenet_v2.hef"
