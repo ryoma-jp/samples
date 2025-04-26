@@ -18,9 +18,16 @@ def index():
 @app.route('/chat', methods=['POST'])
 def chat():
     user_message = request.json.get('message')
+    selected_model = request.json.get('model', 'gpt-3.5-turbo')  # Default to gpt-3.5-turbo if no model is selected
+
+    # Validate the selected model
+    valid_models = ["o4-mini", "o3-mini", "gpt-4o"]
+    if selected_model not in valid_models:
+        return jsonify({"error": "Invalid model selected."}), 400
+
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=selected_model,
             messages=[{"role": "user", "content": user_message}]
         )
         ai_message = response['choices'][0]['message']['content']
