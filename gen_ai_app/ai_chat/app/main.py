@@ -175,5 +175,15 @@ def create_new_thread():
     except Exception as e:
         return jsonify({'message': f'Error creating new thread: {str(e)}'}), 500
 
+@app.route('/threads', methods=['DELETE'])
+def delete_all_threads():
+    try:
+        num_deleted = ConversationThread.query.delete()
+        db.session.commit()
+        return jsonify({'message': f'All threads deleted successfully ({num_deleted} threads removed)'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': f'Error deleting all threads: {str(e)}'}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
