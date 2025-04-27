@@ -9,7 +9,8 @@ services:
       - .env
     volumes:
       - .:/app
-    command: ["python", "-m", "app.main"]
+    #entrypoint: ["/app/entrypoint.sh", "db", "python", "-m", "app.main"]
+    entrypoint: ["/tmp/entrypoint.sh", "db", "python", "-m", "app.main"]
     depends_on:
       - db
 

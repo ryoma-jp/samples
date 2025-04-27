@@ -8,11 +8,16 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from flask_migrate import Migrate
+from app.models import db
 
 # Load environment variables from .env
 load_dotenv()
 
 app = Flask(__name__)
+
+# Initialize Flask-Migrate
+migrate = Migrate(app, db)
 
 # Set OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -107,6 +112,61 @@ def get_threads():
         for thread in threads
     ]
     return jsonify(result)
+
+@app.route('/threads/<int:thread_id>', methods=['GET'])
+def get_thread(thread_id):
+    thread = ConversationThread.query.get(thread_id)
+    if not thread:
+        return jsonify({'message': 'Thread not found'}), 404
+
+    result = {
+        'id': thread.id,
+        'created_at': thread.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'updated_at': thread.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'summary': thread.summary,
+        'content': thread.content,
+        'is_archived': thread.is_archived
+    }
+    return jsonify(result)
+
+@app.route('/threads/<int:thread_id>', methods=['PUT'])
+def update_thread(thread_id):
+    data = request.get_json()
+    thread = ConversationThread.query.get(thread_id)
+    if not thread:
+        return jsonify({'message': 'Thread not found'}), 404
+
+    if 'summary' in data:
+        thread.summary = data['summary']
+    if 'content' in data:
+        thread.content = data['content']
+    if 'is_archived' in data:
+        thread.is_archived = data['is_archived']
+
+    db.session.commit()
+    return jsonify({'message': 'Thread updated successfully'})
+
+@app.route('/threads/<int:thread_id>', methods=['DELETE'])
+def delete_thread(thread_id):
+    thread = ConversationThread.query.get(thread_id)
+    if not thread:
+        return jsonify({'message': 'Thread not found'}), 404
+
+    db.session.delete(thread)
+    db.session.commit()
+    return jsonify({'message': 'Thread deleted successfully'})
+
+@app.route('/threads_page', methods=['GET'])
+def threads_page():
+    return render_template('threads.html')
+
+@app.route('/thread_detail', methods=['GET'])
+def thread_detail():
+    return render_template('thread_detail.html')
+
+@app.route('/create_thread', methods=['GET'])
+def create_thread():
+    return render_template('create_thread.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
