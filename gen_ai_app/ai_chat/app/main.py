@@ -156,17 +156,24 @@ def delete_thread(thread_id):
     db.session.commit()
     return jsonify({'message': 'Thread deleted successfully'})
 
-@app.route('/threads_page', methods=['GET'])
-def threads_page():
-    return render_template('threads.html')
+@app.route('/threads/new', methods=['POST'])
+def create_new_thread():
+    try:
+        # Create a new empty thread with default values
+        new_thread = ConversationThread(summary="New Conversation", content="")
+        db.session.add(new_thread)
+        db.session.commit()
 
-@app.route('/thread_detail', methods=['GET'])
-def thread_detail():
-    return render_template('thread_detail.html')
-
-@app.route('/create_thread', methods=['GET'])
-def create_thread():
-    return render_template('create_thread.html')
+        return jsonify({
+            'message': 'New thread created successfully',
+            'thread': {
+                'id': new_thread.id,
+                'created_at': new_thread.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'summary': new_thread.summary
+            }
+        }), 201
+    except Exception as e:
+        return jsonify({'message': f'Error creating new thread: {str(e)}'}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

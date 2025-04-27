@@ -54,6 +54,7 @@
                         <div id="chat-box" class="chat-box mb-3">
                             <!-- Chat messages will appear here -->
                         </div>
+                        <button id="new-conversation" class="btn btn-success w-100 mb-3" onclick="startNewConversation()">Start New Conversation</button>
                         <form id="chat-form">
                             <div class="mb-3">
                                 <label for="model" class="form-label">Select AI Model:</label>
@@ -183,6 +184,12 @@
 
             // Clear the input field
             document.getElementById('message').value = '';
+        }
+
+        async function startNewConversation() {
+            // Clear the chat box
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = '';
         }
 
         document.addEventListener('DOMContentLoaded', loadThreads);
