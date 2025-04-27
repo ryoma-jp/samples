@@ -1,0 +1,30 @@
+services:
+  ai_chat:
+    build:
+      context: ./docker/ai_chat
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    command: ["python", "-m", "app.main"]
+    depends_on:
+      - db
+
+  db:
+    build:
+      context: ./docker/db
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_USER: ai_chat_user
+      POSTGRES_PASSWORD: securepassword
+      POSTGRES_DB: ai_chat_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:

@@ -40,23 +40,48 @@ This is a simple AI chat application that uses the ChatGPT API to provide AI-gen
 
 5. Open your browser and navigate to `http://localhost:5000` to use the application.
 
+## Running the Application with Docker Compose
+
+1. Ensure you have Docker and Docker Compose installed on your system.
+
+2. Navigate to the project directory:
+   ```bash
+   cd gen_ai_app/ai_chat
+   ```
+
+3. Create a `.env` file with your OpenAI API key. You can use `.env.example` as a template:
+   ```bash
+   cp .env.example .env
+   # Edit .env to add your OpenAI API key
+   ```
+
+4. Build and start the application using Docker Compose:
+   ```bash
+   docker-compose up --build
+   ```
+
+5. Access the application in your browser at `http://localhost:5000`.
+
+6. To stop the application, press `Ctrl+C` and run:
+   ```bash
+   docker-compose down
+   ```
+
 ## File Structure
+
+The project directory is organized as follows:
+
 ```
-├── app/
-│   ├── static/
-│   │   ├── css/
-│   │   │   └── style.css
-│   │   └── js/
-│   │       └── app.js
-│   ├── templates/
-│   │   └── index.html
-│   ├── __init__.py
-│   └── main.py
-├── Dockerfile
-├── requirements.txt
-├── .env.example
-└── README.md
+├── .env                # Environment variables (not included in the repository)
+├── .env.example        # Example environment variables file
+├── Dockerfile          # Dockerfile for building the application image
+├── docker-compose.yml  # Docker Compose configuration file
+├── README.md           # Project documentation
+├── app/                # Application source code
+├── requirements.txt    # Python dependencies
 ```
+
+This structure ensures a clean separation of concerns and simplifies deployment using Docker Compose.
 
 ## License
 This project is licensed under the MIT License.

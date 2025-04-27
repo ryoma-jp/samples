@@ -36,33 +36,96 @@
 </head>
 <body>
     <div class="container">
-        <div class="card">
-            <div class="card-body">
-                <h1 class="card-title text-center">AI Chat Application</h1>
-                <div id="chat-box" class="chat-box mb-3">
-                    <!-- Chat messages will appear here -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Conversation Threads</h5>
+                        <ul id="thread-list" class="list-group">
+                            <!-- Threads will be dynamically loaded here -->
+                        </ul>
+                    </div>
                 </div>
-                <form id="chat-form">
-                    <div class="mb-3">
-                        <label for="model" class="form-label">Select AI Model:</label>
-                        <select id="model" name="model" class="form-select">
-                            <option value="o4-mini">o4-mini</option>
-                            <option value="o3-mini">o3-mini</option>
-                            <option value="gpt-4o">gpt-4o</option>
-                        </select>
+            </div>
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-body">
+                        <h1 class="card-title text-center">AI Chat Application</h1>
+                        <div id="chat-box" class="chat-box mb-3">
+                            <!-- Chat messages will appear here -->
+                        </div>
+                        <form id="chat-form">
+                            <div class="mb-3">
+                                <label for="model" class="form-label">Select AI Model:</label>
+                                <select id="model" name="model" class="form-select">
+                                    <option value="o4-mini">o4-mini</option>
+                                    <option value="o3-mini">o3-mini</option>
+                                    <option value="gpt-4o">gpt-4o</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Your Message:</label>
+                                <textarea id="message" name="message" rows="4" class="form-control"></textarea>
+                            </div>
+                            <button type="button" class="btn btn-primary w-100" onclick="sendMessage()">Send</button>
+                        </form>
                     </div>
-                    <div class="mb-3">
-                        <label for="message" class="form-label">Your Message:</label>
-                        <textarea id="message" name="message" rows="4" class="form-control"></textarea>
-                    </div>
-                    <button type="button" class="btn btn-primary w-100" onclick="sendMessage()">Send</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        async function loadThreads() {
+            try {
+                const response = await fetch('/threads');
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Error loading threads:', errorData.message);
+                    return;
+                }
+
+                const threads = await response.json();
+
+                const threadList = document.getElementById('thread-list');
+                threadList.innerHTML = '';
+
+                threads.forEach(thread => {
+                    const threadItem = document.createElement('li');
+                    threadItem.className = 'list-group-item';
+
+                    // Format date and trim summary if too long
+                    const formattedDate = new Date(thread.created_at).toLocaleString();
+                    const trimmedSummary = thread.summary.length > 50 ? thread.summary.substring(0, 50) + '...' : thread.summary;
+
+                    threadItem.textContent = `${formattedDate} - ${trimmedSummary}`;
+                    threadItem.onclick = () => loadThreadDetails(thread.id);
+                    threadList.appendChild(threadItem);
+                });
+            } catch (error) {
+                console.error('Error fetching threads:', error);
+            }
+        }
+
+        async function loadThreadDetails(threadId) {
+            const response = await fetch(`/threads/${threadId}`);
+            const thread = await response.json();
+
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = '';
+
+            thread.content.forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${message.sender}`;
+                messageDiv.textContent = `${message.sender === 'user' ? 'You' : 'AI'}: ${message.text}`;
+                chatBox.appendChild(messageDiv);
+            });
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
         const chatBox = document.getElementById('chat-box');
 
         async function sendMessage() {
@@ -96,6 +159,21 @@
                 aiMessageDiv.textContent = `AI: Error - ${data.error}`;
             } else {
                 aiMessageDiv.textContent = `AI: ${data.message}`;
+
+                // Save the conversation thread
+                await fetch('/threads', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    },
+                    body: JSON.stringify({
+                        content: [{ sender: 'user', text: message }, { sender: 'ai', text: data.message }]
+                    }),
+                });
+
+                // Reload the thread list
+                loadThreads();
             }
 
             chatBox.appendChild(aiMessageDiv);
@@ -106,6 +184,8 @@
             // Clear the input field
             document.getElementById('message').value = '';
         }
+
+        document.addEventListener('DOMContentLoaded', loadThreads);
     </script>
 </body>
 </html>
