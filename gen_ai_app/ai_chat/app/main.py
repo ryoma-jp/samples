@@ -95,7 +95,8 @@ def save_thread():
     db.session.add(new_thread)
     db.session.commit()
 
-    return jsonify({'message': 'Thread saved successfully'}), 201
+    # 新規スレッドIDも返す
+    return jsonify({'message': 'Thread saved successfully', 'id': new_thread.id}), 201
 
 @app.route('/threads', methods=['GET'])
 def get_threads():
@@ -160,10 +161,9 @@ def delete_thread(thread_id):
 def create_new_thread():
     try:
         # Create a new empty thread with default values
-        new_thread = ConversationThread(summary="New Conversation", content="")
+        new_thread = ConversationThread(summary="New Conversation", content=[])  # 空リストで初期化
         db.session.add(new_thread)
         db.session.commit()
-
         return jsonify({
             'message': 'New thread created successfully',
             'thread': {
@@ -184,6 +184,23 @@ def delete_all_threads():
     except Exception as e:
         db.session.rollback()
         return jsonify({'message': f'Error deleting all threads: {str(e)}'}), 500
+
+# 既存スレッドにメッセージを追加するAPI
+@app.route('/threads/<int:thread_id>/messages', methods=['POST'])
+def add_message_to_thread(thread_id):
+    thread = ConversationThread.query.get(thread_id)
+    if not thread:
+        return jsonify({'message': 'Thread not found'}), 404
+
+    data = request.get_json()
+    user_message = {'sender': 'user', 'text': data.get('text')}
+    ai_message = {'sender': 'ai', 'text': data.get('ai_text')}
+    if not isinstance(thread.content, list):
+        thread.content = []
+    thread.content.append(user_message)
+    thread.content.append(ai_message)
+    db.session.commit()
+    return jsonify({'message': 'Messages added to thread'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

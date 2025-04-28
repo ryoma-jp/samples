@@ -165,10 +165,20 @@
         async function loadThreadDetails(threadId) {
             const response = await fetch(`/threads/${threadId}`);
             const thread = await response.json();
-            currentThreadId = threadId; // スレッドIDをセット
+            currentThreadId = thread.id;
             const chatBox = document.getElementById('chat-box');
             chatBox.innerHTML = '';
-            thread.content.forEach(message => {
+            let messages = [];
+            if (Array.isArray(thread.content)) {
+                messages = thread.content;
+            } else if (typeof thread.content === 'string' && thread.content.trim().startsWith('[')) {
+                try {
+                    messages = JSON.parse(thread.content);
+                } catch (e) {
+                    messages = [];
+                }
+            }
+            messages.forEach(message => {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `chat-message ${message.sender}`;
                 messageDiv.textContent = `${message.sender === 'user' ? 'You' : 'AI'}: ${message.text}`;
@@ -227,8 +237,7 @@
                 if (res.ok) {
                     const thread = await res.json();
                     currentThreadId = thread.id;
-                    // 新規スレッド作成時のみスレッドリストをリロード
-                    loadThreads();
+                    await loadThreads(); // 新規作成時のみリロード
                 }
             } else {
                 // 既存スレッドに追記
@@ -239,11 +248,10 @@
                         'Authorization': `Bearer ${localStorage.getItem('access_token')}`
                     },
                     body: JSON.stringify({
-                        sender: 'user', text: message,
+                        text: message,
                         ai_text: data.message
                     }),
                 });
-                // 既存スレッド追記時はスレッドリストをリロードしない
             }
             document.getElementById('message').value = '';
         }
@@ -251,7 +259,7 @@
         async function startNewConversation() {
             currentThreadId = null;
             document.getElementById('chat-box').innerHTML = '';
-            await loadThreads(); // スレッドリストもリロード
+            // スレッドリストはリロードしない
         }
 
         document.addEventListener('DOMContentLoaded', loadThreads);
