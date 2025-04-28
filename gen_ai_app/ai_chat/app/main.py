@@ -56,16 +56,30 @@ def chat():
     app.logger.info("Received chat request")
     user_message = request.json.get('message')
     selected_model = request.json.get('model', 'gpt-3.5-turbo')  # Default to gpt-3.5-turbo if no model is selected
+    thread_id = request.json.get('thread_id')
 
     # Validate the selected model
     valid_models = ["o4-mini", "o3-mini", "gpt-4o"]
     if selected_model not in valid_models:
         return jsonify({"error": "Invalid model selected."}), 400
 
+    # --- Retrieve conversation history and pass to AI model ---
+    messages = []
+    if thread_id:
+        # Existing thread: fetch past history
+        thread = ConversationThread.query.get(thread_id)
+        if thread:
+            db_messages = Message.query.filter_by(thread_id=thread_id).order_by(Message.created_at).all()
+            for m in db_messages:
+                role = 'user' if m.sender == 'user' else 'assistant'
+                messages.append({"role": role, "content": m.text})
+    # Add latest user question
+    messages.append({"role": "user", "content": user_message})
+
     try:
         response = openai.ChatCompletion.create(
             model=selected_model,
-            messages=[{"role": "user", "content": user_message}]
+            messages=messages
         )
         ai_message = response['choices'][0]['message']['content']
         return jsonify({"message": ai_message})
