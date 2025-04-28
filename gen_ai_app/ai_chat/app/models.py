@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 # Initialize SQLAlchemy
 db = SQLAlchemy()
 
-
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean
 from sqlalchemy.dialects.postgresql import JSON
 from datetime import datetime
@@ -13,7 +12,7 @@ class ConversationThread(db.Model):
 
     id = Column(Integer, primary_key=True)
     summary = Column(String(255), nullable=False)
-    # content = Column(JSON, nullable=False)  # ← 旧設計。不要ならコメントアウトまたは削除
+    # content = Column(JSON, nullable=False)  # ← Old design. Comment out or remove if unnecessary
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     is_archived = Column(Boolean, default=False, nullable=False)

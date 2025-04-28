@@ -74,11 +74,11 @@ def chat():
 
 @app.route('/threads', methods=['POST'])
 def create_thread():
-    # 最初のやり取り（ユーザー発言・AI返答）を受け取る
+    # Receive the initial exchange (user message and AI response)
     data = request.get_json()
     user_text = data.get('text')
     ai_text = data.get('ai_text')
-    # タイトル生成用のプロンプト
+    # Prompt for generating the thread title
     prompt = f"Create a short conversation title from the following messages: user: {user_text} ai: {ai_text}"
     try:
         response = openai.ChatCompletion.create(
@@ -88,11 +88,11 @@ def create_thread():
         summary = response['choices'][0]['message']['content']
     except Exception as e:
         summary = "New Conversation"
-    # スレッド作成
+    # Create thread
     new_thread = ConversationThread(summary=summary)
     db.session.add(new_thread)
     db.session.commit()
-    # 最初のメッセージを保存
+    # Save the initial messages
     if user_text:
         user_msg = Message(thread_id=new_thread.id, sender='user', text=user_text)
         db.session.add(user_msg)
@@ -110,11 +110,11 @@ def add_message(thread_id):
     data = request.get_json()
     user_text = data.get('text')
     ai_text = data.get('ai_text')
-    # ユーザー発言
+    # User message
     if user_text:
         user_msg = Message(thread_id=thread_id, sender='user', text=user_text)
         db.session.add(user_msg)
-    # AI返答
+    # AI response
     if ai_text:
         ai_msg = Message(thread_id=thread_id, sender='ai', text=ai_text)
         db.session.add(ai_msg)
