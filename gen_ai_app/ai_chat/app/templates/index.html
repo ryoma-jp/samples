@@ -168,16 +168,7 @@
             currentThreadId = thread.id;
             const chatBox = document.getElementById('chat-box');
             chatBox.innerHTML = '';
-            let messages = [];
-            if (Array.isArray(thread.content)) {
-                messages = thread.content;
-            } else if (typeof thread.content === 'string' && thread.content.trim().startsWith('[')) {
-                try {
-                    messages = JSON.parse(thread.content);
-                } catch (e) {
-                    messages = [];
-                }
-            }
+            let messages = thread.content || [];
             messages.forEach(message => {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `chat-message ${message.sender}`;
@@ -220,7 +211,7 @@
             chatBox.scrollTop = chatBox.scrollHeight;
             // 3. スレッド保存API
             if (!currentThreadId) {
-                // 新規スレッド作成
+                // 新規スレッド作成（最初のやり取りを送信）
                 const res = await fetch('/threads', {
                     method: 'POST',
                     headers: {
@@ -228,10 +219,8 @@
                         'Authorization': `Bearer ${localStorage.getItem('access_token')}`
                     },
                     body: JSON.stringify({
-                        content: [
-                            { sender: 'user', text: message },
-                            { sender: 'ai', text: data.message }
-                        ]
+                        text: message,
+                        ai_text: data.message
                     }),
                 });
                 if (res.ok) {

@@ -3,7 +3,7 @@ import openai
 import os
 from dotenv import load_dotenv
 from app.database import init_db
-from app.models import db, ConversationThread
+from app.models import db, ConversationThread, Message
 import logging
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -73,37 +73,76 @@ def chat():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/threads', methods=['POST'])
-def save_thread():
-    app.logger.info("Received save_thread request")
+def create_thread():
+    # 最初のやり取り（ユーザー発言・AI返答）を受け取る
     data = request.get_json()
-    if 'content' not in data or not data['content']:
-        return jsonify({'message': 'Content is required'}), 400
-
+    user_text = data.get('text')
+    ai_text = data.get('ai_text')
+    # タイトル生成用のプロンプト
+    prompt = f"Create a short conversation title from the following messages: user: {user_text} ai: {ai_text}"
     try:
-        prompt=f"Create the conversation title from the following conversation: {data['content']}"
         response = openai.ChatCompletion.create(
             model="o4-mini",
             messages=[{"role": "user", "content": prompt}]
         )
-        app.logger.info(f"OpenAI response: {response}")
         summary = response['choices'][0]['message']['content']
-        app.logger.info(f"Generated summary: {summary}")
     except Exception as e:
-        return jsonify({'message': f'Error generating summary: {str(e)}'}), 500
-
-    new_thread = ConversationThread(summary=summary, content=data['content'])
+        summary = "New Conversation"
+    # スレッド作成
+    new_thread = ConversationThread(summary=summary)
     db.session.add(new_thread)
     db.session.commit()
+    # 最初のメッセージを保存
+    if user_text:
+        user_msg = Message(thread_id=new_thread.id, sender='user', text=user_text)
+        db.session.add(user_msg)
+    if ai_text:
+        ai_msg = Message(thread_id=new_thread.id, sender='ai', text=ai_text)
+        db.session.add(ai_msg)
+    db.session.commit()
+    return jsonify({'id': new_thread.id, 'created_at': new_thread.created_at.strftime('%Y-%m-%d %H:%M:%S'), 'summary': new_thread.summary}), 201
 
-    # 新規スレッドIDも返す
-    return jsonify({'message': 'Thread saved successfully', 'id': new_thread.id}), 201
+@app.route('/threads/<int:thread_id>/messages', methods=['POST'])
+def add_message(thread_id):
+    thread = ConversationThread.query.get(thread_id)
+    if not thread:
+        return jsonify({'message': 'Thread not found'}), 404
+    data = request.get_json()
+    user_text = data.get('text')
+    ai_text = data.get('ai_text')
+    # ユーザー発言
+    if user_text:
+        user_msg = Message(thread_id=thread_id, sender='user', text=user_text)
+        db.session.add(user_msg)
+    # AI返答
+    if ai_text:
+        ai_msg = Message(thread_id=thread_id, sender='ai', text=ai_text)
+        db.session.add(ai_msg)
+    db.session.commit()
+    return jsonify({'message': 'Messages added to thread'})
+
+@app.route('/threads/<int:thread_id>', methods=['GET'])
+def get_thread(thread_id):
+    thread = ConversationThread.query.get(thread_id)
+    if not thread:
+        return jsonify({'message': 'Thread not found'}), 404
+    messages = Message.query.filter_by(thread_id=thread_id).order_by(Message.created_at).all()
+    messages_list = [{'sender': m.sender, 'text': m.text, 'created_at': m.created_at.strftime('%Y-%m-%d %H:%M:%S')} for m in messages]
+    result = {
+        'id': thread.id,
+        'created_at': thread.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'updated_at': thread.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'summary': thread.summary,
+        'content': messages_list,
+        'is_archived': thread.is_archived
+    }
+    return jsonify(result)
 
 @app.route('/threads', methods=['GET'])
 def get_threads():
     threads = ConversationThread.query.all()
     if not threads:
         return jsonify({'message': 'No threads found'}), 404
-
     result = [
         {
             'id': thread.id,
@@ -114,93 +153,22 @@ def get_threads():
     ]
     return jsonify(result)
 
-@app.route('/threads/<int:thread_id>', methods=['GET'])
-def get_thread(thread_id):
-    thread = ConversationThread.query.get(thread_id)
-    if not thread:
-        return jsonify({'message': 'Thread not found'}), 404
-
-    result = {
-        'id': thread.id,
-        'created_at': thread.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-        'updated_at': thread.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
-        'summary': thread.summary,
-        'content': thread.content,
-        'is_archived': thread.is_archived
-    }
-    return jsonify(result)
-
-@app.route('/threads/<int:thread_id>', methods=['PUT'])
-def update_thread(thread_id):
-    data = request.get_json()
-    thread = ConversationThread.query.get(thread_id)
-    if not thread:
-        return jsonify({'message': 'Thread not found'}), 404
-
-    if 'summary' in data:
-        thread.summary = data['summary']
-    if 'content' in data:
-        thread.content = data['content']
-    if 'is_archived' in data:
-        thread.is_archived = data['is_archived']
-
-    db.session.commit()
-    return jsonify({'message': 'Thread updated successfully'})
-
 @app.route('/threads/<int:thread_id>', methods=['DELETE'])
 def delete_thread(thread_id):
     thread = ConversationThread.query.get(thread_id)
     if not thread:
         return jsonify({'message': 'Thread not found'}), 404
-
+    Message.query.filter_by(thread_id=thread_id).delete()
     db.session.delete(thread)
     db.session.commit()
     return jsonify({'message': 'Thread deleted successfully'})
 
-@app.route('/threads/new', methods=['POST'])
-def create_new_thread():
-    try:
-        # Create a new empty thread with default values
-        new_thread = ConversationThread(summary="New Conversation", content=[])  # 空リストで初期化
-        db.session.add(new_thread)
-        db.session.commit()
-        return jsonify({
-            'message': 'New thread created successfully',
-            'thread': {
-                'id': new_thread.id,
-                'created_at': new_thread.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                'summary': new_thread.summary
-            }
-        }), 201
-    except Exception as e:
-        return jsonify({'message': f'Error creating new thread: {str(e)}'}), 500
-
 @app.route('/threads', methods=['DELETE'])
 def delete_all_threads():
-    try:
-        num_deleted = ConversationThread.query.delete()
-        db.session.commit()
-        return jsonify({'message': f'All threads deleted successfully ({num_deleted} threads removed)'}), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'message': f'Error deleting all threads: {str(e)}'}), 500
-
-# 既存スレッドにメッセージを追加するAPI
-@app.route('/threads/<int:thread_id>/messages', methods=['POST'])
-def add_message_to_thread(thread_id):
-    thread = ConversationThread.query.get(thread_id)
-    if not thread:
-        return jsonify({'message': 'Thread not found'}), 404
-
-    data = request.get_json()
-    user_message = {'sender': 'user', 'text': data.get('text')}
-    ai_message = {'sender': 'ai', 'text': data.get('ai_text')}
-    if not isinstance(thread.content, list):
-        thread.content = []
-    thread.content.append(user_message)
-    thread.content.append(ai_message)
+    Message.query.delete()
+    ConversationThread.query.delete()
     db.session.commit()
-    return jsonify({'message': 'Messages added to thread'})
+    return jsonify({'message': 'All threads deleted successfully'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
