@@ -85,7 +85,8 @@ async function summarizeUrl() {
     const url = document.getElementById('url-input').value;
     if (!url) return;
     const chatBox = document.getElementById('chat-box');
-    // バブルチャットデザインでユーザーメッセージを追加
+    
+    // Add user message in bubble chat design
     chatBox.innerHTML += `
         <div class="chat-message user">
             <div>${marked.parse(url)}</div>
@@ -102,7 +103,7 @@ async function summarizeUrl() {
         if (contentType && contentType.indexOf('application/json') !== -1) {
             const data = await response.json();
             if (data.summary) {
-                // バブルチャットデザインでAIメッセージを追加
+                // Add AI message in bubble chat design
                 chatBox.innerHTML += `
                     <div class="chat-message ai">
                         <div>${marked.parse(data.summary)}</div>
@@ -112,7 +113,7 @@ async function summarizeUrl() {
                 if (data.thread_id) {
                     window.currentThreadId = data.thread_id;
                 }
-                // Summarize直後にスレッド一覧をリロード
+                // Reload the thread list immediately after summarization
                 if (typeof loadThreads === 'function') {
                     loadThreads();
                 }

@@ -73,7 +73,7 @@ def chat():
         if thread:
             db_messages = Message.query.filter_by(thread_id=thread_id).order_by(Message.created_at).all()
             for m in db_messages:
-                # summary も含めてAIへ渡す
+                # Pass summary messages to AI as well
                 if m.type in ('text', 'summary'):
                     role = 'user' if m.sender == 'user' else 'assistant'
                     messages.append({"role": role, "content": m.content})
@@ -203,7 +203,7 @@ def summarize():
     thread_id = data.get('thread_id')
     if not url:
         return jsonify({'error': 'URL is required.'}), 400
-    # 新規スレッドの場合は作成
+    # Create a new thread if it does not exist
     if not thread_id:
         new_thread = ConversationThread(summary=url)
         db.session.add(new_thread)
@@ -236,7 +236,7 @@ def summarize():
     # Save summary as AI message (type=summary)
     ai_msg = Message(thread_id=thread_id, sender='ai', type='summary', content=summary)
     db.session.add(ai_msg)
-    # スレッドのsummaryを要約結果の先頭50文字で更新
+    # Update the thread summary with the first 50 characters of the summary result
     thread.summary = summary[:50]
     db.session.commit()
     return jsonify({'summary': summary, 'thread_id': thread_id})

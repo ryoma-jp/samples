@@ -129,7 +129,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        // 修正: currentThreadIdをwindowで一元管理
+        // Refactor: Manage currentThreadId globally on window
         window.currentThreadId = null;
 
         async function loadThreads() {
@@ -210,7 +210,7 @@
 
         document.getElementById('delete-all-threads').onclick = deleteAllThreads;
 
-        // 修正: loadThreadDetailsでwindow.currentThreadIdをセット
+        // Refactor: Set window.currentThreadId in loadThreadDetails
         async function loadThreadDetails(threadId) {
             const response = await fetch(`/threads/${threadId}`);
             const thread = await response.json();
