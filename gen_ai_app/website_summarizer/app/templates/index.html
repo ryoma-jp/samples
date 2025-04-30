@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e3e6f3 100%);
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 20px 10px 10px 10px;
+            background: linear-gradient(120deg, #f8f9fa 60%, #e3e6f3 100%);
+            border-radius: 12px;
+            scrollbar-width: thin;
+            scrollbar-color: #b3b3b3 #f8f9fa;
+        }
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-box::-webkit-scrollbar-thumb {
+            background: #b3b3b3;
+            border-radius: 3px;
+        }
+        .chat-message {
+            display: flex;
+            flex-direction: column;
+            max-width: 70%;
+            margin-bottom: 18px;
+            position: relative;
+        }
+        .chat-message.user {
+            align-self: flex-end;
+            background: #d1e7dd;
+            color: #155724;
+            border-radius: 18px 18px 4px 18px;
+            box-shadow: 0 2px 8px rgba(33, 37, 41, 0.07);
+            padding: 12px 18px;
+            margin-right: 8px;
+        }
+        .chat-message.ai {
+            align-self: flex-start;
+            background: #fff;
+            color: #212529;
+            border-radius: 18px 18px 18px 4px;
+            box-shadow: 0 2px 8px rgba(33, 37, 41, 0.07);
+            padding: 12px 18px;
+            margin-left: 8px;
+        }
+        .chat-meta {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 4px;
+            text-align: right;
+        }
+        .chat-message.ai .chat-meta {
+            text-align: left;
+        }
+        @media (max-width: 768px) {
+            .chat-message {
+                max-width: 90%;
+            }
+            .chat-box {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title d-flex justify-content-between align-items-center">
+                            <span>Conversation Threads</span>
+                            <button id="delete-all-threads" class="btn btn-danger btn-sm">Delete All</button>
+                        </h5>
+                        <ul id="thread-list" class="list-group">
+                            <!-- Threads will be dynamically loaded here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-body">
+                        <h1 class="card-title text-center">AI Chat Application</h1>
+                        <div id="chat-box" class="chat-box mb-3">
+                            <!-- Chat messages will appear here -->
+                        </div>
+                        <button id="new-conversation" class="btn btn-success w-100 mb-3" onclick="startNewConversation()">Start New Conversation</button>
+                        <form id="chat-form">
+                            <div class="mb-3">
+                                <label for="model" class="form-label">Select AI Model:</label>
+                                <select id="model" name="model" class="form-select">
+                                    <option value="o4-mini">o4-mini</option>
+                                    <option value="o3-mini">o3-mini</option>
+                                    <option value="gpt-4o">gpt-4o</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Your Message:</label>
+                                <textarea id="message" name="message" rows="4" class="form-control"></textarea>
+                            </div>
+                            <div class="mb-3 d-flex">
+    <input type="text" id="url-input" class="form-control me-2" placeholder="Enter website URL to summarize">
+    <button id="summarize-button" type="button" class="btn btn-info">Summarize</button>
+</div>
+                            <button id="send-button" type="button" class="btn btn-primary w-100">Send</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // 修正: currentThreadIdをwindowで一元管理
+        window.currentThreadId = null;
+
+        async function loadThreads() {
+            try {
+                const response = await fetch('/threads');
+                const threadList = document.getElementById('thread-list');
+                if (!response.ok) {
+                    threadList.innerHTML = '';
+                    document.getElementById('chat-box').innerHTML = '';
+                    return;
+                }
+                const threads = await response.json();
+                threadList.innerHTML = '';
+                threads.forEach(thread => {
+                    const threadItem = document.createElement('li');
+                    threadItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    const formattedDate = new Date(thread.created_at).toLocaleString();
+                    const trimmedSummary = thread.summary.length > 50 ? thread.summary.substring(0, 50) + '...' : thread.summary;
+                    const threadText = document.createElement('span');
+                    threadText.textContent = `${formattedDate} - ${trimmedSummary}`;
+                    threadText.style.cursor = 'pointer';
+                    threadText.onclick = () => loadThreadDetails(thread.id);
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn btn-outline-danger btn-sm ms-2';
+                    deleteBtn.textContent = '×';
+                    deleteBtn.onclick = async (e) => {
+                        e.stopPropagation();
+                        if (confirm('Delete this conversation?')) {
+                            await deleteThread(thread.id);
+                        }
+                    };
+                    threadItem.appendChild(threadText);
+                    threadItem.appendChild(deleteBtn);
+                    threadList.appendChild(threadItem);
+                });
+            } catch (error) {
+                document.getElementById('thread-list').innerHTML = '';
+                document.getElementById('chat-box').innerHTML = '';
+                console.error('Error fetching threads:', error);
+            }
+        }
+
+        async function deleteThread(threadId) {
+            const response = await fetch(`/threads/${threadId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                }
+            });
+            if (response.ok) {
+                // Reset if the deleted thread was selected
+                if (currentThreadId === threadId) {
+                    currentThreadId = null;
+                    document.getElementById('chat-box').innerHTML = '';
+                }
+                loadThreads();
+            } else {
+                alert('Failed to delete the conversation');
+            }
+        }
+
+        async function deleteAllThreads() {
+            if (!confirm('Delete all conversations?')) return;
+            const response = await fetch('/threads', {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                }
+            });
+            if (response.ok) {
+                currentThreadId = null;
+                await loadThreads();
+                document.getElementById('chat-box').innerHTML = '';
+            } else {
+                alert('Failed to delete all conversations');
+            }
+        }
+
+        document.getElementById('delete-all-threads').onclick = deleteAllThreads;
+
+        // 修正: loadThreadDetailsでwindow.currentThreadIdをセット
+        async function loadThreadDetails(threadId) {
+            const response = await fetch(`/threads/${threadId}`);
+            const thread = await response.json();
+            window.currentThreadId = thread.id;
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = '';
+            let messages = thread.content || [];
+            messages.forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chat-message ${message.sender}`;
+                // Markdown rendering
+                messageDiv.innerHTML = `
+                    <div>${marked.parse(message.content)}</div>
+                    <div class="chat-meta">${message.sender === 'user' ? 'You' : 'AI'}
+                        ${message.created_at ? '・' + new Date(message.created_at).toLocaleTimeString() : ''}
+                    </div>
+                `;
+                chatBox.appendChild(messageDiv);
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        const chatBox = document.getElementById('chat-box');
+
+        async function sendMessage() {
+            const model = document.getElementById('model').value;
+            const message = document.getElementById('message').value;
+            if (!message.trim()) return;
+            // Append user message to chat box
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'chat-message user';
+            userMessageDiv.innerHTML = `
+                <div>${marked.parse(message)}</div>
+                <div class="chat-meta">You・${new Date().toLocaleTimeString()}</div>
+            `;
+            chatBox.appendChild(userMessageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            // 1. Send to AI
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ model, message, thread_id: currentThreadId }),
+            });
+            const data = await response.json();
+            // 2. Display AI response
+            const aiMessageDiv = document.createElement('div');
+            aiMessageDiv.className = 'chat-message ai';
+            if (data.error) {
+                aiMessageDiv.innerHTML = `<div>Error - ${data.error}</div><div class="chat-meta">AI・${new Date().toLocaleTimeString()}</div>`;
+            } else {
+                aiMessageDiv.innerHTML = `<div>${marked.parse(data.message)}</div><div class="chat-meta">AI・${new Date().toLocaleTimeString()}</div>`;
+            }
+            chatBox.appendChild(aiMessageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            // 3. Save thread via API
+            if (!currentThreadId) {
+                // Create new thread (send the first exchange)
+                const res = await fetch('/threads', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    },
+                    body: JSON.stringify({
+                        text: message,
+                        ai_text: data.message
+                    }),
+                });
+                if (res.ok) {
+                    const thread = await res.json();
+                    currentThreadId = thread.id;
+                    await loadThreads(); // Reload only on new creation
+                }
+            } else {
+                // Add to existing thread
+                await fetch(`/threads/${currentThreadId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                    },
+                    body: JSON.stringify({
+                        text: message,
+                        ai_text: data.message
+                    }),
+                });
+            }
+            document.getElementById('message').value = '';
+        }
+
+        async function startNewConversation() {
+            window.currentThreadId = null;
+            document.getElementById('chat-box').innerHTML = '';
+            // Do not reload thread list
+        }
+
+        document.addEventListener('DOMContentLoaded', loadThreads);
+    </script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
