@@ -18,6 +18,15 @@ from urllib.parse import urlparse
 # Load environment variables from .env
 load_dotenv()
 
+# Restrict outbound summarization targets to approved domains.
+# Comma-separated list from env, e.g.:
+# ALLOWED_SUMMARIZER_DOMAINS=example.com,docs.example.com
+ALLOWED_SUMMARIZER_DOMAINS = {
+    d.strip().lower()
+    for d in os.getenv("ALLOWED_SUMMARIZER_DOMAINS", "").split(",")
+    if d.strip()
+}
+
 app = Flask(__name__)
 
 # Initialize Flask-Migrate
@@ -211,6 +220,19 @@ def _is_public_ip(ip_str):
     )
 
 
+def _is_allowed_hostname(hostname):
+    if not hostname:
+        return False
+    host = hostname.lower().rstrip(".")
+    if not ALLOWED_SUMMARIZER_DOMAINS:
+        return False
+    for allowed in ALLOWED_SUMMARIZER_DOMAINS:
+        allowed_host = allowed.lower().rstrip(".")
+        if host == allowed_host or host.endswith("." + allowed_host):
+            return True
+    return False
+
+
 def _is_safe_public_url(raw_url):
     try:
         parsed = urlparse(raw_url)
@@ -218,6 +240,8 @@ def _is_safe_public_url(raw_url):
             return False, "Only http/https URLs are allowed."
         if not parsed.hostname:
             return False, "URL must include a valid hostname."
+        if not _is_allowed_hostname(parsed.hostname):
+            return False, "URL hostname is not in the allowed domain list."
 
         addr_info = socket.getaddrinfo(parsed.hostname, None)
         resolved_ips = {entry[4][0] for entry in addr_info}
