@@ -311,9 +311,14 @@ def _fetch_url_safely(raw_url):
     safe_url = _build_safe_url(raw_url)
     try:
         resp = requests.get(safe_url, timeout=10, allow_redirects=False)
+        # Treat any redirect response as an error to prevent redirect-based SSRF.
+        if resp.is_redirect or 300 <= resp.status_code < 400:
+            raise ValueError("URL redirects are not permitted.")
         resp.raise_for_status()
     except requests.exceptions.RequestException as exc:
-        raise ValueError(f"Failed to fetch URL: {exc}") from exc
+        # Log the underlying exception without exposing it to the caller.
+        logger.warning("URL fetch failed for safe_url: %s", exc)
+        raise ValueError("Failed to fetch URL.") from exc
     return resp.text[:5000]  # Limit size for demo
 
 
@@ -341,7 +346,9 @@ def summarize():
     try:
         text = _fetch_url_safely(url)
     except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+        # Log the specific reason; return a generic message to avoid information leakage.
+        logger.warning("URL fetch rejected: %s", e)
+        return jsonify({'error': 'The provided URL is invalid or cannot be fetched safely.'}), 400
     # Summarize with OpenAI
     prompt = f"Summarize the following website content in concise English:\n{text}"
     try:
