@@ -11,6 +11,9 @@ from sqlalchemy.orm import sessionmaker
 from flask_migrate import Migrate
 from app.models import db
 import requests
+import ipaddress
+import socket
+from urllib.parse import urlparse
 
 # Load environment variables from .env
 load_dotenv()
@@ -196,6 +199,40 @@ def delete_all_threads():
     db.session.commit()
     return jsonify({'message': 'All threads deleted successfully'})
 
+def _is_public_ip(ip_str):
+    ip_obj = ipaddress.ip_address(ip_str)
+    return not (
+        ip_obj.is_private
+        or ip_obj.is_loopback
+        or ip_obj.is_link_local
+        or ip_obj.is_multicast
+        or ip_obj.is_reserved
+        or ip_obj.is_unspecified
+    )
+
+
+def _is_safe_public_url(raw_url):
+    try:
+        parsed = urlparse(raw_url)
+        if parsed.scheme not in ("http", "https"):
+            return False, "Only http/https URLs are allowed."
+        if not parsed.hostname:
+            return False, "URL must include a valid hostname."
+
+        addr_info = socket.getaddrinfo(parsed.hostname, None)
+        resolved_ips = {entry[4][0] for entry in addr_info}
+        if not resolved_ips:
+            return False, "Unable to resolve hostname."
+
+        for ip_str in resolved_ips:
+            if not _is_public_ip(ip_str):
+                return False, "Target host resolves to a non-public IP address."
+
+        return True, raw_url
+    except Exception:
+        return False, "Invalid or unreachable URL."
+
+
 @app.route('/summarize', methods=['POST'])
 def summarize():
     data = request.get_json()
@@ -217,8 +254,11 @@ def summarize():
     db.session.add(user_msg)
     db.session.commit()
     # Fetch website content (simple implementation)
+    is_safe, validated_url_or_error = _is_safe_public_url(url)
+    if not is_safe:
+        return jsonify({'error': validated_url_or_error}), 400
     try:
-        resp = requests.get(url, timeout=10)
+        resp = requests.get(validated_url_or_error, timeout=10)
         resp.raise_for_status()
         text = resp.text[:5000]  # Limit size for demo
     except Exception as e:
