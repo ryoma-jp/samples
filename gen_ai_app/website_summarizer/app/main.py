@@ -312,12 +312,12 @@ def _fetch_url_safely(raw_url):
     try:
         resp = requests.get(safe_url, timeout=10, allow_redirects=False)
         # Treat any redirect response as an error to prevent redirect-based SSRF.
-        if resp.is_redirect or 300 <= resp.status_code < 400:
+        if resp.is_redirect:
             raise ValueError("URL redirects are not permitted.")
         resp.raise_for_status()
     except requests.exceptions.RequestException as exc:
         # Log the underlying exception without exposing it to the caller.
-        logger.warning("URL fetch failed for safe_url: %s", exc)
+        logger.warning("URL fetch failed: %s", exc)
         raise ValueError("Failed to fetch URL.") from exc
     return resp.text[:5000]  # Limit size for demo
 
